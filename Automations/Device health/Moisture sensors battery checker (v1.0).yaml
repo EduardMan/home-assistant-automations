@@ -98,7 +98,7 @@ actions:
                 # Список датчиков у которых сработал сенсор низкого заряда
                 {%
                 set entities_low = expand(label_entities("moisture") |
-                select('match',  '.*_battery_low$')) | 
+                select('match', '.*_battery_low$')) | 
                 selectattr('state', '!=', 'off') |
                 list
                 %}

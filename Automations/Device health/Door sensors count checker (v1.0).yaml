@@ -1,0 +1,146 @@
+# category
+#   - Device health
+# labels:
+#   - notification
+#   - scheduled
+# dependencies:
+#   - Door sensors availability timeout minutes (Helper)
+#   - Door sensors expected count (Helper)
+#   - sensor.uptime (Integration)
+#   - Universal notification sender (Script)
+
+alias: Door sensors count checker
+description: >-
+  **Что делает:**  
+  Проверяет, что необходимым датчикам и сенсорам дверей/окон проставлен лейбл *door*.
+
+  **Как приходит оповещение:**  
+  - Проверяет лейблы у датчиков трёх типов: доступность, уровень батареи, состояние контакта.  
+  - Для каждого типа сравнивает фактическое число с ожидаемым.  
+  - При расхождении отправляет отдельное уведомление, где указано, сколько датчиков есть сейчас и сколько должно быть (например, «2/3»).
+
+  **Когда срабатывает проверка:**  
+  - 📅 Каждое утро в 08:00  
+  - ✏️ Когда вы меняете ожидаемое количество датчиков (настройка `Door sensors expected count`)  
+  - 🔄 После запуска системы (через 5 минут после того, как время работы превысит заданный таймаут — чтобы датчики успели проснуться)  
+  - 🔔 Когда вы закрываете любое из уведомлений о несовпадении — автоматизация сразу перепроверяет, не устранена ли проблема
+
+  **Настройки:**  
+  - `Door sensors expected count` — сколько всего датчиков дверей/окон должно быть в доме.  
+  - `Door sensors availability timeout minutes` — через сколько минут без ответа датчик считается недоступным (влияет только на задержку запуска проверки после перезагрузки).
+triggers:
+  # Когда меняется настройка ожидаемого количества датчиков в доме
+  - trigger: state
+    entity_id:
+      - input_number.door_sensors_expected_count
+  # Каждый день в 08:00
+  - trigger: time
+    at: "08:00:00"
+  # При удалении уведомления о несоответствии числа датчиков доступности
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: door_sensors_availability_count_problem_notification
+    id: persistent_notification_removed
+  # При удалении уведомления о несоответствии числа датчиков с батареями
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: door_sensors_battery_count_problem_notification
+    id: persistent_notification_removed
+  # При удалении уведомления о несоответствии числа датчиков двери
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: door_sensors_contact_count_problem_notification
+    id: persistent_notification_removed
+  - alias: >-
+      When system uptime + 5 greater than Door sensors availability timeout minutes
+    trigger: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int - 
+          states('input_number.door_sensors_availability_timeout_minutes') | int
+          ) > 5 
+      }}
+conditions:
+  - alias: System uptime is greater then Door sensors availability timeout minutes
+    condition: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int -
+          states('input_number.door_sensors_availability_timeout_minutes') | int
+          ) > 0 
+      }}
+    enabled: true
+actions:
+  # Вычисляем количество датчиков доступности с лейблом door
+  - variables:
+      door_sensors_labeled_availability_current_count: >
+        {{ label_entities("door") | select('match', '.*_availability$') | 
+        list | count }}
+  # Вычисляем количество датчиков батарей с лейблом door
+  - variables:
+      door_sensors_labeled_battery_current_count: >
+        {{ label_entities("door") | select('match', '.*_battery$') | 
+        list | count }}
+  # Вычисляем количество датчиков контакта с лейблом door
+  - variables:
+      door_sensors_labeled_contact_current_count: >
+        {{ label_entities("door") | select('match', '.*_contact$') | 
+        list | count }}
+  # Если вычисленное количество датчиков доступности с лейблом door не совпадает с настройкой ожидаемого количества датчиков в доме,
+  # то отправляем уведомление о проблеме с количеством  
+  - if:
+      - condition: template
+        value_template: >-
+          {{ door_sensors_labeled_availability_current_count | int !=
+          states('input_number.door_sensors_expected_count') | int }}
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          message_title: Количество датчиков двери не совпадает
+          message_text: >-
+            Фактическое количество датчиков двери (доступность) не совпадает с
+            ожидаемым ({{ door_sensors_labeled_availability_current_count }}/
+            {{ states('input_number.door_sensors_expected_count') | int }})
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: door_sensors_availability_count_problem_notification
+  # Если вычисленное количество датчиков батарей с лейблом door не совпадает с настройкой ожидаемого количества датчиков в доме,
+  # то отправляем уведомление о проблеме с количеством
+  - if:
+      - condition: template
+        value_template: >-
+          {{ door_sensors_labeled_battery_current_count | int !=
+          states('input_number.door_sensors_expected_count') | int }}
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          message_title: Количество датчиков двери не совпадает
+          message_text: >-
+            Фактическое количество датчиков двери (батарея) не совпадает с
+            ожидаемым ({{ door_sensors_labeled_battery_current_count }}/
+            {{ states('input_number.door_sensors_expected_count') | int }})
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: door_sensors_battery_count_problem_notification
+  # Если вычисленное количество датчиков контакта с лейблом door не совпадает с настройкой ожидаемого количества датчиков в доме,
+  # то отправляем уведомление о проблеме с количеством
+  - if:
+      - condition: template
+        value_template: >-
+          {{ door_sensors_labeled_contact_current_count | int !=
+          states('input_number.door_sensors_expected_count') | int }}
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          message_title: Количество датчиков двери не совпадает
+          message_text: >-
+            Фактическое количество датчиков двери (контакт) не совпадает 
+            с ожидаемым ({{ door_sensors_labeled_contact_current_count }}/
+            {{ states('input_number.door_sensors_expected_count') | int }})
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: door_sensors_contact_count_problem_notification
+mode: single
