@@ -1,0 +1,21 @@
+# dependencies:
+#   - Moisture sensors battery threshold (Helper)
+name: Moisture sensors discharged count
+type: Template number
+label: moisture
+entityId: moisture_sensors_discharged_count
+maximumValue: 100
+state:
+  {% set battery_threshold = states('input_number.moisture_sensors_battery_threshold') | float %}
+
+  {% set entities = expand(label_entities("moisture") | select('match', '.*_battery$')) | list %}
+  {% set filtered_threshold_entities = namespace(filtered_entities=[ ]) %}
+  {% for entity_for_filter in entities %}
+    {% if entity_for_filter.state | float < battery_threshold %}
+      {% set filtered_threshold_entities.filtered_entities = filtered_threshold_entities.filtered_entities + [ entity_for_filter ] %}
+    {% endif %}
+  {% endfor %}
+
+  {% set entities_low = expand(label_entities("moisture") | select('match', '.*_battery_low$')) | selectattr('state', '!=', 'off') | list %}
+
+  {{ (filtered_threshold_entities.filtered_entities + entities_low) | unique(attribute='entity_id') | list | count }}

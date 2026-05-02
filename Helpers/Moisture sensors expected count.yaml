@@ -1,0 +1,7 @@
+name: Moisture sensors expected count
+type: Number
+label: moisture
+entityId: moisture_sensors_expected_count
+displayMode: Input field
+maximumValue: 100
+value: {{ количество датчиков протечки в доме }}

@@ -1,0 +1,52 @@
+# labels:
+#   - notification
+# entityId
+#   - universal_notification_sender
+sequence:
+  - if:
+      - condition: template
+        value_template: "{{ automation_trigger_id == 'persistent_notification_removed' }}"
+    then:
+      - action: persistent_notification.create
+        metadata: {}
+        data:
+          title: "{{ message_title }}"
+          message: "{{ message_text }}"
+          notification_id: "{{ message_notification_id }}"
+    else:
+      - parallel:
+          - action: notify.notify
+            metadata: {}
+            data:
+              message: "{{ message_text }}"
+              title: "{{ message_title }}"
+              data:
+                tag: "{{ message_notification_id }}"
+          - action: persistent_notification.create
+            metadata: {}
+            data:
+              title: "{{ message_title }}"
+              notification_id: "{{ message_notification_id }}"
+              message: "{{ message_text }}"
+fields:
+  automation_trigger_id:
+    selector:
+      text: {}
+    required: true
+  message_text:
+    selector:
+      text: null
+    required: true
+  message_title:
+    selector:
+      text: null
+    name: title
+    required: true
+  message_notification_id:
+    selector:
+      text: null
+    required: true
+alias: Universal notification sender for availability checker
+description: ""
+mode: parallel
+max: 10
