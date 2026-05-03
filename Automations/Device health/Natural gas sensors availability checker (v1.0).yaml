@@ -1,0 +1,108 @@
+# category
+#   - Device health
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - natural_gas_sensors_availability_checker
+# dependencies:
+#   - Natural gas sensors unavailable count (Helper)
+#   - Natural gas sensors available count (Helper)
+#   - Natural gas sensors expected count (Helper)
+#   - Universal notification sender (Script)
+
+alias: Natural gas sensors availability checker (v1.0)
+description: >-
+  **Что делает:**
+  Проверяет, все ли датчики утечки газа выходят на связь.
+  Если какой-то датчик перестаёт отвечать — приходит уведомление.
+  
+  **Как приходит оповещение:**
+  - Если недоступны 1–2 датчика — в сообщении перечислены их названия и в каких они комнатах.
+  - Если недоступны 3 или больше — показывается только общее число работающих датчиков (например, 5 из 7).
+  
+  **Когда срабатывает проверка:**  
+  - 📅 Каждое утро в 08:00.
+  - ⚙️ Когда меняется количество недоступных датчиков (счётчик `Natural gas sensors unavailable count`).
+  - 🔔 Сразу после того, как вы закрыли предыдущее оповещение (чтобы перепроверить, не появились ли новые проблемы).
+  
+  **Настройки:**  
+  - `Natural gas sensors expected count` — сколько всего датчиков утечки газа должно быть в доме.
+  
+  **Сенсоры:**  
+  - `Natural gas sensors unavailable count` — текущее число датчиков, которые не на связи.  
+  - `Natural gas sensors available count` — текущее число датчиков, которые на связи.
+triggers:
+  # Когда меняется количество недоступных датчиков
+  - trigger: state
+    entity_id:
+      - number.natural_gas_sensors_unavailable_count
+  # Каждый день в 08:00
+  - trigger: time
+    at: "08:00:00"
+  # При удалении уведомления недоступности датчиков
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    id: persistent_notification_removed
+    notification_id: natural_gas_sensors_availability_notification
+conditions: [ ]
+actions:
+  - choose:
+      # Если количество недоступных датчиков менее трех, то отправляем уведомление со списком датчиков
+      - conditions:
+          - condition: numeric_state
+            entity_id: number.natural_gas_sensors_unavailable_count
+            above: 0
+            below: 3
+        sequence:
+          - variables:
+              unavailable_natural_gas_sensors: >
+                {%
+                set unavailable_filtered_natural_gas_sensors = 
+                expand(label_entities("natural gas") |
+                select('match', '.*_availability$')) |
+                selectattr('state', '!=', 'on') | 
+                map(attribute='entity_id') |
+                list
+                %}
+
+                {% set ns = namespace(device_names=[]) %}
+
+                {% for entity in unavailable_filtered_natural_gas_sensors %}
+                  {% set natural_gas_sensor_device_id = device_id(entity) %}
+                  {% if natural_gas_sensor_device_id %}
+                    {% set area_id = device_attr(natural_gas_sensor_device_id, 'area_id') %}
+                    {% set area_name = area_name(area_id) if area_id else "Без комнаты" %}
+                
+                    {% set natural_gas_sensor_name = 
+                      device_attr(natural_gas_sensor_device_id, 'name_by_user') or device_attr(natural_gas_sensor_device_id, 'name') %}
+                
+                    {% set ns.device_names = ns.device_names + [natural_gas_sensor_name ~ " (" ~ area_name ~")"] %}
+                  {% endif %}
+                {% endfor %}
+
+                {{ ns.device_names | join("\n") }}
+          - action: script.universal_notification_sender
+            metadata: { }
+            data:
+              automation_trigger_id: "{{ trigger.id }}"
+              message_text: "{{ unavailable_natural_gas_sensors }}"
+              message_title: Датчики газа недоступны!
+              message_notification_id: natural_gas_sensors_availability_notification
+      # Если количество недоступных датчиков более двух, то отправляем уведомление с общим количеством недоступных датчиков
+      - conditions:
+          - condition: numeric_state
+            entity_id: number.natural_gas_sensors_unavailable_count
+            above: 2
+        sequence:
+          - action: script.universal_notification_sender
+            metadata: { }
+            data:
+              message_text: >-
+                Доступно датчиков утечки газа {{ states("number.natural_gas_sensors_available_count") | int | string
+                + "/" + states('input_number.natural_gas_sensors_expected_count') | int | string }}
+              message_title: Датчики газа недоступны!
+              message_notification_id: natural_gas_sensors_availability_notification
+              automation_trigger_id: "{{ trigger.id }}"
+mode: single
