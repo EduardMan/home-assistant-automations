@@ -13,7 +13,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Door sensors availability checker
+alias: Door sensors availability checker (v1.0)
 description: >-
   **Что делает:**  
   Проверяет, все ли датчики открытия дверей и окон выходят на связь.  
@@ -85,7 +85,7 @@ actions:
           - variables:
               unavailable_door_sensors: >
                 {%
-                set unavailable_door_sensors = 
+                set unavailable_filtered_door_sensors = 
                 expand(label_entities("door") |
                 select('match', '.*_availability$')) |
                 selectattr('state', '!=', 'on') | 
@@ -94,7 +94,7 @@ actions:
 
                 {% set ns = namespace(device_names=[]) %}
 
-                {% for door_sensor in unavailable_door_sensors %}
+                {% for door_sensor in unavailable_filtered_door_sensors %}
                   {% set door_sensor_device_id = device_id(door_sensor) %}
                   {% if door_sensor_device_id %}
                     {% set area_id = device_attr(door_sensor_device_id, 'area_id') %}

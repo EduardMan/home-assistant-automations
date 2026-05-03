@@ -13,7 +13,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Moisture sensors availability checker
+alias: Moisture sensors availability checker (v1.0)
 description: >-
   **Что делает:**  
   Проверяет, все ли датчики протечки выходят на связь.  
@@ -86,7 +86,7 @@ actions:
           - variables:
               unavailable_moisture_sensors: >
                 {%
-                set unavailable_moisture_sensors = 
+                set unavailable_filtered_moisture_sensors = 
                 expand(label_entities("moisture") |
                 select('match', '.*_availability$')) |
                 selectattr('state', '!=', 'on') | 
@@ -95,7 +95,7 @@ actions:
 
                 {% set ns = namespace(device_names=[]) %}
 
-                {% for moisture_sensor in unavailable_moisture_sensors %}
+                {% for moisture_sensor in unavailable_filtered_moisture_sensors %}
                   {% set moisture_sensor_device_id = device_id(moisture_sensor) %}
                   {% if moisture_sensor_device_id %}
                     {% set area_id = device_attr(moisture_sensor_device_id, 'area_id') %}

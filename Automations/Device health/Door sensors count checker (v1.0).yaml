@@ -9,14 +9,14 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Door sensors count checker
+alias: Door sensors count checker (v1.0)
 description: >-
   **Что делает:**  
   Проверяет, что необходимым датчикам и сенсорам дверей/окон проставлен лейбл *door*.
 
   **Как приходит оповещение:**  
   - Проверяет лейблы у датчиков трёх типов: доступность, уровень батареи, состояние контакта.  
-  - Для каждого типа сравнивает фактическое число с ожидаемым.  
+  - Для каждого типа сравнивает фактическое число с ожидаемым.
   - При расхождении отправляет отдельное уведомление, где указано, сколько датчиков есть сейчас и сколько должно быть (например, «2/3»).
 
   **Когда срабатывает проверка:**  
@@ -54,6 +54,7 @@ triggers:
       - removed
     notification_id: door_sensors_contact_count_problem_notification
     id: persistent_notification_removed
+  # После запуска системы (время работы системы - настройка таймаута датчиков > 5, +5 минут на всякий случай)
   - alias: >-
       When system uptime + 5 greater than Door sensors availability timeout minutes
     trigger: template
@@ -90,7 +91,7 @@ actions:
         {{ label_entities("door") | select('match', '.*_contact$') | 
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом door не совпадает с настройкой ожидаемого количества датчиков в доме,
-  # то отправляем уведомление о проблеме с количеством  
+  # то отправляем уведомление о проблеме с количеством
   - if:
       - condition: template
         value_template: >-
