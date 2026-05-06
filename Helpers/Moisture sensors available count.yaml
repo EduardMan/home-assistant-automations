@@ -1,4 +1,4 @@
-name: Moisture sensors discharged count
+name: Moisture sensors available count
 type: Template number
 label: moisture
 entityId: moisture_sensors_available_count
