@@ -3,6 +3,8 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - moisture_sensors_count_checker
 # dependencies:
 #   - Moisture sensors availability timeout minutes (Helper)
 #   - Moisture sensors expected count (Helper)

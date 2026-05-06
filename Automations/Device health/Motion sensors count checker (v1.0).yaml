@@ -3,6 +3,8 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - motion_sensors_count_checker
 # dependencies:
 #   - Motion sensors availability timeout minutes (Helper)
 #   - Motion sensors expected count (Helper)

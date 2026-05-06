@@ -3,6 +3,8 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - temperature_sensors_count_checker
 # dependencies:
 #   - Temperature sensors availability timeout minutes (Helper)
 #   - Temperature sensors expected count (Helper)

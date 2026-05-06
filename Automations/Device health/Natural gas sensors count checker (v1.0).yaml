@@ -3,12 +3,14 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - natural_gas_sensors_count_checker
 # dependencies:
 #   - Natural gas sensors expected count (Helper)
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Natural gas sensors count checker
+alias: Natural gas sensors count checker (v1.0)
 description: >-
   **Что делает:**
   Проверяет, что все датчики утечки газа имеют нужную метку и их количество совпадает с ожидаемым.

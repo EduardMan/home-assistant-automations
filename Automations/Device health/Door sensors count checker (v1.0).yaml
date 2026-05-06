@@ -3,6 +3,8 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - door_sensors_count_checker
 # dependencies:
 #   - Door sensors availability timeout minutes (Helper)
 #   - Door sensors expected count (Helper)

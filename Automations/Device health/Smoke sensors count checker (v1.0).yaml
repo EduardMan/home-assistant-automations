@@ -3,6 +3,8 @@
 # labels:
 #   - notification
 #   - scheduled
+# entityId
+#   - smoke_sensors_count_checker
 # dependencies:
 #   - Smoke sensors availability timeout minutes (Helper)
 #   - Smoke sensors expected count (Helper)
