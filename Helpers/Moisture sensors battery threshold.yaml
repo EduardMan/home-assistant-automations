@@ -1,4 +1,5 @@
 name: Moisture sensors battery threshold
+icon: mdi:battery-low
 type: Number
 label: moisture
 entityId: moisture_sensors_battery_threshold

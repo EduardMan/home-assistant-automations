@@ -1,0 +1,20 @@
+# Сенсор отображающий текущее количество разряженных датчиков задымления
+# dependencies:
+#   - Smoke sensors battery threshold (Helper)
+name: Smoke sensors discharged count
+icon: mdi:battery-alert-variant-outline
+type: Template number
+label: smoke
+entityId: smoke_sensors_discharged_count
+state:
+  {% set battery_threshold = states('input_number.smoke_sensors_battery_threshold') | float %}
+
+  {% set entities = expand(label_entities("smoke") | select('match', '.*_battery$')) | list %}
+  {% set filtered_threshold_entities = namespace(filtered_entities=[ ]) %}
+  {% for entity_for_filter in entities %}
+    {% if entity_for_filter.state | float < battery_threshold %}
+      {% set filtered_threshold_entities.filtered_entities = filtered_threshold_entities.filtered_entities + [ entity_for_filter ] %}
+    {% endif %}
+  {% endfor %}
+
+  {{ (filtered_threshold_entities.filtered_entities) | unique(attribute='entity_id') | list | count }}

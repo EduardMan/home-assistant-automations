@@ -1,7 +1,8 @@
 name: Moisture sensors unavailable count
+icon: mdi:close-circle-outline
 type: Template number
 label: moisture
 entityId: moisture_sensors_unavailable_count
 maximumValue: 100
 state:
-  {{ expand(label_entities("moisture") | select('match', '.*_availability$')) | selectattr('state', '==', 'off') | list | count }}
+  {{ expand(label_entities("moisture") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}

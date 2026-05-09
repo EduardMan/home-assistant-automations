@@ -1,0 +1,8 @@
+# Сенсор, отображающий текущее количество доступных датчиков задымления
+name: Smoke sensors available count
+icon: mdi:check-circle-outline
+type: Template number
+label: smoke
+entityId: smoke_sensors_available_count
+state:
+  {{ expand(label_entities("smoke") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}

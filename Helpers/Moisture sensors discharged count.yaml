@@ -1,6 +1,7 @@
 # dependencies:
 #   - Moisture sensors battery threshold (Helper)
 name: Moisture sensors discharged count
+icon: mdi:battery-alert-variant-outline
 type: Template number
 label: moisture
 entityId: moisture_sensors_discharged_count

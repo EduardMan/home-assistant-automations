@@ -1,4 +1,5 @@
 name: Moisture sensors available count
+icon: mdi:check-circle-outline
 type: Template number
 label: moisture
 entityId: moisture_sensors_available_count

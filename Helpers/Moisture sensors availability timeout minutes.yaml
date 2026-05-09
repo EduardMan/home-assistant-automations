@@ -1,6 +1,7 @@
 # Таймаут доступности датчиков влажности (в минутах).
 # Если датчик не присылает данные дольше этого времени, он считается недоступным.
 name: Moisture sensors availability timeout minutes
+icon: mdi:timer-outline
 type: Number
 label: moisture
 entityId: moisture_sensors_availability_timeout_minutes

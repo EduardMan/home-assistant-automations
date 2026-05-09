@@ -1,0 +1,10 @@
+# Настройка ожидаемого количества датчиков задымления в системе.
+name: Smoke sensors expected count
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: smoke
+entityId: smoke_sensors_expected_count
+displayMode: Input field
+value: {{ количество датчиков задымления в доме }}
