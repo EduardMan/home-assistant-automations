@@ -1,6 +1,7 @@
 # Сенсор, отображающий текущее количество доступных датчиков задымления
 name: Smoke sensors available count (v1.0)
 icon: mdi:check-circle-outline
+unitOfMeasurement: pcs
 type: Template number
 label: smoke
 entityId: smoke_sensors_available_count

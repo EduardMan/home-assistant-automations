@@ -1,11 +1,12 @@
+# Сенсор отображающий текущее количество разряженных датчиков протечки
 # dependencies:
 #   - Moisture sensors battery threshold (Helper)
-name: Moisture sensors discharged count
+name: Moisture sensors discharged count (v1.0)
 icon: mdi:battery-alert-variant-outline
+unitOfMeasurement: pcs
 type: Template number
 label: moisture
 entityId: moisture_sensors_discharged_count
-maximumValue: 100
 state:
   {% set battery_threshold = states('input_number.moisture_sensors_battery_threshold') | float %}
 

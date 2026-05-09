@@ -3,6 +3,7 @@
 #   - Smoke sensors battery threshold (Helper)
 name: Smoke sensors discharged count (v1.0)
 icon: mdi:battery-alert-variant-outline
+unitOfMeasurement: pcs
 type: Template number
 label: smoke
 entityId: smoke_sensors_discharged_count

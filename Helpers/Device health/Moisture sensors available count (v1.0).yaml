@@ -1,5 +1,7 @@
-name: Moisture sensors available count
+# Сенсор, отображающий текущее количество доступных датчиков протечки
+name: Moisture sensors available count (v1.0)
 icon: mdi:check-circle-outline
+unitOfMeasurement: pcs
 type: Template number
 label: moisture
 entityId: moisture_sensors_available_count
