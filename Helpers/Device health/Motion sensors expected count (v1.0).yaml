@@ -1,0 +1,10 @@
+# Настройка ожидаемого количества датчиков движения.
+name: Motion sensors expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: motion
+entityId: motion_sensors_expected_count
+displayMode: Input field
+value: {{ количество датчиков открытия двери/окна в доме }}

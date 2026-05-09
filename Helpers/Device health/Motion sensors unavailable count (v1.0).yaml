@@ -1,0 +1,10 @@
+# Сенсор, отображающий текущее количество недоступных датчиков движения
+name: Motion sensors unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: motion
+entityId: motion_sensors_unavailable_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("motion") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}

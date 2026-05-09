@@ -1,0 +1,12 @@
+# Настройка таймаута доступности датчиков движения (в минутах).
+# Если датчик не присылает данные дольше этого времени, он считается недоступным.
+name: Motion sensors availability timeout minutes (v1.0)
+icon: mdi:timer-outline
+stepSize: 1
+unitOfMeasurement: min
+type: Number
+label: motion
+entityId: motion_sensors_availability_timeout_minutes
+displayMode: Input field
+maximumValue: 160
+value: 110

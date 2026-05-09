@@ -1,0 +1,10 @@
+# Сенсор, отображающий текущее количество доступных датчиков движения
+name: Motion sensors available count (v1.0)
+icon: mdi:check-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: motion
+entityId: motion_sensors_available_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("motion") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}
