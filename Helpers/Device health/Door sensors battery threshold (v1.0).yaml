@@ -1,0 +1,13 @@
+# Настройка уровня заряда (%), ниже которого датчик считается разряженным
+# Если заряд батареи падает ниже этого значения, датчик считается разряженным
+name: Door sensors battery threshold (v1.0)
+icon: mdi:battery-low
+stepSize: 1
+unitOfMeasurement: %
+type: Number
+label: door
+entityId: door_sensors_battery_threshold
+displayMode: Input field
+minimumValue: 5
+maximumValue: 100
+value: 15

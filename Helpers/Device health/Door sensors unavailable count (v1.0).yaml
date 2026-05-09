@@ -1,0 +1,10 @@
+# Сенсор, отображающий текущее количество недоступных датчиков открытия двери/окна
+name: Door sensors unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: door
+entityId: door_sensors_unavailable_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("door") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}

@@ -1,0 +1,10 @@
+# Настройка ожидаемого количества датчиков открытия двери/окна в системе.
+name: Door sensors expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: door
+entityId: door_sensors_expected_count
+displayMode: Input field
+value: {{ количество датчиков открытия двери/окна в доме }}
