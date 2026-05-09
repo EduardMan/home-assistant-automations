@@ -1,6 +1,6 @@
 # Настройка таймаута доступности датчиков задымления (в минутах).
 # Если датчик не присылает данные дольше этого времени, он считается недоступным.
-name: Smoke sensors availability timeout minutes
+name: Smoke sensors availability timeout minutes (v1.0)
 icon: mdi:timer-outline
 stepSize: 1
 unitOfMeasurement: min

@@ -1,5 +1,5 @@
 # Настройка ожидаемого количества датчиков задымления в системе.
-name: Smoke sensors expected count
+name: Smoke sensors expected count (v1.0)
 icon: mdi:clipboard-check-outline
 stepSize: 1
 unitOfMeasurement: pcs

@@ -1,7 +1,7 @@
 # Сенсор отображающий текущее количество разряженных датчиков задымления
 # dependencies:
 #   - Smoke sensors battery threshold (Helper)
-name: Smoke sensors discharged count
+name: Smoke sensors discharged count (v1.0)
 icon: mdi:battery-alert-variant-outline
 type: Template number
 label: smoke
