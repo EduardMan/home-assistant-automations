@@ -1,0 +1,10 @@
+# Настройка ожидаемого количества датчиков температуры.
+name: Temperature sensors expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: temperature
+entityId: temperature_sensors_expected_count
+displayMode: Input field
+value: {{ количество датчиков температуры }}

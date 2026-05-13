@@ -1,0 +1,10 @@
+# Сенсор, отображающий текущее количество недоступных датчиков температуры
+name: Temperature sensors unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: temperature
+entityId: temperature_sensors_unavailable_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("temperature") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}
