@@ -1,0 +1,10 @@
+# Настройка ожидаемого количества датчиков задымления в системе.
+name: Natural gas sensors expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: natural gas
+entityId: natural_gas_sensors_expected_count
+displayMode: Input field
+value: {{ количество датчиков задымления в доме }}
