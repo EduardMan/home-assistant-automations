@@ -1,0 +1,335 @@
+views:
+  - type: sections
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Door sensors
+            heading_style: title
+            icon: mdi:door
+          - type: tile
+            entity: input_number.door_sensors_expected_count
+            name: Expected count
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.door_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.door_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.door_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.door_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.door_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Moisture sensors
+            heading_style: title
+            icon: mdi:water
+          - type: tile
+            entity: input_number.moisture_sensors_expected_count
+            name: Expected count
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.moisture_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Motion sensors
+            heading_style: title
+            icon: mdi:motion-sensor
+          - type: tile
+            entity: input_number.motion_sensors_expected_count
+            name: Expected count
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.motion_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.motion_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: number.motion_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.motion_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.motion_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Temperature sensors
+            heading_style: title
+            icon: mdi:thermometer-high
+          - type: tile
+            entity: input_number.temperature_sensors_expected_count
+            name: Expected count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.temperature_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.temperature_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.temperature_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.temperature_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.temperature_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Smoke sensors
+            heading_style: title
+            icon: mdi:smoke-detector-variant
+          - type: tile
+            entity: input_number.smoke_sensors_expected_count
+            name: Expected count
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.smoke_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.smoke_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.smoke_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smoke_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smoke_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Natural gas sensors
+            heading_style: title
+            icon: mdi:gas-burner
+          - type: tile
+            entity: input_number.natural_gas_sensors_expected_count
+            name: Expected count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.natural_gas_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.natural_gas_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+    max_columns: 4
+    title: Device Health
+    icon: mdi:connection
+    subview: false
+    top_margin: false
+    cards: []
+    show_icon_and_title: true
+    path: device-health-view

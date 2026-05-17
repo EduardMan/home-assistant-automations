@@ -1,0 +1,27 @@
+category:
+  - name: Device health
+    icon: mdi:connection
+label:
+  - name: door
+    icon: mdi:door
+    colour: Brown
+  - name: moisture
+    icon: mdi:water
+    colour: Blue
+  - name: motion
+    icon: mdi:motion-sensor
+    colour: Amber
+  - name: temperature
+    icon: mdi:thermometer
+    colour: Red
+  - name: smoke
+    icon: mdi:smoke-detector-variant
+    colour: Grey
+  - name: natural gas
+    icon: mdi:gas-burner
+    colour: Cyan
+dashboards:
+  - name: Admin Controls
+    icon: mdi:shield-account
+    adminOnly: true
+    addToSidebar: true
