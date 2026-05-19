@@ -1,6 +1,8 @@
 category:
   - name: Device health
     icon: mdi:connection
+  - name: Device health availability
+    icon: mdi:access-point-check
 label:
   - name: door
     icon: mdi:door
