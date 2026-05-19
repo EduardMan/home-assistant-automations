@@ -1,5 +1,5 @@
 # Сенсор, отображающий текущее количество недоступных датчиков задымления
-name: Natural Gas sensors unavailable count (v1.0)
+name: Natural gas sensors unavailable count (v1.0)
 icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
 type: Template number

@@ -10,7 +10,7 @@
 #   - Universal notification sender (Script)
 
 alias: Expected helpers checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**  
   Проверяет, что в системе присутствуют все обязательные хелперы, заданные списком внутри автоматизации, и их названия не изменены.
 
@@ -51,76 +51,76 @@ actions:
       expected_helpers:
         # Moisture
         - entity_id: input_number.moisture_sensors_expected_count
-          name: Moisture sensors expected count
+          name: Moisture sensors expected count (v1.0)
         - entity_id: input_number.moisture_sensors_availability_timeout_minutes
-          name: Moisture sensors availability timeout minutes
+          name: Moisture sensors availability timeout minutes (v1.0)
         - entity_id: input_number.moisture_sensors_battery_threshold
-          name: Moisture sensors battery threshold
-        - entity_id: input_number.moisture_sensors_available_count
-          name: Moisture sensors available count
-        - entity_id: input_number.moisture_sensors_unavailable_count
-          name: Moisture sensors unavailable count
-        - entity_id: input_number.moisture_sensors_discharged_count
-          name: Moisture sensors discharged count
+          name: Moisture sensors battery threshold (v1.0)
+        - entity_id: number.moisture_sensors_available_count
+          name: Moisture sensors available count (v1.0)
+        - entity_id: number.moisture_sensors_unavailable_count
+          name: Moisture sensors unavailable count (v1.0)
+        - entity_id: number.moisture_sensors_discharged_count
+          name: Moisture sensors discharged count (v1.0)
         # Door
         - entity_id: input_number.door_sensors_expected_count
-          name: Door sensors expected count
+          name: Door sensors expected count (v1.0)
         - entity_id: input_number.door_sensors_availability_timeout_minutes
-          name: Door sensors availability timeout minutes
+          name: Door sensors availability timeout minutes (v1.0)
         - entity_id: input_number.door_sensors_battery_threshold
-          name: Door sensors battery threshold
-        - entity_id: input_number.door_sensors_available_count
-          name: Door sensors available count
-        - entity_id: input_number.door_sensors_unavailable_count
-          name: Door sensors unavailable count
-        - entity_id: input_number.door_sensors_discharged_count
-          name: Door sensors discharged count
+          name: Door sensors battery threshold (v1.0)
+        - entity_id: number.door_sensors_available_count
+          name: Door sensors available count (v1.0)
+        - entity_id: number.door_sensors_unavailable_count
+          name: Door sensors unavailable count (v1.0)
+        - entity_id: number.door_sensors_discharged_count
+          name: Door sensors discharged count (v1.0)
         # Motion
         - entity_id: input_number.motion_sensors_expected_count
-          name: Motion sensors expected count
+          name: Motion sensors expected count (v1.0)
         - entity_id: input_number.motion_sensors_availability_timeout_minutes
-          name: Motion sensors availability timeout minutes
+          name: Motion sensors availability timeout minutes (v1.0)
         - entity_id: input_number.motion_sensors_battery_threshold
-          name: Motion sensors battery threshold
-        - entity_id: input_number.motion_sensors_available_count
-          name: Motion sensors available count
-        - entity_id: input_number.motion_sensors_unavailable_count
-          name: Motion sensors unavailable count
-        - entity_id: input_number.motion_sensors_discharged_count
-          name: Motion sensors discharged count
+          name: Motion sensors battery threshold (v1.0)
+        - entity_id: number.motion_sensors_available_count
+          name: Motion sensors available count (v1.0)
+        - entity_id: number.motion_sensors_unavailable_count
+          name: Motion sensors unavailable count (v1.0)
+        - entity_id: number.motion_sensors_discharged_count
+          name: Motion sensors discharged count (v1.0)
         # Smoke
         - entity_id: input_number.smoke_sensors_expected_count
-          name: Smoke sensors expected count
+          name: Smoke sensors expected count (v1.0)
         - entity_id: input_number.smoke_sensors_availability_timeout_minutes
-          name: Smoke sensors availability timeout minutes
+          name: Smoke sensors availability timeout minutes (v1.0)
         - entity_id: input_number.smoke_sensors_battery_threshold
-          name: Smoke sensors battery threshold
-        - entity_id: input_number.smoke_sensors_available_count
-          name: Smoke sensors available count
-        - entity_id: input_number.smoke_sensors_unavailable_count
-          name: Smoke sensors unavailable count
-        - entity_id: input_number.smoke_sensors_discharged_count
-          name: Smoke sensors discharged count
+          name: Smoke sensors battery threshold (v1.0)
+        - entity_id: number.smoke_sensors_available_count
+          name: Smoke sensors available count (v1.0)
+        - entity_id: number.smoke_sensors_unavailable_count
+          name: Smoke sensors unavailable count (v1.0)
+        - entity_id: number.smoke_sensors_discharged_count
+          name: Smoke sensors discharged count (v1.0)
         # Temperature
         - entity_id: input_number.temperature_sensors_expected_count
-          name: Temperature sensors expected count
+          name: Temperature sensors expected count (v1.0)
         - entity_id: input_number.temperature_sensors_availability_timeout_minutes
-          name: Temperature sensors availability timeout minutes
+          name: Temperature sensors availability timeout minutes (v1.0)
         - entity_id: input_number.temperature_sensors_battery_threshold
-          name: Temperature sensors battery threshold
-        - entity_id: input_number.temperature_sensors_available_count
-          name: Temperature sensors available count
-        - entity_id: input_number.temperature_sensors_unavailable_count
-          name: Temperature sensors unavailable count
-        - entity_id: input_number.temperature_sensors_discharged_count
-          name: Temperature sensors discharged count
+          name: Temperature sensors battery threshold (v1.0)
+        - entity_id: number.temperature_sensors_available_count
+          name: Temperature sensors available count (v1.0)
+        - entity_id: number.temperature_sensors_unavailable_count
+          name: Temperature sensors unavailable count (v1.0)
+        - entity_id: number.temperature_sensors_discharged_count
+          name: Temperature sensors discharged count (v1.0)
         # Natural gas
         - entity_id: input_number.natural_gas_sensors_expected_count
-          name: Natural gas sensors expected count
-        - entity_id: input_number.natural_gas_sensors_available_count
-          name: Natural gas sensors available count
-        - entity_id: input_number.natural_gas_sensors_unavailable_count
-          name: Natural gas sensors unavailable count
+          name: Natural gas sensors expected count (v1.0)
+        - entity_id: number.natural_gas_sensors_available_count
+          name: Natural gas sensors available count (v1.0)
+        - entity_id: number.natural_gas_sensors_unavailable_count
+          name: Natural gas sensors unavailable count (v1.0)
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |

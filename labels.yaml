@@ -3,6 +3,10 @@ category:
     icon: mdi:connection
   - name: Device health availability
     icon: mdi:access-point-check
+  - name: Util
+    icon: mdi:tools
+  - name: System
+    icon: mdi:cog
 label:
   - name: door
     icon: mdi:door
@@ -22,6 +26,12 @@ label:
   - name: natural gas
     icon: mdi:gas-burner
     colour: Cyan
+  - name: notification
+    icon: mdi:bell-outline
+    colour: Yellow
+  - name: scheduled
+    icon: mdi:clock-outline
+    colour: Light grey
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account

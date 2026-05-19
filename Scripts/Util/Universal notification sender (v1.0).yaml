@@ -46,7 +46,7 @@ fields:
     selector:
       text: null
     required: true
-alias: Universal notification sender for availability checker
+alias: Universal notification sender (v1.0)
 description: ""
 mode: parallel
 max: 10
