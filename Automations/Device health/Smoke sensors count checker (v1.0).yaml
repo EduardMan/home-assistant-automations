@@ -12,7 +12,7 @@
 #   - Universal notification sender (Script)
 
 alias: Smoke sensors count checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**
   Проверяет, что необходимым датчикам и сенсорам задымления проставлен лейбл *smoke*.
 

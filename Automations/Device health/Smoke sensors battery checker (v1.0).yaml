@@ -14,7 +14,7 @@
 #   - Universal notification sender (Script)
 
 alias: Smoke sensors battery checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**
   Проверяет, нет ли в доме датчиков задымления с низким зарядом батареи.
   Если заряд какого-то датчика опускается ниже заданного порога — приходит уведомление.

@@ -14,7 +14,7 @@
 #   - Universal notification sender (Script)
 
 alias: Smoke sensors availability checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**
   Проверяет, все ли датчики задымления выходят на связь.
   Если какой-то датчик не отвечает дольше заданного времени — приходит уведомление.

@@ -14,7 +14,7 @@
 #   - Universal notification sender (Script)
 
 alias: Moisture sensors battery checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**
   Проверяет, нет ли в доме датчиков протечки с низким зарядом батареи.
   Если заряд опускается ниже заданного порога или срабатывает сенсор низкого заряда — приходит уведомление.

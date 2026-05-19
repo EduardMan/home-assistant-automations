@@ -12,7 +12,7 @@
 #   - Universal notification sender (Script)
 
 alias: Natural gas sensors availability checker (v1.0)
-description: >-
+description: |2-
   **Что делает:**
   Проверяет, все ли датчики утечки газа выходят на связь.
   Если какой-то датчик перестаёт отвечать — приходит уведомление.
