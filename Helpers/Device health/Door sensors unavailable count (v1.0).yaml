@@ -3,6 +3,7 @@ name: Door sensors unavailable count (v1.0)
 icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
 type: Template number
+visible: false
 label: door
 entityId: door_sensors_unavailable_count
 maximumValue: 100

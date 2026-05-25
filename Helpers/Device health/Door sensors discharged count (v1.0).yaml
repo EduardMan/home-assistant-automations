@@ -4,6 +4,7 @@
 name: Door sensors discharged count (v1.0)
 icon: mdi:battery-alert-variant-outline
 unitOfMeasurement: pcs
+visible: false
 type: Template number
 label: door
 entityId: door_sensors_discharged_count

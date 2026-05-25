@@ -6,5 +6,6 @@ type: Template number
 label: door
 entityId: door_sensors_available_count
 maximumValue: 100
+visible: false
 state:
   {{ expand(label_entities("door") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}

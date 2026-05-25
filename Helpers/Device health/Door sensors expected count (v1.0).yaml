@@ -7,4 +7,5 @@ type: Number
 label: door
 entityId: door_sensors_expected_count
 displayMode: Input field
+visible: false
 value: {{ количество датчиков открытия двери/окна в доме }}

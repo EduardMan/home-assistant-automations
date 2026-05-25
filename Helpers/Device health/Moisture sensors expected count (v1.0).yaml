@@ -7,4 +7,5 @@ type: Number
 label: moisture
 entityId: moisture_sensors_expected_count
 displayMode: Input field
+visible: false
 value: {{ количество датчиков протечки в доме }}

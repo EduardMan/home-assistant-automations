@@ -2,6 +2,7 @@
 name: Moisture sensors available count (v1.0)
 icon: mdi:check-circle-outline
 unitOfMeasurement: pcs
+visible: false
 type: Template number
 label: moisture
 entityId: moisture_sensors_available_count

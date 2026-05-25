@@ -8,5 +8,6 @@ type: Number
 label: door
 entityId: door_sensors_availability_timeout_minutes
 displayMode: Input field
+visible: false
 maximumValue: 160
 value: 110
