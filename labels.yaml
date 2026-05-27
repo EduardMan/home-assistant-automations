@@ -34,6 +34,9 @@ label:
   - name: scheduled
     icon: mdi:clock-outline
     colour: Light grey
+  - name: moisture valve
+    icon: mdi:valve
+    colour: Blue grey
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account
