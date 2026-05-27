@@ -1,0 +1,11 @@
+# Настройка ожидаемого количества водопроводных кранов в системе.
+name: Moisture valves expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: moisture valve
+entityId: moisture_valves_expected_count
+displayMode: Input field
+visible: false
+value: {{ количество водопроводных кранов в доме }}
