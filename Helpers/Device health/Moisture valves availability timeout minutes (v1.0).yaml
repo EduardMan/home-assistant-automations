@@ -1,0 +1,13 @@
+# Настройка таймаута доступности водопроводных кранов (в минутах).
+# Если кран не присылает данные дольше этого времени, он считается недоступным.
+name: Moisture valves availability timeout minutes (v1.0)
+icon: mdi:timer-outline
+stepSize: 1
+unitOfMeasurement: min
+type: Number
+label: moisture valve
+entityId: moisture_valves_availability_timeout_minutes
+displayMode: Input field
+visible: false
+maximumValue: 30
+value: 10
