@@ -1,0 +1,119 @@
+# category
+#   - Device health
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - moisture_valves_count_checker
+# dependencies:
+#   - Moisture valves availability timeout minutes (Helper)
+#   - Moisture valves expected count (Helper)
+#   - sensor.uptime (Integration)
+#   - Universal notification sender (Script)
+
+alias: Moisture valves count checker (v1.0)
+description: |2-
+  **Что делает:**  
+  Проверяет, что все водопроводные краны имеют нужные метки и их количество совпадает с ожидаемым.
+
+  **Как приходит оповещение:**  
+  - Сравнивает фактическое число кранов с ожидаемым (как общее количество, так и количество сенсоров доступности).  
+  - При расхождении отправляет отдельное уведомление, где указано, сколько кранов есть сейчас и сколько должно быть (например, «2/3»).
+
+  **Когда срабатывает проверка:**  
+  - 📅 Каждое утро в 08:00  
+  - ✏️ Когда вы меняете ожидаемое количество кранов (настройка `Moisture valves expected count`)  
+  - 🔄 После запуска системы (через 5 минут после того, как время работы превысит заданный таймаут — чтобы краны успели проснуться)  
+  - 🔔 Когда вы закрываете любое из уведомлений о несовпадении — автоматизация сразу перепроверяет, не устранена ли проблема
+
+  **Настройки:**  
+  - `Moisture valves expected count` — сколько всего водопроводных кранов должно быть в системе.  
+  - `Moisture valves availability timeout minutes` — через сколько минут без ответа кран считается недоступным (влияет только на задержку проверки после перезагрузки).
+triggers:
+  # Когда меняется настройка ожидаемого количества водопроводных кранов в доме
+  - trigger: state
+    entity_id:
+      - input_number.moisture_valves_expected_count
+  # Каждый день в 08:00
+  - trigger: time
+    at: "08:00:00"
+  # При удалении уведомления о несоответствии числа датчиков доступности водопроводных кранов
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: moisture_valves_availability_count_problem_notification
+    id: persistent_notification_removed
+  # При удалении уведомления о несоответствии числа водопроводных кранов
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: moisture_valves_valves_count_problem_notification
+    id: persistent_notification_removed
+  # После запуска системы (время работы системы - настройка таймаута датчиков > 5, +5 минут на всякий случай)
+  - alias: >-
+      When system uptime + 5 greater than Moisture valves availability timeout minutes
+    trigger: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int - 
+          states('input_number.moisture_valves_availability_timeout_minutes') | int
+          ) > 5 
+      }}
+conditions:
+  - alias: System uptime is greater then Moisture valves availability timeout minutes
+    condition: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int -
+          states('input_number.moisture_valves_availability_timeout_minutes') | int
+          ) > 0 
+      }}
+    enabled: true
+actions:
+  # Вычисляем количество датчиков доступности с лейблом moisture valve
+  - variables:
+      moisture_valves_labeled_availability_current_count: >
+        {{ label_entities("moisture_valve") | select('match', '.*_availability$') |
+        list | count }}
+  # Вычисляем количество водопроводных кранов с лейблом moisture valve
+  - variables:
+      moisture_valves_labeled_valves_current_count: >
+        {{ expand(label_entities("moisture_valve")) | selectattr('domain', 'eq', 'valve') 
+        | list | count }}
+  # Если вычисленное количество датчиков доступности с лейблом moisture valve не совпадает с настройкой ожидаемого количества водопроводных кранов в доме,
+  # то отправляем уведомление о проблеме с количеством  
+  - if:
+      - condition: template
+        value_template: >-
+          {{ moisture_valves_labeled_availability_current_count | int !=
+          states('input_number.moisture_valves_expected_count') | int }}
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          message_title: Количество водопроводных кранов не совпадает
+          message_text: >-
+            Фактическое количество водопроводных кранов (доступность) не совпадает
+            с ожидаемым ({{ moisture_valves_labeled_availability_current_count }}/
+            {{ states('input_number.moisture_valves_expected_count') | int }})
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: moisture_valves_availability_count_problem_notification
+  # Если вычисленное количество водопроводных кранов с лейблом moisture valve не совпадает с настройкой ожидаемого количества водопроводных кранов в доме,
+  # то отправляем уведомление о проблеме с количеством
+  - if:
+      - condition: template
+        value_template: >-
+          {{ moisture_valves_labeled_valves_current_count | int !=
+          states('input_number.moisture_valves_expected_count') | int }}
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          message_title: Количество водопроводных кранов не совпадает
+          message_text: >-
+            Фактическое количество водопроводных кранов (кран) не совпадает
+            с ожидаемым ({{ moisture_valves_labeled_valves_current_count }}/
+            {{ states('input_number.moisture_valves_expected_count') | int }})
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: moisture_valves_valves_count_problem_notification
+mode: single
