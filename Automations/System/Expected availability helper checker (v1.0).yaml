@@ -60,6 +60,8 @@ actions:
         - entity_id_postfix: .*_contact$
           label: door
           type: binary_sensor
+        - label: moisture_valve
+          type: valve
   # Находим сенсоры у которых отсутствуют availability
   - variables:
       missing_availability_helper: |
@@ -80,6 +82,11 @@ actions:
           {% elif type == 'sensor' %}
             {% set filtered_sensors_by_prefix = states.sensor
                | selectattr('entity_id', 'match', entity_id_postfix)
+               | map(attribute='entity_id')
+               | list %}
+            {% set filtered_sensors = label_entities(required_label) | select('in', filtered_sensors_by_prefix) | list %}
+          {% elif type == 'valve' %}
+            {% set filtered_sensors_by_prefix = states.valve
                | map(attribute='entity_id')
                | list %}
             {% set filtered_sensors = label_entities(required_label) | select('in', filtered_sensors_by_prefix) | list %}
