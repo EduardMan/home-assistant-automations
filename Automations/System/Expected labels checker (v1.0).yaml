@@ -51,6 +51,8 @@ actions:
       expected_labels:
         - entity_id_postfix: .*_water_leak$
           label: moisture
+        - entity_type: valve
+          label: moisture_valve
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |
@@ -60,11 +62,17 @@ actions:
         {% for expected_label in expected_labels %}
           {% set required_label = expected_label.label %}
           {% set entity_id_postfix = expected_label.entity_id_postfix %}
-
-          {% set filtered_sensors = states.binary_sensor
-           | selectattr('entity_id', 'match', entity_id_postfix)
-           | map(attribute='entity_id')
-           | list %}
+        
+          {% if 'entity_type' in expected_label %}
+            {% set filtered_sensors = states[expected_label.entity_type]
+              | map(attribute='entity_id')
+              | list %}  
+          {% else %}
+            {% set filtered_sensors = states.binary_sensor
+              | selectattr('entity_id', 'match', entity_id_postfix)
+              | map(attribute='entity_id')
+              | list %}
+          {% endif %}
 
           {% for sensor in filtered_sensors %}
             {% if required_label not in labels(sensor) %}
