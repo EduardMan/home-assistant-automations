@@ -52,75 +52,121 @@ actions:
         # Moisture
         - entity_id: input_number.moisture_sensors_expected_count
           name: Moisture sensors expected count (v1.0)
+          label: "moisture"
         - entity_id: input_number.moisture_sensors_availability_timeout_minutes
           name: Moisture sensors availability timeout minutes (v1.0)
+          label: "moisture"
         - entity_id: input_number.moisture_sensors_battery_threshold
           name: Moisture sensors battery threshold (v1.0)
+          label: "moisture"
         - entity_id: number.moisture_sensors_available_count
           name: Moisture sensors available count (v1.0)
+          label: "moisture"
         - entity_id: number.moisture_sensors_unavailable_count
           name: Moisture sensors unavailable count (v1.0)
+          label: "moisture"
         - entity_id: number.moisture_sensors_discharged_count
           name: Moisture sensors discharged count (v1.0)
+          label: "moisture"
         # Door
         - entity_id: input_number.door_sensors_expected_count
           name: Door sensors expected count (v1.0)
+          label: "door"
         - entity_id: input_number.door_sensors_availability_timeout_minutes
           name: Door sensors availability timeout minutes (v1.0)
+          label: "door"
         - entity_id: input_number.door_sensors_battery_threshold
           name: Door sensors battery threshold (v1.0)
+          label: "door"
         - entity_id: number.door_sensors_available_count
           name: Door sensors available count (v1.0)
+          label: "door"
         - entity_id: number.door_sensors_unavailable_count
           name: Door sensors unavailable count (v1.0)
+          label: "door"
         - entity_id: number.door_sensors_discharged_count
           name: Door sensors discharged count (v1.0)
+          label: "door"
         # Motion
         - entity_id: input_number.motion_sensors_expected_count
           name: Motion sensors expected count (v1.0)
+          label: "motion"
         - entity_id: input_number.motion_sensors_availability_timeout_minutes
           name: Motion sensors availability timeout minutes (v1.0)
+          label: "motion"
         - entity_id: input_number.motion_sensors_battery_threshold
           name: Motion sensors battery threshold (v1.0)
+          label: "motion"
         - entity_id: number.motion_sensors_available_count
           name: Motion sensors available count (v1.0)
+          label: "motion"
         - entity_id: number.motion_sensors_unavailable_count
           name: Motion sensors unavailable count (v1.0)
+          label: "motion"
         - entity_id: number.motion_sensors_discharged_count
           name: Motion sensors discharged count (v1.0)
+          label: "motion"
         # Smoke
         - entity_id: input_number.smoke_sensors_expected_count
           name: Smoke sensors expected count (v1.0)
+          label: "smoke"
         - entity_id: input_number.smoke_sensors_availability_timeout_minutes
           name: Smoke sensors availability timeout minutes (v1.0)
+          label: "smoke"
         - entity_id: input_number.smoke_sensors_battery_threshold
           name: Smoke sensors battery threshold (v1.0)
+          label: "smoke"
         - entity_id: number.smoke_sensors_available_count
           name: Smoke sensors available count (v1.0)
+          label: "smoke"
         - entity_id: number.smoke_sensors_unavailable_count
           name: Smoke sensors unavailable count (v1.0)
+          label: "smoke"
         - entity_id: number.smoke_sensors_discharged_count
           name: Smoke sensors discharged count (v1.0)
+          label: "smoke"
         # Temperature
         - entity_id: input_number.temperature_sensors_expected_count
           name: Temperature sensors expected count (v1.0)
+          label: "temperature"
         - entity_id: input_number.temperature_sensors_availability_timeout_minutes
           name: Temperature sensors availability timeout minutes (v1.0)
+          label: "temperature"
         - entity_id: input_number.temperature_sensors_battery_threshold
           name: Temperature sensors battery threshold (v1.0)
+          label: "temperature"
         - entity_id: number.temperature_sensors_available_count
           name: Temperature sensors available count (v1.0)
+          label: "temperature"
         - entity_id: number.temperature_sensors_unavailable_count
           name: Temperature sensors unavailable count (v1.0)
+          label: "temperature"
         - entity_id: number.temperature_sensors_discharged_count
           name: Temperature sensors discharged count (v1.0)
+          label: "temperature"
         # Natural gas
         - entity_id: input_number.natural_gas_sensors_expected_count
           name: Natural gas sensors expected count (v1.0)
+          label: "natural_gas"
         - entity_id: number.natural_gas_sensors_available_count
           name: Natural gas sensors available count (v1.0)
+          label: "natural_gas"
         - entity_id: number.natural_gas_sensors_unavailable_count
           name: Natural gas sensors unavailable count (v1.0)
+          label: "natural_gas"
+        # Moisture valve
+        - entity_id: input_number.moisture_valves_expected_count
+          name: Moisture valves expected count (v1.0)
+          label: "moisture_valve"
+        - entity_id: input_number.moisture_valves_availability_timeout_minutes
+          name: Moisture valves availability timeout minutes (v1.0)
+          label: "moisture_valve"
+        - entity_id: number.moisture_valves_available_count
+          name: Moisture valves available count (v1.0)
+          label: "moisture_valve"
+        - entity_id: number.moisture_valves_unavailable_count
+          name: Moisture valves unavailable count (v1.0)
+          label: "moisture_valve"
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
@@ -129,12 +175,16 @@ actions:
         {% for helper in expected_helpers %}
           {% set state = states(helper.entity_id) %}
           {% set friendly_name = state_attr(helper.entity_id, 'friendly_name') %}
+          {% set labels = labels(helper.entity_id) %}
           {% if state == 'unknown' %}
             {% set issues.total = issues.total + 1 %}
             {% set issues.list = issues.list + ["Отсутствует: " + helper.entity_id] %}
           {% elif friendly_name != helper.name %}
             {% set issues.total = issues.total + 1 %}
             {% set issues.list = issues.list + ["Неверное имя: " + helper.entity_id] %}
+          {% elif helper.label not in labels %}
+            {% set issues.total = issues.total + 1 %}
+            {% set issues.list = issues.list + ["Неверный лейбл: " + friendly_name] %}
           {% endif %}
         {% endfor %}
 

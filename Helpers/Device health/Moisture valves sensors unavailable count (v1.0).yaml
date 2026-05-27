@@ -4,7 +4,7 @@ icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
 visible: false
 type: Template number
-label: moisture
+label: moisture valve
 entityId: moisture_valves_unavailable_count
 maximumValue: 100
 state:
