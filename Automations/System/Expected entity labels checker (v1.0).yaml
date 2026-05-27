@@ -4,11 +4,11 @@
 #   - notification
 #   - scheduled
 # entityId
-#   - expected_labels_checker
+#   - expected_entity_labels_checker
 # dependencies:
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
-alias: Expected labels checker (v1.0)
+alias: Expected entity labels checker (v1.0)
 description: |2-
   **Что делает:**  
   Проверяет, что у всех нужных сенсоров проставлены обязательные лейблы.  
