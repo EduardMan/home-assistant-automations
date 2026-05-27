@@ -1,0 +1,11 @@
+# Сенсор, отображающий текущее количество доступных водопроводных кранов
+name: Moisture valves available count (v1.0)
+icon: mdi:check-circle-outline
+unitOfMeasurement: pcs
+visible: false
+type: Template number
+label: moisture valve
+entityId: moisture_valves_available_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("moisture valve") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}
