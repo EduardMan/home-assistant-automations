@@ -1,0 +1,13 @@
+# Настройка количества попыток закрытия всех кранов с лейблом moisture valve.
+name: Close valves retry count (v1.0)
+icon: mdi:repeat
+stepSize: 1
+unitOfMeasurement: times
+type: Number
+label: moisture valve
+entityId: close_valves_retry_count
+displayMode: Input field
+visible: false
+minimumValue: 1
+maximumValue: 5
+value: 3
