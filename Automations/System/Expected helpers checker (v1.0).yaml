@@ -167,6 +167,12 @@ actions:
         - entity_id: number.moisture_valves_unavailable_count
           name: Moisture valves unavailable count (v1.0)
           label: "moisture_valve"
+        - entity_id: input_number.close_valve_required_time_seconds
+          name: Close valve required time seconds (v1.0)
+          label: "moisture_valve"
+        - entity_id: input_number.close_valves_retry_count
+          name: Close valves retry count (v1.0)
+          label: "moisture_valve"
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
