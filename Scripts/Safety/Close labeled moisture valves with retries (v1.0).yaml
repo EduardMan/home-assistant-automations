@@ -1,0 +1,205 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+#   - moisture valve
+# entityId
+#   - close_labeled_moisture_valves_with_retries
+# dependencies:
+#   - Close valves retry count (Helper)
+#   - Close valve required time seconds (Helper)
+#   - Universal notification sender (Script)
+
+description: |2-
+  **Что делает:**
+  Последовательно закрывает все водопроводные краны с лейблом *moisture valve*, повторяя попытки при неудаче.
+  Если после заданного числа попыток краны не закрылись — приходит оповещение с требованием ручной проверки.
+
+  **Как работает:**
+  - Отправляет команду `valve.close_valve` всем кранам с лейблом *moisture valve*.
+  - Ждёт заданное время (`Close valve required time seconds`), пока краны не перейдут в состояние «closed».
+  - Если по истечении времени остались открытые краны — повторяет попытку.
+  - Количество попыток ограничено настройкой `Close valves retry count`.
+  - После каждой неудачной попытки (начиная со второй) отправляется промежуточное уведомление с прогрессом и списком незакрытых кранов.
+  - По окончании цикла отправляется итоговое уведомление: либо об успешном закрытии всех кранов, либо о необходимости ручного вмешательства.
+
+  **Когда используется:**
+  - При обнаружении протечки (вызывается из аварийных автоматизаций).
+
+  **Особенности:**
+  - Работает только с кранами, помеченными лейблом *moisture valve*.
+  - Если в системе нет таких кранов, скрипт сразу завершится с уведомлением об успехе (кранов нет — протечки нет).
+  - Все уведомления отправляются через `universal_notification_sender`, что позволяет гибко настраивать каналы оповещения.
+
+  **Настройки:**
+  - `Close valve required time seconds` — сколько секунд ждать закрытия крана перед проверкой.
+  - `Close valves retry count` — максимальное количество повторных попыток закрытия.
+sequence:
+  - repeat:
+      until:
+        # До момента пока не закроем все краны ИЛИ не достигнем лимита по количеству попыток
+        - condition: or
+          conditions:
+            # Если нашли хоть один открытый кран с лейблом moisture_valve
+            - condition: template
+              value_template: >-
+                {{ expand(label_entities("moisture_valve")) |
+                selectattr('domain', 'eq', 'valve') | selectattr('state', '!=',
+                'closed') | list | count == 0 }}
+              alias: If all valves are closed
+            # Если количество попыток равно или превысило настройку Close valves retry count
+            - condition: template
+              value_template: >-
+                {{ repeat.index >=
+                (states('input_number.close_valves_retry_count') | int) }}
+              alias: >-
+                If current retries count is more or equal than retry count limit
+                setting
+      sequence:
+        # Закрыть все краны с лейблом moisture_valve
+        - action: valve.close_valve
+          metadata: {}
+          target:
+            label_id: moisture_valve
+          data: {}
+        - if:
+            # Если это уже не первая попытка закрытия кранов
+            - condition: template
+              value_template: "{{ repeat.index > 1 }}"
+              alias: If this is not the first attempt
+          then:
+            - variables:
+                # Определяем все открытые краны
+                opened_valves_var: >
+                  {% set limit = 5 %}
+                  {% set issues = namespace(total=0, list=[]) %}
+
+                  {% set opened_valves =
+                  expand(label_entities("moisture_valve")) 
+                   | selectattr('domain', 'eq', 'valve')
+                   | selectattr('state', '!=', 'closed')
+                   | map(attribute='entity_id')
+                   | list %}
+
+                  {% for opened_valve in opened_valves %}
+                    {% set issues.total = issues.total + 1 %}
+
+                    {% set area_id = device_attr(opened_valve, 'area_id') %}
+                    {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+                    {% set issues.list = issues.list + [device_name(opened_valve) + " (" + area + ")"] %}
+                  {% endfor %} 
+                  
+                  {% if issues.total > limit %}
+                    {{ issues.list[:limit] | join('\n') ~ '\n... и ещё ' ~ (issues.total - limit) ~ ' кран(а)' }}
+                  {% else %}
+                    {{ issues.list | join('\n') }}
+                  {% endif %}
+            # Отправляем уведомление о том, что у нас не закрылись краны и мы делаем новую попытку
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                message_text: >-
+                  Закрылись {{ expand(label_entities("moisture_valve")) |
+                  selectattr('domain', 'eq', 'valve') | selectattr('state', '==', 'closed') | list | count }}/
+                  {{ expand(label_entities("moisture_valve")) |
+                  selectattr('domain', 'eq', 'valve') | list | count }} кранов.
+
+                  Выполняем повторную попытку {{ repeat.index }} из {{
+                  states('input_number.close_valves_retry_count') | int }}
+                  попыток, ожидайте {{
+                  states('input_number.close_valve_required_time_seconds') | int
+                  }} сек.
+
+                  Не удалось закрыть:
+
+                  {{ opened_valves_var }}
+                message_notification_id: close_valve_problem_{{ repeat.index }}
+                automation_trigger_id: close_valve
+                message_title: Не удалось закрыть все краны!
+              enabled: true
+        - if:
+            # Если есть хоть один не закрытый кран с лейблом moisture_valve
+            - condition: template
+              value_template: >-
+                {{ expand(label_entities("moisture_valve")) |
+                selectattr('domain', 'eq', 'valve') | selectattr('state', '!=',
+                'closed') | list | count == 0 }}
+              alias: If not all valves are closed
+          then: []
+          else:
+            # Ожидаем пока все кран закроются ИЛИ время Close valve required time seconds
+            - wait_for_trigger:
+                - trigger: template
+                  value_template: >-
+                    {{ expand(label_entities("moisture_valve")) |
+                    selectattr('domain', 'eq', 'valve') | selectattr('state',
+                    '!=', 'closed') | list | count == 0 }}
+              timeout:
+                seconds: >-
+                  {{ states('input_number.close_valve_required_time_seconds') |
+                  int }}
+              continue_on_timeout: true
+  # Отправка итогового уведомления после выполнения блока repeat
+  - if:
+      # Если есть хоть один не закрытый кран
+      - condition: template
+        value_template: >-
+          {{ expand(label_entities("moisture_valve")) | selectattr('domain',
+          'eq', 'valve') | selectattr('state', '!=', 'closed') | list | count !=
+          0 }}
+        alias: If not all valves are closed
+    then:
+      - variables:
+          opened_valves_var: |
+            {% set limit = 5 %}  {% set issues = namespace(total=0, list=[]) %}
+            {% set opened_valves = expand(label_entities("moisture_valve")) 
+             | selectattr('domain', 'eq', 'valve')
+             | selectattr('state', '!=', 'closed')
+             | map(attribute='entity_id')
+             | list %}
+
+            {% for opened_valve in opened_valves %}
+              {% set issues.total = issues.total + 1 %}
+
+              {% set area_id = device_attr(opened_valve, 'area_id') %}
+              {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+              {% set issues.list = issues.list + [device_name(opened_valve) + " (" + area + ")"] %}
+            {% endfor %} {% if issues.total > limit %}
+              {{ issues.list[:limit] | join('\n') ~ '\n... и ещё ' ~ (issues.total - limit) ~ ' кран(а)' }}
+            {% else %}
+              {{ issues.list | join('\n') }}
+            {% endif %}
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          automation_trigger_id: close_valve
+          message_text: >-
+            После {{ states('input_number.close_valves_retry_count') | int }}
+            попыток удалось закрыть {{ expand(label_entities("moisture_valve"))
+            | selectattr('domain', 'eq', 'valve') | selectattr('state', '==',
+            'closed') | list | count }}/{{
+            expand(label_entities("moisture_valve")) | selectattr('domain',
+            'eq', 'valve') | list | count }} кранов.
+
+            Требуется ручная проверка.
+
+
+            Не удалось закрыть:
+
+            {{ opened_valves_var }}
+          message_title: Не удалось закрыть все краны!
+          message_notification_id: close_valve_failed
+    else:
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          automation_trigger_id: close_valve
+          message_text: >-
+            Все водопроводные краны ({{
+            states('input_number.moisture_valves_expected_count') | int }} шт.)
+            успешно закрыты!
+          message_title: Водопроводные краны закрыты!
+          message_notification_id: close_valve_success
+    enabled: true
+fields: {}
+alias: Close labeled moisture valves with retries (v1.0)
