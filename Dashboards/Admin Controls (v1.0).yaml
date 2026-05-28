@@ -182,7 +182,7 @@ views:
           - type: heading
             heading: Temperature sensors
             heading_style: title
-            icon: mdi:thermometer-high
+            icon: mdi:thermometer
           - type: tile
             entity: input_number.temperature_sensors_expected_count
             name: Expected count
@@ -293,6 +293,64 @@ views:
               action: none
             features_position: bottom
         column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Moisture valves
+            heading_style: title
+            icon: mdi:valve
+          - type: tile
+            entity: input_number.moisture_valves_expected_count
+            name: Expected count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_valves_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.close_valve_required_time_seconds
+            name: Close required time
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.close_valves_retry_count
+            name: Close retries count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.moisture_valves_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_valves_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
       - type: grid
         cards:
           - type: heading
