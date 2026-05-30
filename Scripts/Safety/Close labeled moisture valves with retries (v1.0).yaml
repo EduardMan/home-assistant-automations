@@ -35,6 +35,11 @@ description: |2-
   - `Close valve required time seconds` — сколько секунд ждать закрытия крана перед проверкой.
   - `Close valves retry count` — максимальное количество повторных попыток закрытия.
 sequence:
+  - condition: template
+    value_template: >-
+      {{ label_entities('moisture_valve') | select('match', 'valve') | list |
+      count > 0 }}
+    alias: If system has at least one valve with label = 'moisture valve'
   - repeat:
       until:
         # До момента пока не закроем все краны ИЛИ не достигнем лимита по количеству попыток
