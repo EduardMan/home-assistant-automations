@@ -100,8 +100,8 @@ sequence:
               data:
                 message_text: >-
                   Закрылись {{ expand(label_entities("moisture_valve")) |
-                  selectattr('domain', 'eq', 'valve') | selectattr('state', '==', 'closed') | list | count }}/
-                  {{ expand(label_entities("moisture_valve")) |
+                  selectattr('domain', 'eq', 'valve') | selectattr('state', '==', 'closed') | list | count }}/{{
+                  expand(label_entities("moisture_valve")) |
                   selectattr('domain', 'eq', 'valve') | list | count }} кранов.
 
                   Выполняем повторную попытку {{ repeat.index }} из {{
