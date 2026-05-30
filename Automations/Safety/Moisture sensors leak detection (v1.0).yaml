@@ -1,0 +1,96 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+# entityId
+#   - moisture_sensors_leak_detection
+# dependencies:
+#   - moisture (label)
+#   - Universal notification sender (Script)
+#   - Close labeled moisture valves with retries (Script)
+
+alias: Moisture sensors leak detection (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Мгновенно реагирует на протечку воды: одновременно запускает закрытие всех кранов и отправляет оповещение с указанием датчика и комнаты.
+
+  **⚙️ Как работает:**  
+  - При срабатывании любого датчика протечки (явного или найденного по лейблу *moisture*) параллельно вызываются скрипт `close_labeled_moisture_valves_with_retries` и уведомление через `universal_notification_sender`.  
+  - Явные датчики перечислены в первых двух триггерах. Третий триггер — шаблонный — ловит все остальные датчики с лейблом *moisture* и суффиксом `_water_leak`, исключая уже указанные, чтобы избежать дублирования.  
+  - **Важно:** массив `exclude_moisture_sensors` в шаблонном триггере должен содержать entity_id всех явных датчиков, иначе возможна ошибка «Already running».  
+
+  **📅 Когда срабатывает:**  
+  - Только при переходе датчика в состояние «on» (обнаружена протечка).  
+  - Реакция мгновенная, без задержек.
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your water leak sensor }}` на реальные entity_id ваших датчиков протечки в первых двух триггерах.  
+  - Скопируйте эти же entity_id в массив `exclude_moisture_sensors` внутри шаблонного триггера.
+triggers:
+  # Когда срабатывает указанный датчик протечки (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ПРОТЕЧКИ)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your water leak sensor }}
+    to:
+      - "on"
+    enabled: true
+  # Когда срабатывает указанный датчик протечки (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ПРОТЕЧКИ)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your water leak sensor }}
+    to:
+      - "on"
+    enabled: true
+  # Когда статус одного из сенсора протечки воды помеченного лейблом moisture перестает быть равным off
+  # Данный триггер это защита, если вдруг забыли добавить сенсор протечки в список триггеров
+  # НЕ НАДО НАДЕЯТЬСЯ И РАССЧИТЫВАТЬ НА ЭТОТ ТРИГГЕР - ЭТО "защита от дурака", ВСЕ СЕНСОРЫ ПРОТЕЧКИ ДОЛЖНЫ ПРИСУТСТВОВАТЬ
+  # В СПИСКЕ ТРИГГЕРОВ
+  # В СКРИПТЕ ЕСТЬ МАССИВ exclude_moisture_sensors, который должен содержать entity_id сенсоров указанных в триггерах,
+  # иначе в логах постоянно будет ошибка "Already running (only a single execution is allowed)"
+  - trigger: template
+    value_template: |
+      {% set moisture_labeled_sensors = label_entities("moisture") 
+         | select('match', '.*_water_leak$')
+         | list %}
+      
+      {% set exclude_moisture_sensors = [
+      'binary_sensor.{{ your water leak sensor from triggers }}',
+      'binary_sensor.{{ your water leak sensor from triggers }}'
+      ] %}
+
+      {{ 
+        expand(moisture_labeled_sensors) 
+         | selectattr('state', '!=', 'off') 
+         | map(attribute = 'entity_id') 
+         | reject('in', exclude_moisture_sensors) 
+         | list 
+         | count != 0
+      }}
+    alias: When labeled moisture sensor changes to on
+conditions: [ ]
+actions:
+  # Вызываем действия параллельно, так как close_labeled_moisture_valves_with_retries может выполняться долго,
+  # а мы хотим уведомить пользователя о протечке (universal_notification_sender) моментально как только ее обнаружили
+  - parallel:
+      # Вызываем скрипт, который перекроет все краны
+      - action: script.close_labeled_moisture_valves_with_retries
+        metadata: { }
+        data: { }
+      # Определим имя сенсора и его комнату
+      - variables:
+          device_name_with_area: >
+            {% set dev = device_id(trigger.entity_id) %}
+            {% set area_id = device_attr(dev, 'area_id') %}
+            {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+            {% set device_name = device_attr(dev, 'name_by_user') or device_attr(dev, 'name') %} 
+
+            {{device_name ~ " (" ~ area ~ ")" }}
+      # Отправим уведомление о протечке
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          automation_trigger_id: "{{ trigger.id }}"
+          message_title: Обнаружена протечка ({{ area_name(trigger.entity_id) }})!
+          message_text: "{{ device_name_with_area }}"
+          message_notification_id: moisture_sensors_leak_detection_notification-{{trigger.entity_id}}
+mode: single
