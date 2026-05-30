@@ -5,7 +5,7 @@
 # entityId
 #   - moisture_sensors_leak_detection
 # dependencies:
-#   - moisture (label)
+#   - moisture valve (label)
 #   - Universal notification sender (Script)
 #   - Close labeled moisture valves with retries (Script)
 

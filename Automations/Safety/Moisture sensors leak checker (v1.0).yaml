@@ -1,0 +1,194 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - moisture_sensors_leak_checker
+# dependencies:
+#   - moisture (label)
+#   - Universal notification sender (Script)
+#   - Close labeled moisture valves with retries (Script)
+#   - sensor.uptime (Integration)
+
+alias: Moisture sensors leak checker (v1.0)
+description: |2-
+  **Что делает:**  
+  Постоянно следит за датчиками протечки. Если хотя бы один датчик всё ещё показывает протечку — закрывает вентили воды и отправляет оповещение.  
+  Помогает убедиться, что протечка не осталась незамеченной, даже если основная аварийная автоматизация уже сработала.
+
+  **Как приходит оповещение:**  
+  - Если активны 1–5 датчиков — в сообщении перечислены их названия и комнаты.  
+  - Если больше 5 — показаны первые пять, а затем общее количество оставшихся.  
+  - Оповещение обновляется при каждой проверке, пока датчики не станут сухими.
+
+  **Когда срабатывает проверка:**  
+  - 🔁 Каждые 10 минут (чтобы вовремя заметить продолжающуюся протечку).  
+  - 📅 Каждое утро в 08:02 (дополнительный контроль).  
+  - 🔄 Через несколько минут после запуска системы (после того, как датчики успели обновить своё состояние).  
+  - 🔔 Сразу после того, как вы закрыли уведомление о протечке — чтобы перепроверить, не осталось ли влаги.
+
+  **Особенности работы:**  
+  - Если протечка обнаружена на 10-й минуте, автоматизация подождёт 45 секунд, давая основной аварийной автоматизации время закрыть вентили.  
+  - Затем проверит, остались ли незакрытые вентили с лейблом *moisture*. Если да — закроет их сама.  
+  - Все вентили с лейблом *moisture* перекрываются командой `valve.close_valve`.
+triggers:
+  # Каждую десятую минуту
+  - trigger: time_pattern
+    minutes: /10
+    enabled: true
+    id: every_ten_minutes_trigger
+  # При удалении уведомления об обнаруженной протечке
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    id: persistent_notification_removed
+  # После запуска системы (время работы системы - настройка таймаута датчиков > 5, +5 минут на всякий случай)
+  - alias: >-
+      When system uptime + 5 greater than Moisture sensors availability timeout
+      minutes
+    trigger: template
+    value_template: |-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int - 
+          states('input_number.moisture_sensors_availability_timeout_minutes') | int
+          ) > 5 
+      }}
+  # Каждый день в 08:02:22, такое странное время нужно для того, чтобы избежать возможного одновременного запуска
+  - trigger: time
+    at: "08:02:22"
+    id: fixed_time
+conditions:
+  - condition: or
+    conditions:
+      - condition: and
+        conditions:
+          - condition: trigger
+            id:
+              - persistent_notification_removed
+          - condition: template
+            value_template: >-
+              {{ trigger.notification.notification_id is
+              match('moisture_sensors_leak_detection_notification.*') }}
+      - condition: and
+        conditions:
+          - condition: not
+            conditions:
+              - condition: trigger
+                id:
+                  - persistent_notification_removed
+actions:
+  - variables:
+      # Определяем список сработавших сенсоров протечки (и комнату каждого сенсора)
+      device_name_with_area: |
+        {% set limit = 5 %} 
+        {% set issues = namespace(total=0, list=[]) %}
+        {% set moisture_labeled_sensors = label_entities("moisture") 
+           | select('match', '.*_water_leak$')
+           | list %}
+
+        {% for moisture_labeled_sensor in moisture_labeled_sensors %}
+          {% if states(moisture_labeled_sensor) != 'off' %}
+            {% set issues.total = issues.total + 1 %}
+
+            {% set area_id = device_attr(moisture_labeled_sensor, 'area_id') %}
+            {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+            {% set issues.list = issues.list + [device_name(moisture_labeled_sensor) + " (" + area + ")"] %}
+          {% endif %}
+        {% endfor %}
+        {% if issues.total > limit %}
+          {{ issues.list[:limit] | join('\n') ~ '\n... и ещё ' ~ (issues.total - limit) ~ ' датчик(а)' }}
+        {% else %}
+          {{ issues.list | join('\n') }}
+        {% endif %}
+  - if:
+      # Список сработавших сенсоров протечки не пустой И (Удалено уведомление об обнаружении протечки ИЛИ автоматизация сработала по фиксированному времени)
+      - condition: and
+        conditions:
+          # Проверяем, что список сработавших сенсоров протечки не пустой
+          - condition: template
+            value_template: "{{ device_name_with_area != '' }}"
+            alias: If device_name_with_area is not empty
+          # Удалено уведомление об обнаружении протечки ИЛИ автоматизация сработала по фиксированному времени
+          - condition: or
+            conditions:
+              # Удалено уведомление об обнаружении протечки (паттерн notification_id проходит по moisture_sensors_leak_detection_notification.*)
+              - condition: and
+                conditions:
+                  # Проверяем, сработала ли автоматизация по триггеру удаления уведомления
+                  - condition: trigger
+                    id:
+                      - persistent_notification_removed
+                  # Проверяем, что notification_id уведомления проходит по паттерну уведомлений о протечке
+                  - condition: template
+                    value_template: >-
+                      {{ trigger.notification.notification_id is
+                      match('moisture_sensors_leak_detection_notification.*') }}
+                alias: >-
+                  if triggered by removing
+                  moisture_sensors_leak_detection_notification.* notification
+              # Проверяем, что автоматизация сработала по фиксированному времени
+              - condition: trigger
+                id:
+                  - fixed_time
+    then:
+      - parallel:
+          # Вызываем скрипт, который перекроет все краны
+          - action: script.close_labeled_moisture_valves_with_retries
+            metadata: { }
+            data: { }
+          # Отправляем уведомление о протечке
+          - action: script.universal_notification_sender
+            metadata: { }
+            data:
+              automation_trigger_id: "{{ trigger.id }}"
+              message_title: Обнаружена протечка!
+              message_text: "{{ device_name_with_area }}"
+              message_notification_id: moisture_sensors_leak_detection_notification
+    else:
+      - if:
+          # Проверяем, что список сработавших сенсоров протечки не пустой
+          - condition: template
+            value_template: "{{ device_name_with_area != '' }}"
+            alias: If device_name_with_area is not empty
+        then:
+          # Даем время закрыться крану (для большинства моделей 45 секунд более чем достаточно)
+          # Кейс, когда у нас обнаружилась протечка на 10й минуте и другая автоматизация уже дала команду на закрытие крана
+          # Такая задержка позволяет избежать лишних срабатываний
+          - delay:
+              seconds: >-
+                {{ states('input_number.close_valve_required_time_seconds') |
+                int }}
+            alias: Delay for 45 seconds (for close any valve)
+          - if:
+              # Проверяем, что в системе есть хоть один НЕ закрытый кран с лейблом moisture valve
+              - condition: and
+                conditions:
+                  # Проверяем, что в системе есть хоть один кран с лейблом = moisture valve
+                  - condition: template
+                    value_template: >-
+                      {{ label_entities('moisture_valve') | select('match', 'valve') |
+                      list | count > 0 }}
+                    alias: If system contains moisture valves
+                  # Проверяем, что в системе есть хоть один НЕ закрытый кран (с лейблом = moisture valve)
+                  - condition: template
+                    value_template: >-
+                      {{ label_entities('moisture_valve') | select('match', 'valve') |
+                      expand | selectattr('state', '!=', 'closed') | list |
+                      count != 0 }}
+                    alias: Any valve is not closed
+            then:
+              - parallel:
+                  # Вызываем скрипт, который перекроет все краны
+                  - action: script.close_labeled_moisture_valves_with_retries
+                    metadata: { }
+                    data: { }
+                  # Отправляем уведомление о протечке
+                  - action: script.universal_notification_sender
+                    metadata: { }
+                    data:
+                      automation_trigger_id: "{{ trigger.id }}"
+                      message_text: "{{ device_name_with_area }}"
+                      message_title: Обнаружена протечка!
+                      message_notification_id: moisture_sensors_leak_detection_notification
+mode: single
