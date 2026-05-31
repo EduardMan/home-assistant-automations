@@ -1,0 +1,13 @@
+# Настройка порога утечки агза при превышении которого будет отправлено уведомление об утечке.
+name: Natural gas sensors leak detection threshold (v1.0)
+icon: mdi:gauge
+stepSize: 1
+unitOfMeasurement: %
+type: Number
+label: natural gas
+entityId: natural_gas_sensors_leak_detection_threshold
+displayMode: Input field
+visible: false
+minimumValue: 1
+maximumValue: 5
+value: 3
