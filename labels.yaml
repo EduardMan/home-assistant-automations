@@ -9,6 +9,8 @@ category:
     icon: mdi:cog
   - name: Safety
     icon: mdi:shield-home
+  - name: Safety device
+    icon: mdi:shield-check
 label:
   - name: door
     icon: mdi:door
