@@ -62,6 +62,9 @@ actions:
           type: binary_sensor
         - label: moisture_valve
           type: valve
+        - entity_id_postfix: .*_gas_leak$
+          label: natural_gas
+          type: binary_sensor
   # Находим сенсоры у которых отсутствуют availability
   - variables:
       missing_availability_helper: |
