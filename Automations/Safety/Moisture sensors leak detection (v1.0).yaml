@@ -76,21 +76,24 @@ actions:
       - action: script.close_labeled_moisture_valves_with_retries
         metadata: { }
         data: { }
-      # Определим имя сенсора и его комнату
-      - variables:
-          device_name_with_area: >
-            {% set dev = device_id(trigger.entity_id) %}
-            {% set area_id = device_attr(dev, 'area_id') %}
-            {% set area = area_name(area_id) if area_id else "Без комнаты" %}
-            {% set device_name = device_attr(dev, 'name_by_user') or device_attr(dev, 'name') %} 
+      # Вызываем последовательно, так как сначала надо определить device_name_with_area и только потом отправить уведомление
+      # Если это запустить параллельно, то есть риск, что отправка уведомления вызовется до такого как device_name_with_area вычислиться
+      - sequence:
+          # Определим имя сенсора и его комнату
+          - variables:
+              device_name_with_area: >
+                {% set dev = device_id(trigger.entity_id) %}
+                {% set area_id = device_attr(dev, 'area_id') %}
+                {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+                {% set device_name = device_attr(dev, 'name_by_user') or device_attr(dev, 'name') %} 
 
-            {{device_name ~ " (" ~ area ~ ")" }}
-      # Отправим уведомление о протечке
-      - action: script.universal_notification_sender
-        metadata: { }
-        data:
-          automation_trigger_id: "{{ trigger.id }}"
-          message_title: Обнаружена протечка ({{ area_name(trigger.entity_id) }})!
-          message_text: "{{ device_name_with_area }}"
-          message_notification_id: moisture_sensors_leak_detection_notification-{{trigger.entity_id}}
+                {{device_name ~ " (" ~ area ~ ")" }}
+          # Отправим уведомление о протечке
+          - action: script.universal_notification_sender
+            metadata: { }
+            data:
+              automation_trigger_id: "{{ trigger.id }}"
+              message_title: Обнаружена протечка ({{ area_name(trigger.entity_id) }})!
+              message_text: "{{ device_name_with_area }}"
+              message_notification_id: moisture_sensors_leak_detection_notification-{{trigger.entity_id}}
 mode: single
