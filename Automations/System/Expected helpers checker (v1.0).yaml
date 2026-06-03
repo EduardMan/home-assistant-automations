@@ -157,6 +157,9 @@ actions:
         - entity_id: input_number.natural_gas_sensors_leak_detection_threshold
           name: Natural gas sensors leak detection threshold (v1.0)
           label: "natural_gas"
+        - entity_id: input_number.natural_gas_sensors_availability_timeout_minutes
+          name: Natural gas sensors availability timeout minutes (v1.0)
+          label: "natural_gas"
         # Moisture valve
         - entity_id: input_number.moisture_valves_expected_count
           name: Moisture valves expected count (v1.0)
