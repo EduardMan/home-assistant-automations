@@ -1,0 +1,13 @@
+# Настройка таймаута доступности датчиков утечки газа (в минутах).
+# Если датчик не присылает данные дольше этого времени, он считается недоступным.
+name: Natural gas sensors availability timeout minutes (v1.0)
+icon: mdi:timer-outline
+stepSize: 1
+unitOfMeasurement: min
+type: Number
+label: natural gas
+entityId: natural_gas_sensors_availability_timeout_minutes
+displayMode: Input field
+visible: false
+maximumValue: 10
+value: 5
