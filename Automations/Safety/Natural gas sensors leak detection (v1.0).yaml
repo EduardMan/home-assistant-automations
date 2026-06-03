@@ -1,0 +1,85 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+# entityId
+#   - natural_gas_sensors_leak_detection
+# dependencies:
+#   - natural gas (label)
+#   - Universal notification sender (Script)
+
+alias: Natural gas sensors leak detection (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Мгновенно реагирует на обнаружение утечки газа и отправляет оповещение с указанием датчика, комнаты и текущей концентрации газа.
+
+  **⚙️ Как работает:**  
+  - При срабатывании любого датчика утечки газа (явно указанного или найденного по лейблу *natural gas*) формируется уведомление через `universal_notification_sender`.  
+  - Основной датчик перечислен в первом триггере. Второй триггер — шаблонный — ловит все остальные датчики с лейблом *natural gas* и суффиксом `_gas_leak`, исключая уже указанный, чтобы избежать дублирования.  
+  - **Важно:** массив `exclude_natural_gas_sensors` в шаблонном триггере должен содержать entity_id основного датчика, иначе возможна ошибка «Already running».
+
+  **📅 Когда срабатывает:**  
+  - Только при переходе датчика в состояние «on» (обнаружена утечка газа).  
+  - Реакция мгновенная, без задержек.
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your natural gas leak sensor }}` на реальный entity_id вашего основного датчика утечки газа.  
+  - Скопируйте этот же entity_id в массив `exclude_natural_gas_sensors` внутри шаблонного триггера.
+triggers:
+  # Когда срабатывает указанный датчик утечки каза (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ УТЕЧКИ ГАЗА)
+  - trigger: state
+    entity_id:
+      - {{ your natural gas leak sensor }}
+    to:
+      - "on"
+  # Когда статус одного из сенсора утечки газа помеченного лейблом natural gas перестает быть равным off
+  # Данный триггер это защита, если вдруг забыли добавить сенсор утечки газа в список триггеров
+  # НЕ НАДО НАДЕЯТЬСЯ И РАССЧИТЫВАТЬ НА ЭТОТ ТРИГГЕР - ЭТО "защита от дурака", ВСЕ СЕНСОРЫ УТЕЧКИ ГАЗА ДОЛЖНЫ ПРИСУТСТВОВАТЬ
+  # В СПИСКЕ ТРИГГЕРОВ
+  # В СКРИПТЕ ЕСТЬ МАССИВ exclude_natural_gas_sensors, который должен содержать entity_id сенсоров указанных в триггерах,
+  # иначе в логах постоянно будет ошибка "Already running (only a single execution is allowed)"
+  - alias: When labeled natural gas sensor changes to on
+    trigger: template
+    value_template: >
+      {% set natural_gas_labeled_sensors = label_entities("natural_gas") 
+         | select('match', '.*_gas_leak$')
+         | list %}
+
+      {% set exclude_natural_gas_sensors = [
+      'binary_sensor.{{ your gas leak sensor from triggers }}',
+      'binary_sensor.{{ your gas leak sensor from triggers }}'
+      ] %}
+
+      {{ 
+        expand(natural_gas_labeled_sensors)
+         | selectattr('state', '!=', 'off')
+         | selectattr('state', '!=', 'unavailable')
+         | map(attribute = 'entity_id')
+         | reject('in', exclude_natural_gas_sensors)
+         | list
+         | count != 0
+      }}
+conditions: []
+actions:
+  - variables:
+      # Определим имя сенсора, его комнату и концентрацию
+      device_name_with_area: >
+        {% set dev = device_id(trigger.entity_id) %} {% set area_id =
+        device_attr(dev, 'area_id') %} {% set area = area_name(area_id) if
+        area_id else "Без комнаты" %} {% set device_name = device_attr(dev,
+        'name_by_user') or device_attr(dev, 'name') %}
+        
+        {% set concentration = expand(device_entities(dev) | select('match',
+            '.*_gas_concentration$')) | map(attribute='state') | first |
+            default('unknown') %}
+        
+        {{device_name ~ " (" ~ area ~ ")." ~ " Концентрация - " ~ concentration ~ "%"}}
+  # Отправим уведомление об утечке газа
+  - action: script.universal_notification_sender
+    metadata: {}
+    data:
+      automation_trigger_id: "{{ trigger.id }}"
+      message_title: Обнаружена утечка газа ({{ area_name(trigger.entity_id) }})!
+      message_notification_id: natural_gas_sensors_leak_detection_notification-{{trigger.entity_id}}
+      message_text: "{{ device_name_with_area }}"
+mode: single
