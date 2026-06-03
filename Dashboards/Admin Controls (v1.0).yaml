@@ -367,6 +367,24 @@ views:
                 style: buttons
             features_position: inline
           - type: tile
+            entity: input_number.natural_gas_sensors_leak_detection_threshold
+            name: Leak detection limit
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.natural_gas_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
             entity: number.natural_gas_sensors_available_count
             name: Available count
             color: grey
