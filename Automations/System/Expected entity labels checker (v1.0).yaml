@@ -53,6 +53,8 @@ actions:
           label: moisture
         - entity_type: valve
           label: moisture_valve
+        - entity_id_postfix: .*_gas_leak$
+          label: natural_gas
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |
