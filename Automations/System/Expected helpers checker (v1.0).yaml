@@ -179,6 +179,9 @@ actions:
         - entity_id: input_number.close_valves_retry_count
           name: Close valves retry count (v1.0)
           label: "moisture_valve"
+        # Common
+        - entity_id: input_number.untracked_zigbee_sensors_availability_timeout_minutes
+          name: Untracked zigbee sensors availability timeout minutes (v1.0)
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
@@ -194,7 +197,7 @@ actions:
           {% elif friendly_name != helper.name %}
             {% set issues.total = issues.total + 1 %}
             {% set issues.list = issues.list + ["Неверное имя: " + helper.entity_id] %}
-          {% elif helper.label not in labels %}
+          {% elif (helper.label is defined) and (helper.label not in labels) %}
             {% set issues.total = issues.total + 1 %}
             {% set issues.list = issues.list + ["Неверный лейбл: " + friendly_name] %}
           {% endif %}

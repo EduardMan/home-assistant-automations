@@ -1,0 +1,12 @@
+# Настройка таймаута доступности ZigBee устройств, за которыми не следят автоматизации (в минутах).
+# Если датчик не присылает данные дольше этого времени, он считается недоступным.
+name: Untracked zigbee sensors availability timeout minutes (v1.0)
+icon: mdi:timer-outline
+stepSize: 1
+unitOfMeasurement: min
+type: Number
+entityId: untracked_zigbee_sensors_availability_timeout_minutes
+displayMode: Input field
+visible: false
+maximumValue: 300
+value: 180
