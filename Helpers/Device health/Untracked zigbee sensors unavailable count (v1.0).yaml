@@ -1,0 +1,48 @@
+# Сенсор, отображающий текущее количество недоступных неотслеживаемых ZigBee устройств
+name: Untracked zigbee sensors unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+visible: false
+type: Template number
+entityId: untracked_zigbee_sensors_unavailable_count
+maximumValue: 500
+state:
+    {# find all entities ends with _last_seen #}
+    {% set all_last_seen_entities = states.sensor
+        | selectattr('entity_id', 'match', '.*_last_seen$')
+        | list %}
+        
+    {# Define devices labels which already tracked by automations =>
+        they don't need to check in this helper #}
+    {% set excluded_labels = [
+        'door',
+        'moisture',
+        'motion',
+        'temperature',
+        'smoke',
+        'moisture_valve',
+        ] %}
+    
+    {% set unavailable_count = namespace(total=0) %}
+    {% set atm = 'input_number.untracked_zigbee_sensors_availability_timeout_minutes' %}
+    
+    {% for last_seen_entity in all_last_seen_entities %}
+    {% set dev = device_id(last_seen_entity.entity_id) %}
+    
+    {# Check that device is zigbee and works via zigbee2mqtt_,
+        because we don't need to catch unwanted devices - this can lead to unpredictable behavior #}
+    {# device_attr(dev, 'identifiers') - this is tuple, i.e. [('mqtt', 'zigbee2mqtt_0x00158d0004519235')] #}
+    {% if 'zigbee2mqtt_' in device_attr(dev, 'identifiers') | string %}
+        {% set all_entity_labels = device_entities(dev) | map('labels') | sum(start=[]) | unique | list %}
+        {% if all_entity_labels | select('in', excluded_labels) | list | count == 0 %}
+            {% set last_seen_val = states(last_seen_entity.entity_id) %}
+            {% if last_seen_val in ['unknown', 'unavailable'] 
+                or (as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60 >= (states(atm) | int) %}
+        
+                {% set unavailable_count.total = unavailable_count.total + 1 %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% endfor %}
+    
+    {{ unavailable_count.total }}
