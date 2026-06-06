@@ -1,0 +1,14 @@
+# Настройка уровня заряда (%), ниже которого устройство считается разряженным
+# Если заряд батареи падает ниже этого значения, устройство считается разряженным
+name: Untracked zigbee sensors battery threshold (v1.0)
+icon: mdi:battery-low
+stepSize: 1
+unitOfMeasurement: %
+type: Number
+label: moisture
+entityId: untracked_zigbee_sensors_battery_threshold
+displayMode: Input field
+visible: false
+minimumValue: 5
+maximumValue: 100
+value: 15
