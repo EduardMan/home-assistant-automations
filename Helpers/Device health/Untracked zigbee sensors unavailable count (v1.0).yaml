@@ -20,7 +20,7 @@ state:
         'motion',
         'temperature',
         'smoke',
-        'moisture_valve',
+        'moisture_valve'
         ] %}
     
     {% set unavailable_count = namespace(total=0) %}

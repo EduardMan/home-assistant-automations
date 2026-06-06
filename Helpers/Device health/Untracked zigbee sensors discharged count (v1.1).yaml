@@ -1,0 +1,42 @@
+# Сенсор отображающий текущее количество разряженных неотслеживаемых ZigBee устройств
+# dependencies:
+#   - Untracked zigbee sensors battery threshold (Helper)
+name: Untracked zigbee sensors discharged count (v1.1)
+icon: mdi:battery-alert-variant-outline
+unitOfMeasurement: pcs
+visible: false
+type: Template number
+entityId: untracked_zigbee_sensors_discharged_count
+state:
+  {% set battery_threshold = states('input_number.untracked_zigbee_sensors_battery_threshold') | float %}
+
+  {# Define devices labels which already tracked by automations =>
+        they don't need to check in this helper #}
+  {% set excluded_labels = [
+    'door',
+    'moisture',
+    'motion',
+    'temperature',
+    'smoke',
+    'moisture_valve'
+  ] %}
+
+  {# Get all mqtt integration entities (except labeled by excluded_labels) #}
+  {% set entities = integration_entities('mqtt')
+    | select('match', '.*_battery$')
+    | reject('in', excluded_labels
+      | map('label_entities')
+      | sum(start=[])
+      | unique
+      | list) 
+    | list %}
+      
+    {% set filtered_threshold_entities = namespace(filtered_entities=[ ]) %}
+      
+    {% for entity_for_filter in entities %}
+      {% if states(entity_for_filter) | float < battery_threshold %}
+        {% set filtered_threshold_entities.filtered_entities = filtered_threshold_entities.filtered_entities + [ entity_for_filter ] %}
+      {% endif %}
+    {% endfor %}
+      
+    {{ (filtered_threshold_entities.filtered_entities) | unique(attribute='entity_id') | list | count }}
