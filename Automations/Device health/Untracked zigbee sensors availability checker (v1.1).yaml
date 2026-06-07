@@ -107,10 +107,11 @@ actions:
                     or (as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60 >= (states(atm) | int) %}
                     
                     {% set issues.total = issues.total + 1 %}
+                    {% set val = ((as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60) | int | string %}
 
                     {% set area_id = device_attr(last_seen_entity.entity_id, 'area_id') %}
                     {% set area = area_name(area_id) if area_id else "Без комнаты" %}
-                    {% set issues.list = issues.list + [device_name(last_seen_entity.entity_id) + " (" + area + ")"] %}
+                    {% set issues.list = issues.list + [device_name(last_seen_entity.entity_id) + " (" + area + ")" + " - " + val + " мин."] %}
                 {% endif %}
             {% endif %}
         {% endif %}
