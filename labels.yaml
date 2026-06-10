@@ -41,7 +41,7 @@ label:
     colour: Blue grey
   - name: GSM
     icon: mdi:sim
-    colour: Teal
+    colour: Indigo
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account
