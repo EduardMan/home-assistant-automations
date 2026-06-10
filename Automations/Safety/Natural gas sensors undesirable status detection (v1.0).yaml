@@ -1,0 +1,98 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+# entityId
+#   - natural_gas_sensors_undesirable_status_detection
+# dependencies:
+#   - natural gas (label)
+#   - Universal notification sender (Script)
+
+alias: Natural gas sensors undesirable status detection (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Мгновенно реагирует на появление неожиданного статуса у датчика утечки газа (любого, кроме «normal», «preheating» и «alarming») и отправляет оповещение.  
+  Статус «alarming» (тревога) не отслеживается этой автоматизацией, потому что за него отвечает `Natural gas sensors leak detection`.
+  Зависание статуса и вообще любое зависание датчика отлавливаем через `Natural gas sensors availability checker`.
+
+  **⚙️ Как работает:**  
+  - При переходе любого датчика газа в статус, не входящий в список разрешённых, формируется уведомление через `universal_notification_sender`.  
+  - Основной датчик перечислен в первом триггере. Второй триггер — шаблонный — ловит все остальные датчики с лейблом *natural gas* и суффиксом `_status`, исключая уже указанный, чтобы избежать дублирования.  
+  - **Важно:** массив `exclude_natural_gas_sensors` в шаблонном триггере должен содержать entity_id основного датчика, иначе возможна ошибка «Already running».
+
+  **📅 Когда срабатывает:**  
+  - Только при изменении статуса датчика на нежелательный (например, ошибка, неисправность, неизвестное состояние).  
+  - Реакция мгновенная, без задержек.
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your gas leak sensor }}` на реальный entity_id вашего основного датчика статуса (например, `sensor.lumi_mcn02_5be0_status`).  
+  - Скопируйте этот же entity_id в массив `exclude_natural_gas_sensors` внутри шаблонного триггера.
+triggers:
+  # Когда меняется статус датчика утечки газа, игнорируется изменение атрибутов (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ УТЕЧКИ ГАЗА)
+  - trigger: state
+    entity_id:
+      - sensor.{{ your gas leak sensor }}
+    to: null
+  # Когда меняется статус одного из сенсора утечки газа помеченного лейблом natural gas
+  # Данный триггер это защита, если вдруг забыли добавить сенсор утечки газа в список триггеров
+  # НЕ НАДО НАДЕЯТЬСЯ И РАССЧИТЫВАТЬ НА ЭТОТ ТРИГГЕР - ЭТО "защита от дурака", ВСЕ СЕНСОРЫ УТЕЧКИ ГАЗА ДОЛЖНЫ ПРИСУТСТВОВАТЬ
+  # В СПИСКЕ ТРИГГЕРОВ
+  # В СКРИПТЕ ЕСТЬ МАССИВ exclude_natural_gas_sensors, который должен содержать entity_id сенсоров указанных в триггерах,
+  # иначе в логах постоянно будет ошибка "Already running (only a single execution is allowed)"
+  - trigger: template
+    value_template: |-
+      {# States from documentation https://miot-spec.org/miot-spec-v2/instance?type=urn:miot-spec-v2:device:gas-sensor:0000A022:lumi-mcn02:1 #}
+      {# States which we ignore because it's expected behaviour #}
+      {% set desirable_states = [
+         'normal',
+         'preheating',
+         'alarming'
+      ] %}
+
+      {% set natural_gas_labeled_status_sensors = label_entities("natural_gas")
+        | select('match', '.*_status$')
+        | expand
+        | selectattr('domain', 'eq', 'sensor')
+        | list %}
+      
+      {# YOU MUST FILL WITH SENSORS FROM TRIGGERS #}
+      {% set exclude_natural_gas_sensors = [
+         'sensor.{{ your gas leak sensor from triggers }}',
+         'sensor.{{ your gas leak sensor from triggers }}'
+         ] %}
+      
+      {% set count = 0 %}
+      {% for sensor in natural_gas_labeled_status_sensors %}
+        {% if sensor.entity_id not in exclude_natural_gas_sensors %}
+      
+          {# Sensor state from miot is unreliable => processing it with trim and lower #}
+          {% set state = sensor.state | trim | lower %}
+          {% if state not in desirable_states %}
+            {% set count = count + 1 %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      {{ count != 0 }}
+conditions:
+  # Выполняем блок actions только для неожиданных статусов
+  - condition: template
+    value_template: |-
+      {# States from documentation https://miot-spec.org/miot-spec-v2/instance?type=urn:miot-spec-v2:device:gas-sensor:0000A022:lumi-mcn02:1 #}
+      {% set desirable_states = [
+         'normal',
+         'preheating',
+         'alarming'
+      ] %}
+
+      {# Статусу сенсора из miot не никакого доверия поэтому делаем trim и lower #}
+      {{ states(trigger.entity_id) | trim | lower not in desirable_states }}
+actions:
+  # Отправим уведомление о том, что у нас неизвестный статус сенсора
+  - action: script.universal_notification_sender
+    metadata: {}
+    data:
+      automation_trigger_id: "{{ trigger.id }}"
+      message_title: Неизвестный статус датчика утечки газа!
+      message_text: "{{ device_name(trigger.entity_id) + \" - \" + states(trigger.entity_id) }}"
+      message_notification_id: natural_gas_sensors_undesirable_status_detection_notification-{{trigger.entity_id}}
+mode: single
