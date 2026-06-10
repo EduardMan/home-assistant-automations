@@ -39,6 +39,9 @@ label:
   - name: moisture valve
     icon: mdi:valve
     colour: Blue grey
+  - name: GSM
+    icon: mdi:sim
+    colour: Teal
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account
