@@ -6,7 +6,7 @@ stepSize: 1
 unitOfMeasurement: min
 type: Number
 label: GSM
-entityId: gsm_module_availability_timeout_minutes
+entityId: gsm_modules_availability_timeout_minutes
 displayMode: Input field
 visible: false
 maximumValue: 30
