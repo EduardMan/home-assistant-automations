@@ -5,7 +5,7 @@ unitOfMeasurement: pcs
 type: Template number
 visible: false
 label: GSM
-entityId: gsm_sensors_unavailable_count
+entityId: gsm_modules_unavailable_count
 maximumValue: 100
 state:
   {{ expand(label_entities("gsm") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}
