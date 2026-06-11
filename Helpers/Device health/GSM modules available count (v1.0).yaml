@@ -1,0 +1,11 @@
+# Сенсор, отображающий текущее количество доступных GSM модулей
+name: GSM modules available count (v1.0)
+icon: mdi:check-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: GSM
+entityId: gsm_modules_available_count
+maximumValue: 100
+visible: false
+state:
+  {{ expand(label_entities("gsm") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}
