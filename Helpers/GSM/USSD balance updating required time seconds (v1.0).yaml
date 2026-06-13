@@ -1,0 +1,13 @@
+# Настройка необходимого времени для закрытия крана (в секундах).
+name: USSD balance updating required time seconds (v1.0)
+icon: mdi:clock-outline
+stepSize: 1
+unitOfMeasurement: s
+type: Number
+label: GSM
+entityId: ussd_balance_updating_required_time_seconds
+displayMode: Input field
+visible: false
+minimumValue: 3
+maximumValue: 60
+value: 10

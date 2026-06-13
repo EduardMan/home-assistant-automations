@@ -1,0 +1,13 @@
+# Настройка количества попыток обновления баланса через USSD команду.
+name: USSD balance updating retry count (v1.0)
+icon: mdi:repeat
+stepSize: 1
+unitOfMeasurement: times
+type: Number
+label: GSM
+entityId: ussd_balance_updating_retry_count
+displayMode: Input field
+visible: false
+minimumValue: 1
+maximumValue: 5
+value: 3
