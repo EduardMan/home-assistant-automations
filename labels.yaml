@@ -11,6 +11,8 @@ category:
     icon: mdi:shield-home
   - name: Safety device
     icon: mdi:shield-check
+  - name: GSM
+    icon: mdi:sim
 label:
   - name: door
     icon: mdi:door
@@ -42,6 +44,9 @@ label:
   - name: GSM
     icon: mdi:sim
     colour: Indigo
+  - name: storage
+    icon: mdi:database
+    colour: Deep purple
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account
