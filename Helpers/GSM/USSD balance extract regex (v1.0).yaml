@@ -1,0 +1,14 @@
+# Хелпер для хранения регулярок, при помощи которых можно вытащить баланс
+# из USSD ответа определенного оператора
+name: USSD balance extract regex (v1.0)
+icon: mdi:regex
+entityId: ussd_balance_extract_regex
+displayMode: Text
+visible: false
+maximumLength: 250
+type: Text
+value:
+  {
+    "megafon": "(\\d+(?:[.,]\\d+)?)\\sр\\.\n",
+    "mts": "^(Balance):.*\\d+.*r (@.*)?$"
+  }
