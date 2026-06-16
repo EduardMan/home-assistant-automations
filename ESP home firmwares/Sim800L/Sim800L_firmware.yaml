@@ -1,0 +1,231 @@
+# Tested with:
+# - TTGO T-Call V1.3
+# - ESP32
+# - SIM800L
+# - ESPHome 2026.x
+#
+# Features:
+# - SMS send/receive
+# - UCS2 SMS decoding
+# - UCS2 USSD decoding
+# - Incoming call events
+# - Home Assistant events with full message content
+
+# This is firmware for Sim800L.
+# Fields with {{ DON'T TOUCH. Leave it as is }} you must leave as is.
+# DON'T FORGET REPLACE {{esphome.name}} - i.e. gsm-main-module in this config
+# As you can see, sensor values truncated to 255 characters - this is HA sensors restrictions - Use events to receive the full message.
+# For getting full messages we use events
+# Sensors: decoded_sms_sender, decoded_sms_message, decoded_ussd_message - just for some type of debug
+# For getting ussd and sms RECOMMENDED to catch sms_received_event and ussd_received_event HA events
+# Also for catching incoming calls RECOMMENDED to catch incoming_call_event HA events
+# You must add to yaml this blocks:
+# 1. api:
+#     actions:
+# 2. switch:
+# 3. uart:
+# 4. text_sensor:
+# 5. globals:
+# 6. sim800l:
+# 7. sensor:
+# 8. binary_sensor:
+esphome:
+  name: gsm-main-module
+  friendly_name: GSM main module
+  # Add dependencies
+  includes:
+    # ucs2_decoder.h dependency.
+    # You must put it in /homeassistant/esphome (near your Sim800L config)
+    - ucs2_decoder.h
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: {{ DON'T TOUCH. Leave it as is }}
+  # ADD THIS BLOCK
+  actions:
+    - action: send_sms
+      variables:
+        recipient: string
+        message: string
+      then:
+        - sim800l.send_sms:
+            recipient: !lambda 'return recipient;'
+            message: !lambda 'return message;'
+    - action: dial
+      variables:
+        recipient: string
+      then:
+        - sim800l.dial:
+            recipient: !lambda 'return recipient;'
+    - action: connect
+      then:
+        - sim800l.connect
+    - action: disconnect
+      then:
+        - sim800l.disconnect
+    - action: send_ussd
+      variables:
+        ussdCode: string
+      then:
+        - sim800l.send_ussd:
+            ussd: !lambda 'return ussdCode;'
+
+# Just DON'T TOUCK
+ota:
+  - platform: esphome
+    password: {{ DON'T TOUCH. Leave it as is }}
+
+# Just DON'T TOUCK
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: {{ DON'T TOUCH. Leave it as is }}
+    password: {{ DON'T TOUCH. Leave it as is }}
+
+# Just DON'T TOUCK
+captive_portal:
+
+# Just ADD ALL THIS BLOCKS (below) in the end of file
+# DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
+switch:
+  - platform: gpio
+    name: "SIM800_PWKEY"
+    pin: 4
+    restore_mode: ALWAYS_OFF
+  - platform: gpio
+    name: "SIM800_RST"
+    pin: 5
+    restore_mode: ALWAYS_ON
+    id: sim800_rst
+  - platform: gpio
+    name: "SIM800_POWER"
+    pin: 23
+    restore_mode: ALWAYS_ON
+
+uart:
+  id: uart_bus
+  baud_rate: 9600
+  tx_pin: 27
+  rx_pin: 26
+
+text_sensor:
+  - platform: template
+    id: sms_sender
+    name: "Sms Sender"
+    # this Sms Sender usually receiving in UCS2, so do it internal, we don't need this in HA
+    internal: true
+  - platform: template
+    id: decoded_sms_sender
+    name: "Decoded Sms Sender"
+  - platform: template
+    id: sms_message
+    name: "Sms Message"
+    # this Sms Message usually receiving in UCS2, so do it internal, we don't need this in HA
+    internal: true
+  - platform: template
+    id: decoded_sms_message
+    name: "Decoded Sms Message"
+  - platform: template
+    id: caller_id_text_sensor
+    name: "Caller ID"
+  - platform: template
+    id: ussd_message
+    name: "Ussd Code"
+    # this Ussd Code usually receiving in UCS2, so do it internal, we don't need this in HA
+    internal: true
+  - platform: template
+    id: decoded_ussd_message
+    name: "Decoded Ussd Code"
+
+# global variables for publishing HA events
+globals:
+  - id: decoded_ussd_global
+    type: std::string
+  - id: decoded_sms_global
+    type: std::string
+  - id: decoded_sender_global
+    type: std::string
+
+sim800l:
+  on_sms_received:
+    - lambda: |-
+        std::string decoded_sender;
+        std::string decoded_sms;
+
+        decoded_sender = decode_text(sender);
+        decoded_sms = decode_text(message);
+
+        id(decoded_sender_global) = decoded_sender;
+        id(decoded_sms_global) = decoded_sms;
+        
+        id(sms_sender).publish_state(sender.substr(0, 255));
+        id(sms_message).publish_state(message.substr(0, 255));
+        
+        id(decoded_sms_sender).publish_state(decoded_sender.substr(0, 255));
+        id(decoded_sms_message).publish_state(decoded_sms.substr(0, 255));
+    # Publish full decoded sender and message to HA event sms_received_event
+    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
+    - homeassistant.event:
+        event: esphome.sms_received_{{esphome.name}}_event
+        data:
+          sender: !lambda return id(decoded_sender_global);
+          message: !lambda return id(decoded_sms_global);
+  on_incoming_call:
+    - lambda: |-
+        id(caller_id_text_sensor).publish_state(caller_id);
+    # Publish call event to HA for convenience to catch calls
+    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
+    - homeassistant.event:
+        event: esphome.incoming_call_{{esphome.name}}_event
+        data:
+          caller_id: !lambda 'return id(caller_id_text_sensor).state;'
+    # We instantly connect and disconnect the call, we don't need to occupy the network, there's no point in that.
+    # if you try to disconnect call immediately it can lead to freeze the GSM module, so first connect
+    # FIY: Experimentally, it turned out that this is the most reliable way (delays will not help you -> so, just first connect and then disconnect the call)
+    - sim800l.connect
+    # - delay: 1s (In case of problems, uncomment the line and set necessary delay)
+    - sim800l.disconnect
+  on_call_connected:
+    - logger.log:
+        format: Call connected
+  on_call_disconnected:
+    - logger.log:
+        format: Call disconnected
+  on_ussd_received:
+    - lambda: |-
+        std::string decoded_ussd;
+        decoded_ussd = decode_text(ussd);
+
+        id(decoded_ussd_global) = decoded_ussd;
+        
+        id(ussd_message).publish_state(ussd.substr(0, 255));
+
+        id(decoded_ussd_message).publish_state(decoded_ussd.substr(0, 255));
+    # Publish full decoded ussd message to HA event ussd_received_event
+    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
+    - homeassistant.event:
+        event: esphome.ussd_received_{{esphome.name}}_event
+        data:
+          message: !lambda return id(decoded_ussd_global);
+
+sensor:
+  - platform: sim800l
+    rssi:
+      name: "Sim800L RSSI"
+
+binary_sensor:
+  - platform: sim800l
+    registered:
+      name: "Sim800L Registered"
