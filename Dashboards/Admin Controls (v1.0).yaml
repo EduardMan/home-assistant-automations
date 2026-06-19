@@ -401,6 +401,96 @@ views:
               action: none
             features_position: bottom
         column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Common
+            heading_style: title
+            icon: mdi:zigbee
+          - type: tile
+            entity: input_number.untracked_zigbee_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.untracked_zigbee_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.untracked_zigbee_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.untracked_zigbee_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: GSM
+            heading_style: title
+            icon: mdi:sim
+          - type: tile
+            entity: input_number.gsm_modules_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.ussd_balance_extracting_required_time_seconds
+            name: Balance update required time
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.ussd_balance_extracting_retry_count
+            name: Balance update retries count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.gsm_modules_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.gsm_modules_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
     max_columns: 4
     title: Device Health
     icon: mdi:connection
