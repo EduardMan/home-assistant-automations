@@ -1,0 +1,125 @@
+# category
+#   - Util
+# labels:
+#   - GSM
+# entityId
+#   - ussd_balance_extractor_with_retries
+# dependencies:
+#   - USSD balance extracting regexes (Helper)
+#   - USSD balance extracting retry count (Helper)
+#   - USSD balance extracting required time seconds (Helper)
+
+alias: USSD balance extractor with retries (v1.0)
+description: |
+  **🔧 Что делает:**  
+  Отправляет произвольную USSD-команду на GSM-модуль, дожидается ответа и извлекает из него число (баланс) с помощью набора регулярных выражений.  
+  Возвращает JSON с результатом: `SUCCESS` и суммой, либо `FAILED` при неудаче.
+
+  **⚙️ Как работает:**  
+  - Получает на вход готовое действие для отправки USSD (`send_ussd_action`) и имя события, которое модуль генерирует при получении ответа.  
+  - В цикле (с повторными попытками) выполняет действие, ждёт событие (или таймаут) и пытается применить регулярки из сенсора `ussd_balance_extracting_regexes`.  
+  - При первом совпадении останавливает цикл и возвращает успех с найденной суммой.  
+  - Если за `USSD balance extracting retry count` попыток баланс не найден, возвращает `FAILED`.
+
+  **📅 Когда используется:**  
+  - Вызывается из автоматизаций, которые хотят получить текущий баланс сим-карты (например, по расписанию или вручную).  
+  - Может использоваться с любым GSM-модулем на ESPHome, который отправляет USSD-ответы в виде событий.
+
+  **🛠️ Параметры (fields):**  
+  - `send_ussd_action` — действие, которое будет выполнено для отправки USSD (должно содержать `action` и `data` с `ussdCode`).  
+  - `ussd_received_event_type_name` — полное имя события, которое модуль публикует при получении ответа USSD.
+
+  **📦 Возвращаемое значение:**  
+  JSON-объект с полями `balance_updating_state` (`SUCCESS` или `FAILED`) и `balance` (число или `null`).
+fields:
+  ussd_received_event_type_name:
+    selector:
+      text: null
+    name: USSD received event type name
+    required: true
+  send_ussd_action:
+    selector:
+      action: { }
+    name: Send USSD action
+    required: true
+sequence:
+  - repeat:
+      until:
+        # До момента пока не достигнем лимита по количеству попыток
+        - condition: template
+          # Если количество попыток равно или превысило настройку USSD balance extracting retry count
+          value_template: >-
+            {{ repeat.index >= (states('input_number.ussd_balance_extracting_retry_count') | int) }}
+          alias: >-
+            If current retries count is more or equal than retry count limit
+            setting
+      sequence:
+        # Отправляем USSD code команду
+        - action: "{{ send_ussd_action[0].action }}"
+          data: "{{ send_ussd_action[0].data }}"
+          alias: Send ussd command
+        - alias: Wait for event OR update time required seconds
+          # Ожидаем пока не придет событие ussd_received_event_type_name из fields ИЛИ время USSD balance extracting required time seconds
+          wait_for_trigger:
+            - trigger: event
+              event_type: "{{ ussd_received_event_type_name }}"
+              event_data: { }
+          timeout:
+            seconds: >-
+              {{ states('input_number.ussd_balance_extracting_required_time_seconds') | int }}
+          continue_on_timeout: true
+        - variables:
+            extracted_balance: >
+              {# Массив регулярок, при помощи которых можно вытащить баланс #}
+              {% set ussd_balance_regexes = states('sensor.ussd_balance_extracting_regexes') | from_json %} 
+
+              {# Получаем message из event по которому сработал триггер #}
+              {% set ussd_message = wait.trigger.event.data.message if wait.completed else none %}
+              
+              {% set result = namespace(balance=none) %}
+
+              {# Перебираем регулярки и проверяем какая подойдет для вычленения баланса из сообщения #}
+              {% if ussd_message %}
+                {% for ussd_balance_regex in ussd_balance_regexes %}
+                  {% if (result.balance is none) and (ussd_message | regex_match(ussd_balance_regex)) %}
+                    {# если регулярка подошла, то берем по первой группе (индекс = 0), такого правила написания регулярок #}
+                    {% set balance = ussd_message | regex_findall_index(ussd_balance_regex, 0) %}
+                    {% set result.balance = balance %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {{ result.balance }}
+        - if:
+            # Если удалось вычленить баланс из USSD сообщения
+            - condition: template
+              value_template: "{{ extracted_balance is not none }}"
+              alias: If extracted_balance is not none
+          # Останавливаем выполнение и попытки
+          # возвращаем в ответе state = SUCCESS и значение баланса
+          then:
+            - variables:
+                extracted_balance_result: |
+                  {{ 
+                    {
+                    'balance_updating_state': 'SUCCESS',
+                    'balance': extracted_balance
+                    } 
+                  }}
+            - stop: success_extracted_balance
+              response_variable: extracted_balance_result
+  # Если после USSD balance extracting retry count попыток так и не удалось получить баланс,
+  # то возвращаем в ответе state = FAILED
+  - variables:
+      extracted_balance_result: |
+        {{
+          {
+           'balance_updating_state': 'FAILED',
+           'balance': null
+           } 
+        }}
+  - stop: failed_extracted_balance
+    error: false
+    response_variable: extracted_balance_result
+mode: parallel
+max: 10
