@@ -45,6 +45,11 @@ esp32:
   board: esp32dev
   framework:
     type: esp-idf
+#    ВАЖНО: Раскомментируйте эту опцию, только если в логах видите сообщение:
+#     Bootloader supports SRAM1 as IRAM (+40KB). Set sram1_as_iram: true under esp32 > framework > advanced
+#     Эта опция позволит увеличить IRAM, НО только если ваш бутлоадер поддерживает, ИНАЧЕ МОДУЛЬ НЕ ВКЛЮЧИТСЯ
+#    advanced:
+#      sram1_as_iram: true
 
 # Enable logging
 logger:
