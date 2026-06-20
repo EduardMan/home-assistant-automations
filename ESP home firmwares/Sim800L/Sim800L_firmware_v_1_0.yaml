@@ -132,7 +132,7 @@ text_sensor:
   - platform: template
     id: decoded_sms_sender
     name: "Decoded Sms Sender"
-    icon: 'mdi:account-arrow-right'
+    icon: 'mdi:account-circle'
   - platform: template
     id: sms_message
     name: "Sms Message"
