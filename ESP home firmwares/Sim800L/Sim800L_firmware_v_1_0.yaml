@@ -258,24 +258,15 @@ sensor:
   - platform: sim800l
     rssi:
       name: "Sim800L RSSI"
-  - platform: number
+  - platform: template
+    id: balance
     name: "Balance"
-    source_id: balance
     device_class: 'monetary'
     unit_of_measurement: 'RUB'
     accuracy_decimals: 2
     force_update: true
     filters:
       - round: 2
-
-number:
-  - platform: template
-    id: balance
-    name: "Balance"
-    step: 0.01
-    min_value: -999999
-    max_value: 999999
-    optimistic: true
 
 binary_sensor:
   - platform: sim800l
