@@ -275,6 +275,8 @@ sensor:
   - platform: sim800l
     rssi:
       name: "Sim800L RSSI"
+      # Ставим force_update для того чтобы можно было понимать, что sim модуль не завис
+      force_update: true
   - platform: template
     id: balance
     name: "Balance"
@@ -284,16 +286,6 @@ sensor:
     force_update: true
     filters:
       - round: 2
-  - platform: template
-    id: gsm_heartbeat
-    name: "GSM Heartbeat"
-    entity_category: diagnostic
-    update_interval: 55s
-    force_update: true
-    state_class: measurement
-    lambda: |-
-      return 1;
-
 binary_sensor:
   - platform: sim800l
     registered:
