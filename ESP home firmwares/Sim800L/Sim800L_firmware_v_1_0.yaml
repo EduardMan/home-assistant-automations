@@ -183,6 +183,8 @@ text:
     min_length: 0
     max_length: 15
     mode: text
+    entity_category: diagnostic
+    disabled_by_default: true
 
 # global variables for publishing HA events
 globals:
