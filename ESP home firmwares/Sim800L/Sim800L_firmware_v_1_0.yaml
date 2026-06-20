@@ -107,15 +107,21 @@ switch:
     name: "SIM800_PWKEY"
     pin: 4
     restore_mode: ALWAYS_OFF
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    internal: true
   - platform: gpio
     name: "SIM800_RST"
     pin: 5
     restore_mode: ALWAYS_ON
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    internal: true
     id: sim800_rst
   - platform: gpio
     name: "SIM800_POWER"
     pin: 23
     restore_mode: ALWAYS_ON
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    internal: true
 
 uart:
   id: uart_bus
@@ -279,6 +285,7 @@ sensor:
     entity_category: diagnostic
     update_interval: 55s
     force_update: true
+    state_class: measurement
     lambda: |-
       return 1;
 
