@@ -151,6 +151,33 @@ text_sensor:
   - platform: template
     id: decoded_ussd_message
     name: "Decoded Ussd Code"
+  - platform: text
+    name: "Balance storage"
+    source_id: balance_storage_text
+    on_value:
+      then:
+        - lambda: |-
+            std::string value = x;
+
+            if (value.empty())
+            return;
+
+            // заменяем запятую на точку
+            std::replace(value.begin(), value.end(), ',', '.');
+
+            float val;
+            if (sscanf(value.c_str(), "%f", &val) == 1) {
+              id(balance).publish_state(val);
+            }
+
+text:
+  - platform: template
+    id: balance_storage_text
+    name: "Balance storage text"
+    optimistic: true
+    min_length: 0
+    max_length: 15
+    mode: text
 
 # global variables for publishing HA events
 globals:
@@ -231,6 +258,24 @@ sensor:
   - platform: sim800l
     rssi:
       name: "Sim800L RSSI"
+  - platform: number
+    name: "Balance"
+    source_id: balance
+    device_class: 'monetary'
+    unit_of_measurement: 'RUB'
+    accuracy_decimals: 2
+    force_update: true
+    filters:
+      - round: 2
+
+number:
+  - platform: template
+    id: balance
+    name: "Balance"
+    step: 0.01
+    min_value: -999999
+    max_value: 999999
+    optimistic: true
 
 binary_sensor:
   - platform: sim800l
