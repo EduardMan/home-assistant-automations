@@ -184,7 +184,6 @@ text:
     max_length: 15
     mode: text
     entity_category: diagnostic
-    disabled_by_default: true
 
 # global variables for publishing HA events
 globals:
@@ -274,6 +273,14 @@ sensor:
     force_update: true
     filters:
       - round: 2
+  - platform: template
+    id: gsm_heartbeat
+    name: "GSM Heartbeat"
+    entity_category: diagnostic
+    update_interval: 55s
+    force_update: true
+    lambda: |-
+      return 1;
 
 binary_sensor:
   - platform: sim800l
