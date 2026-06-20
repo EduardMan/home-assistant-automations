@@ -132,6 +132,7 @@ text_sensor:
   - platform: template
     id: decoded_sms_sender
     name: "Decoded Sms Sender"
+    icon: 'mdi:account-arrow-right'
   - platform: template
     id: sms_message
     name: "Sms Message"
@@ -140,9 +141,11 @@ text_sensor:
   - platform: template
     id: decoded_sms_message
     name: "Decoded Sms Message"
+    icon: 'mdi:message-text'
   - platform: template
     id: caller_id_text_sensor
     name: "Caller ID"
+    icon: 'mdi:phone-incoming'
   - platform: template
     id: ussd_message
     name: "Ussd Code"
@@ -151,8 +154,10 @@ text_sensor:
   - platform: template
     id: decoded_ussd_message
     name: "Decoded Ussd Code"
+    icon: 'mdi:cellphone-information'
   - platform: text
     name: "Balance storage"
+    icon: 'mdi:cash'
     source_id: balance_storage_text
     on_value:
       then:
