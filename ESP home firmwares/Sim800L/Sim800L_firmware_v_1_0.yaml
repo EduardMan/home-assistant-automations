@@ -34,9 +34,12 @@ esphome:
   friendly_name: GSM main module
   # Add dependencies
   includes:
-    # ucs2_decoder.h dependency.
+    # ucs2_decoder_v_1_0.h dependency.
     # You must put it in /homeassistant/esphome (near your Sim800L config)
-    - ucs2_decoder.h
+    - ucs2_decoder_v_1_0.h
+  project:
+    name: "sim800.sim800l_firmware"
+    version: "1.0"
 
 esp32:
   board: esp32dev
@@ -193,16 +196,20 @@ sim800l:
           caller_id: !lambda 'return id(caller_id_text_sensor).state;'
     # We instantly connect and disconnect the call, we don't need to occupy the network, there's no point in that.
     # if you try to disconnect call immediately it can lead to freeze the GSM module, so first connect
-    # FIY: Experimentally, it turned out that this is the most reliable way (delays will not help you -> so, just first connect and then disconnect the call)
+    # FIY: It turned out that this is the most reliable way (delays will not help you -> so, just first connect and then disconnect the call)
     - sim800l.connect
     # - delay: 1s (In case of problems, uncomment the line and set necessary delay)
     - sim800l.disconnect
   on_call_connected:
     - logger.log:
         format: Call connected
+    # We instantly disconnect the call, we don't need to occupy the network, there's no point in that.
+    - sim800l.disconnect
   on_call_disconnected:
     - logger.log:
         format: Call disconnected
+    - homeassistant.event:
+        event: esphome.call_disconnected_{{esphome.name}}_event
   on_ussd_received:
     - lambda: |-
         std::string decoded_ussd;
