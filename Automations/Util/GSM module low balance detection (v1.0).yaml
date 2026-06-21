@@ -1,0 +1,68 @@
+# category
+#   - Util
+# labels:
+#   - notification
+# entityId
+#   - gsm_module_{{ meaningful name }}_low_balance_detection
+# dependencies:
+#   - Universal notification sender (Script)
+
+alias: GSM module {{ meaningful name }} low balance detection (v1.0)
+description: |2-
+  **⚙️ Как работает:**  
+  - Сравнивает текущее значение баланса (из текстового поля хранения) с числовым порогом `gsm_modules_sim_balance_threshold`.  
+  - Проверка выполняется при любом изменении баланса, при изменении самого порога, а также при закрытии уведомления о низком балансе (перепроверка).  
+  - Если баланс является числом и он меньше или равен порогу, отправляется оповещение.  
+  - Если баланс долгое время остаётся низким и не меняется, уведомление не дублируется, пока не произойдёт следующее обновление.  
+  - **Периодическое напоминание** обеспечивается автоматизацией `GSM module balance storage updater (v1.0)`, которая раз в сутки (в 08:00) принудительно обновляет баланс и тем самым триггерит проверку.
+
+  **📅 Когда срабатывает:**  
+  - Каждый раз, когда изменяется значение в текстовом поле хранения баланса.  
+  - При изменении значения порога `gsm_modules_sim_balance_threshold`.  
+  - При закрытии уведомления `gsm_main_module_low_balance_detection_notification` (чтобы перепроверить, не остаётся ли баланс низким).  
+  - Дополнительно — после ежедневного обновления баланса в 08:00 (через связку с `GSM module balance storage updater`).
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your text for store balance }}` на реальный `entity_id` текстового поля вашего модуля (например, `text.gsm_main_module_balance_storage_text`).  
+  - Убедитесь, что создан числовой хелпер `input_number.gsm_modules_sim_balance_threshold` с нужным порогом.  
+  - Убедитесь, что скрипт `Universal notification sender` доступен и настроен.
+triggers:
+  - trigger: state
+    # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+    entity_id:
+      - text.{{ your text for store balance }}
+  - trigger: state
+    entity_id:
+      - input_number.gsm_modules_sim_balance_threshold
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: gsm_main_module_low_balance_detection_notification
+    id: persistent_notification_removed
+conditions: []
+actions:
+  - if:
+      - condition: template
+        value_template: >-
+          {# НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text) #}
+          {% set balance_text = states('text.{{ your text for store balance }}') %}
+
+          {% if is_number(balance_text) %}
+            {{ (balance_text | float) <= (states("input_number.gsm_modules_sim_balance_threshold") | float) }}
+          {% else %}
+            {{ false }}
+          {% endif %}
+    then:
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          notify_if_trigger_id_is_none: false
+          automation_trigger_id: "{{ trigger.id }}"
+          message_title: Баланс GSM main module ниже порога!
+          message_notification_id: gsm_main_module_low_balance_detection_notification
+          # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+          message_text: >-
+            Баланс GSM main module {{
+            states('text.gsm_main_module_balance_storage_text') }} р. (ниже {{
+            states('input_number.gsm_modules_sim_balance_threshold') }} р.)
+mode: single
