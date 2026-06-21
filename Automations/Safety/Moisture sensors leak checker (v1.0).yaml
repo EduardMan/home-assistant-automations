@@ -88,7 +88,7 @@ actions:
            | list %}
 
         {% for moisture_labeled_sensor in moisture_labeled_sensors %}
-          {% if states(moisture_labeled_sensor) != 'off' %}
+          {% if states(moisture_labeled_sensor) == 'on' %}
             {% set issues.total = issues.total + 1 %}
 
             {% set area_id = device_attr(moisture_labeled_sensor, 'area_id') %}
