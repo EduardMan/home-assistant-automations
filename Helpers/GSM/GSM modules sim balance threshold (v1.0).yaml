@@ -1,0 +1,11 @@
+# Настройка минимального допустимого баланса для модулей GSM
+name: GSM modules sim balance threshold (v1.0)
+icon: mdi:cash-remove
+stepSize: 1
+unitOfMeasurement: 'RUB'
+type: Number
+entityId: gsm_modules_sim_balance_threshold
+displayMode: Input field
+visible: false
+minimumValue: 0
+maximumValue: 1000

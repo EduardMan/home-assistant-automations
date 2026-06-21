@@ -476,6 +476,15 @@ views:
                 style: buttons
             features_position: inline
           - type: tile
+            entity: input_number.gsm_modules_sim_balance_threshold
+            name: Balance threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
             entity: number.gsm_modules_available_count
             name: Available count
             color: grey
