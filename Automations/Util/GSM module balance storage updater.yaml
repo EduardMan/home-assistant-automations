@@ -25,6 +25,7 @@ description: |2-
   **📅 Когда срабатывает:**  
   - Каждое утро в 08:00 (плановое обновление).  
   - После того как модуль зарегистрировался в сети (с задержкой 1.5 минуты).
+  - 🔄 Через 5 минут после запуска системы (чтобы датчики успели подключиться).
 
   **🛠️ Что нужно настроить:**  
   - Замените `{{ your GSM module registered sensor }}` на реальный `entity_id` сенсора регистрации вашего модуля (например, `binary_sensor.gsm_sim800l_registered`).  
@@ -48,6 +49,14 @@ triggers:
       minutes: 1
       seconds: 30
     id: sim_registered
+  # Через 5 минут после запуска системы
+  - alias: After 5 min start up
+    trigger: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int
+          ) > 5 
+      }}
 conditions: []
 actions:
   # В текстовое поле для хранения баланса проставляем ⟳, чтобы понимать, что сейчас идет процесс обновления баланса
