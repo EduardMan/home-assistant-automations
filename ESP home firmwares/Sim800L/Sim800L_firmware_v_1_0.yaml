@@ -271,12 +271,14 @@ sim800l:
         data:
           message: !lambda return id(decoded_ussd_global);
 
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
 sensor:
   - platform: sim800l
     rssi:
       name: "Sim800L RSSI"
-      # Ставим force_update для того чтобы можно было понимать, что sim модуль не завис
-      force_update: true
   - platform: template
     id: balance
     name: "Balance"
@@ -286,6 +288,24 @@ sensor:
     force_update: true
     filters:
       - round: 2
+    # Используем этот сенсор для availability
+  - platform: template
+    id: gsm_heartbeat
+    name: "GSM Heartbeat"
+    icon: "mdi:heart-pulse"
+    internal: true
+    update_interval: 55s
+    lambda: |-
+      auto now = id(homeassistant_time).now();
+
+      if (!now.is_valid()) {
+        return 0;
+      }
+
+      return now.timestamp;
+    force_update: true
+    entity_category: diagnostic
+
 binary_sensor:
   - platform: sim800l
     registered:
