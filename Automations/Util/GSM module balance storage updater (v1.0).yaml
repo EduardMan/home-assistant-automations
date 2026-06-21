@@ -155,7 +155,7 @@ actions:
             data:
               automation_trigger_id: "{{ trigger.id }}"
               message_title: Ошибка обновления баланса!
-              message_text: GSM main module непредвиденная ошибка при обновлении баланса
+              message_text: Проверьте доступность GSM main module и регистрацию sim в сети
               message_notification_id: gsm_main_module_update_balance_unexpected_error
               notify_if_trigger_id_is_none: false
     else:
