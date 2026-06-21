@@ -288,7 +288,8 @@ sensor:
     force_update: true
     filters:
       - round: 2
-    # Используем этот сенсор для availability
+    # Используем этот сенсор для availability (поставить force_update для sim800l rssi не сработает, так как при Disconnected,
+    # когда невозможно зарегистрироваться в сети, значение обновляться не будет)
   - platform: template
     id: gsm_heartbeat
     name: "GSM Heartbeat"
