@@ -3,6 +3,10 @@
 # entityId
 #   - universal_notification_sender
 sequence:
+  - condition: template
+    value_template: |-
+      {{ notify_if_trigger_id_is_none or (automation_trigger_id is not none and
+        automation_trigger_id != '' and  automation_trigger_id != '""') }}
   - if:
       - condition: template
         value_template: "{{ automation_trigger_id == 'persistent_notification_removed' }}"
@@ -46,7 +50,13 @@ fields:
     selector:
       text: null
     required: true
-alias: Universal notification sender (v1.0)
+  notify_if_trigger_id_is_none:
+    selector:
+      boolean: { }
+    default: false
+    name: Notify if trigger id is none
+    required: true
+alias: Universal notification sender (v1.1)
 description: ""
 mode: parallel
 max: 10
