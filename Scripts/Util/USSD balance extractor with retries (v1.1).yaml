@@ -9,7 +9,7 @@
 #   - USSD balance extracting retry count (Helper)
 #   - USSD balance extracting required time seconds (Helper)
 
-alias: USSD balance extractor with retries (v1.0)
+alias: USSD balance extractor with retries (v1.1)
 description: |
   **🔧 Что делает:**  
   Отправляет произвольную USSD-команду на GSM-модуль, дожидается ответа и извлекает из него число (баланс) с помощью набора регулярных выражений.  
@@ -115,7 +115,7 @@ sequence:
         {{
           {
            'balance_updating_state': 'FAILED',
-           'balance': null
+           'balance': none
            } 
         }}
   - stop: failed_extracted_balance
