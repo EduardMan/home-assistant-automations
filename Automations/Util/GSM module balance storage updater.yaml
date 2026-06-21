@@ -1,0 +1,168 @@
+# category
+#   - Util
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - gsm_module_{{ meaningful name }}_balance_storage_updater
+# dependencies:
+#   - Universal notification sender (Script)
+#   - USSD balance extractor with retries (Script)
+
+alias: GSM module {{ meaningful name }} balance storage updater (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Автоматически обновляет баланс SIM-карты GSM-модуля.  
+  При запуске показывает символ `⟳` (идёт обновление), вызывает скрипт запроса баланса и записывает полученную сумму. Если произошла ошибка — сохраняет «Ошибка» и отправляет уведомление.
+
+  **⚙️ Как работает:**  
+  - Проверяет, что модуль зарегистрирован в сети и доступен (используются сенсоры `registered` и `availability`).  
+  - Если условия выполнены, запускает скрипт `USSD balance extractor with retries`, который отправляет USSD-команду, ждёт ответ и извлекает сумму.  
+  - При успехе записывает баланс в текстовое поле хранения.  
+  - При неудаче или непредвиденной ошибке записывает «Ошибка» и отправляет уведомление с описанием проблемы.  
+  - Защита от «моргания» сети: реагирует на регистрацию модуля только после 1.5 минут стабильного подключения.
+
+  **📅 Когда срабатывает:**  
+  - Каждое утро в 08:00 (плановое обновление).  
+  - После того как модуль зарегистрировался в сети (с задержкой 1.5 минуты).
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your GSM module registered sensor }}` на реальный `entity_id` сенсора регистрации вашего модуля (например, `binary_sensor.gsm_sim800l_registered`).  
+  - Замените `{{ your GSM module availability sensor }}` на `entity_id` сенсора доступности вашего модуля (например, `binary_sensor.gsm_module_main_availability`).  
+  - Замените `{{ your text for store balance }}` на `entity_id` текстового поля для хранения баланса вашего модуля (например, `text.gsm_main_module_balance_storage_text`).  
+  - Убедитесь, что скрипт `USSD balance extractor with retries` и `Universal notification sender` созданы и работают.
+triggers:
+  # Каждый день в 08:00
+  - trigger: time
+    at: "08:00:00"
+  # После того как модуль зарегистриуется в сети.
+  # Есть задержка в 1.5 минут, нужна для зашиты от "моргания" сети
+  # НЕОБХОДИМО выбрать сенсор registered ВАШЕГО модуля (например, gsm_sim800l_registered)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your GSM module registered sensor }}
+    to:
+      - "on"
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
+    id: sim_registered
+conditions: []
+actions:
+  # В текстовое поле для хранения баланса проставляем ⟳, чтобы понимать, что сейчас идет процесс обновления баланса
+  - action: text.set_value
+    metadata: {}
+    target:
+      # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+      entity_id: text.{{ your text for store balance }}
+    data:
+      value: ⟳
+  - if:
+      # Если зарегистрован в сети И модуль доступен
+      - condition: and
+        conditions:
+          - condition: state
+            # НЕОБХОДИМО выбрать сенсор registered ВАШЕГО модуля (например, gsm_sim800l_registered)
+            entity_id: binary_sensor.{{ your GSM module registered sensor }}
+            state:
+              - "on"
+          - condition: state
+            # НЕОБХОДИМО выбрать сенсор availability ВАШЕГО модуля (например, gsm_module_main_availability)
+            entity_id: binary_sensor.{{ your GSM module availability sensor }}
+            state:
+              - "on"
+    then:
+      # Вызываем скрипт обновления баланса
+      - action: script.ussd_balance_extractor_with_retries
+        metadata: {}
+        data:
+          send_ussd_action:
+            - action: esphome.gsm_main_module_send_ussd
+              metadata: {}
+              data:
+                ussdCode: "*100#"
+          ussd_received_event_type_name: esphome.ussd_received_gsm-main-module_event
+        response_variable: extracted_balance_result
+        continue_on_error: true
+      - choose:
+          # Если результат выполнения скрипта ussd_balance_extractor_with_retries не пустой И balance_updating_state == 'FAILED'
+          - conditions:
+              - alias: If balance_updating_state == 'FAILED'
+                condition: template
+                value_template: |-
+                  {{
+                    extracted_balance_result is not none and extracted_balance_result.balance_updating_state == 'FAILED'
+                  }}
+            sequence:
+              # В текстовое поле для хранения баланса ВАШЕГО модуля присваиваем "Ошибка"
+              - action: text.set_value
+                metadata: {}
+                target:
+                  # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+                  entity_id: text.{{ your text for store balance }}
+                data:
+                  value: Ошибка
+              # Отправляем уведомление о том, что баланс не удалось обновить
+              - action: script.universal_notification_sender
+                metadata: {}
+                data:
+                  automation_trigger_id: "{{ trigger.id }}"
+                  message_title: Ошибка обновления баланса!
+                  message_text: >-
+                    GSM main module не удалось обновить баланс после {{
+                    states('input_number.ussd_balance_extracting_retry_count')
+                    }} попыток, попробуйте повторить позже.
+                  message_notification_id: gsm_main_module_update_balance_failed
+          # Если результат выполнения скрипта ussd_balance_extractor_with_retries не пустой
+          # И balance_updating_state == 'SUCCESS' И balance не пустой
+          - conditions:
+              - alias: If balance_updating_state == 'SUCCESS' AND balance is not none
+                condition: template
+                value_template: >-
+                  {{ extracted_balance_result is not none and
+                  (extracted_balance_result.balance_updating_state == 'SUCCESS'
+                  and extracted_balance_result.balance is not none) }}
+            sequence:
+              # В текстовое поле для хранения баланса ВАШЕГО модуля присваиваем результат extracted_balance_result.balance из скрипта ussd_balance_extractor_with_retries
+              - action: text.set_value
+                metadata: {}
+                target:
+                  # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+                  entity_id: text.{{ your text for store balance }}
+                data:
+                  value: "{{ extracted_balance_result.balance }}"
+        default:
+          # В текстовое поле для хранения баланса ВАШЕГО модуля присваиваем "Ошибка"
+          - action: text.set_value
+            metadata: {}
+            target:
+              # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+              entity_id: text.{{ your text for store balance }}
+            data:
+              value: Ошибка
+          - action: script.universal_notification_sender
+            metadata: {}
+            data:
+              automation_trigger_id: "{{ trigger.id }}"
+              message_title: Ошибка обновления баланса!
+              message_text: GSM main module непредвиденная ошибка при обновлении баланса
+              message_notification_id: gsm_main_module_update_balance_unexpected_error
+              notify_if_trigger_id_is_none: false
+    else:
+      - action: text.set_value
+        metadata: {}
+        target:
+          # НЕОБХОДИМО выбрать текстовое поле для хранения баланса ВАШЕГО модуля (например, gsm_main_module_balance_storage_text)
+          entity_id: text.{{ your text for store balance }}
+        data:
+          value: Ошибка
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          automation_trigger_id: "{{ trigger.id }}"
+          message_title: Ошибка обновления баланса!
+          message_text: GSM main module непредвиденная ошибка при обновлении баланса
+          message_notification_id: gsm_main_module_update_balance_unexpected_error
+          notify_if_trigger_id_is_none: false
+mode: single
