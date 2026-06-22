@@ -1,0 +1,88 @@
+# category
+#   - Util
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - gsm_module_{{ meaningful name }}_registration_failed_detection
+# dependencies:
+#   - Universal notification sender (Script)
+
+alias: GSM module {{ meaningful name }} registration failed detection (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Следит за регистрацией GSM-модуля в сотовой сети и отправляет уведомление, если модуль длительно (более 5 минут) не может зарегистрироваться.
+
+  **⚙️ Как работает:**  
+  - Срабатывает при переходе сенсора регистрации в состояние «off» дольше чем на 5 минут — это защищает от ложных срабатываний при кратковременных перебоях связи.  
+  - Дополнительно проверяет статус регистрации по расписанию (раз в сутки), при закрытии уведомления о проблеме, а также через 5 минут после запуска системы.  
+  - Если модуль по-прежнему не зарегистрирован, отправляет оповещение через `Universal notification sender`.  
+  - При закрытии уведомления (notification_id `{{your module name}}_registration_error`) автоматизация перепроверяет статус — это позволяет своевременно обнаружить восстановление связи.
+
+  **📅 Когда срабатывает:**  
+  - Каждое утро в 08:00 (плановая проверка).  
+  - Когда сенсор регистрации находится в состоянии «off» более 5 минут.  
+  - При закрытии уведомления о проблеме регистрации.  
+  - Через 5 минут после запуска Home Assistant (чтобы модуль успел инициализироваться).
+
+  **🛠️ Что нужно настроить:**  
+  - Замените `{{ your GSM module registered sensor }}` на реальный `entity_id` бинарного сенсора регистрации вашего модуля (например, `binary_sensor.gsm_sim800l_registered`).  
+  - Замените `{{your module name}}` на краткое имя вашего модуля (например, `gsm_main_module`) — это будет использовано в идентификаторе уведомления.  
+  - Замените `{{ meaningful name }}` в названии автоматизации на читаемое имя (например, `Main module`).  
+  - Убедитесь, что скрипт `Universal notification sender` создан и работает.
+triggers:
+  # Каждый день в 08:00
+  - trigger: time
+    at: "08:00:00"
+  # При невозможно зарегистрироваться в сети.
+  # Есть задержка в 5 минут, нужна для зашиты от "моргания" сети
+  # НЕОБХОДИМО выбрать сенсор registered ВАШЕГО модуля (например, gsm_sim800l_registered)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your GSM module registered sensor }}
+    to:
+      - "off"
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 0
+  # При удалении уведомления о проблеме регистрации модуля
+  # НЕОБХОДИМО заменить {{your module name}} на имя ВАШЕГО модуля (например, gsm_main_module)
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    notification_id: {{your module name}}_registration_error
+  # Через 5 минут после запуска системы
+  - alias: After 5 min start up
+    trigger: template
+    value_template: >-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int
+          ) > 5 
+      }}
+conditions: []
+actions:
+  - if:
+      - condition: state
+        # НЕОБХОДИМО выбрать сенсор registered ВАШЕГО модуля (например, gsm_sim800l_registered)
+        entity_id: binary_sensor.{{ your GSM module registered sensor }}
+        state:
+          - "off"
+    then:
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          notify_if_trigger_id_is_none: false
+          automation_trigger_id: "{{ trigger.id }}"
+          # НЕОБХОДИМО заменить {{your module name}} на имя ВАШЕГО модуля (например, GSM main module)
+          # НЕОБХОДИМО заменить {{ your GSM module registered sensor }} на сенсор registered ВАШЕГО модуля (например, gsm_sim800l_registered)
+          message_text: >-
+            {% set sensor = {{ your GSM module registered sensor }} %}
+            {% set last_changed = states['binary_sensor.' ~ sensor].last_changed %}
+            {% set duration = (now() - last_changed).total_seconds() / 60 %}
+            
+            {{your module name}} невозможно зарегистрироваться в сети - {{ duration | int }} мин.
+          message_title: Невозможно зарегистрироваться в сети!
+          # НЕОБХОДИМО заменить {{your module name}} на имя ВАШЕГО модуля (например, gsm_main_module)
+          message_notification_id: {{your module name}}_registration_error
+mode: single
