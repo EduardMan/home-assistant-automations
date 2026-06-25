@@ -73,7 +73,16 @@ api:
         recipient: string
       then:
         - sim800l.dial:
-            recipient: !lambda 'return recipient;'
+            recipient: !lambda |-
+              std::string number = recipient;
+              
+              // remove spaces
+              number.erase(
+                std::remove(number.begin(), number.end(), ' '),
+                number.end()
+              );
+              
+              return number;
     - action: connect
       then:
         - sim800l.connect

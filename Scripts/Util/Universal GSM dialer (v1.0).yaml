@@ -1,0 +1,93 @@
+# category
+#   - Util
+# labels:
+#   - GSM
+# entityId
+#   - universal_gsm_dialer
+
+alias: Universal GSM dialer (v1.0)
+description: |2-
+  **🔧 Что делает:**  
+  Последовательно обзванивает список номеров, переданных через сенсор, и принудительно завершает звонок, если абонент не ответил за заданное время.
+
+  **⚙️ Как работает:**  
+  - Получает массив телефонных номеров из сенсора (ожидается JSON-массив в состоянии сенсора).  
+  - Каждый номер проверяется регулярным выражением: допустимы цифры, пробелы и ведущий `+`. Невалидные номера пропускаются, и о них отправляется уведомление.  
+  - Для каждого валидного номера совершается звонок через переданное действие `gsm_module_dial_action`.  
+  - Ожидается событие отбоя (`call_disconnected_event_type_name`) или истечение таймаута, заданного хелпером `gsm_phone_call_duration_seconds`.  
+  - Если звонок не завершился сам, принудительно разрывается через `gsm_module_disconnect_action`.  
+  - Все уведомления о пропущенных номерах отправляются через `Universal notification sender`.
+
+  **📅 Когда используется:**  
+  - Для экстренного обзвона (пожар, протечка, газ) — вызывается из аварийных автоматизаций.  
+  - Может запускаться вручную для тестирования или массового оповещения.
+
+  **🛠️ Параметры (fields):**  
+  - `phone_numbers` — сенсор, содержащий JSON-массив номеров (например, `sensor.emergency_numbers`).  
+  - `gsm_module_dial_action` — действие для совершения звонка (должно содержать ключ `recipient`).  
+  - `call_disconnected_event_type_name` — имя события, которое модуль публикует при отбое (например, `esphome.call_disconnected_gsm-main-module_event`).  
+  - `gsm_module_disconnect_action` — действие для принудительного завершения звонка.  
+
+  **📦 Необходимые хелперы:**  
+  - `input_number.gsm_phone_call_duration_seconds` — максимальная длительность одного звонка в секундах.  
+  - Сенсор с номерами (например, `sensor.emergency_numbers`) должен возвращать JSON-массив строк.  
+  - Скрипт `Universal notification sender` для отправки уведомлений о невалидных номерах.
+fields:
+  phone_numbers:
+    selector:
+      entity:
+        multiple: false
+    name: Phone numbers
+    required: true
+  gsm_module_dial_action:
+    selector:
+      action: {}
+    name: GSM module dial action
+    required: true
+  call_disconnected_event_type_name:
+    selector:
+      text:
+        multiple: false
+        multiline: false
+    name: Call disconnected event type name
+    required: true
+  gsm_module_disconnect_action:
+    selector:
+      action: {}
+    name: GSM module disconnect action
+    required: true
+sequence:
+  - repeat:
+      for_each: "{{ states(phone_numbers) }}"
+      sequence:
+        - if:
+            - condition: template
+              value_template: "{{ repeat.item | regex_match(\"^\\\\+?\\\\d[\\\\d ]*$\") }}"
+          then:
+            - action: "{{ gsm_module_dial_action[0].action }}"
+              data: "{{ {'recipient': repeat.item } }}"
+              alias: Phone call
+            - wait_for_trigger:
+                - trigger: event
+                  event_type: "{{ call_disconnected_event_type_name }}"
+              continue_on_timeout: true
+              timeout:
+                seconds: >-
+                  {{ states('input_number.gsm_phone_call_duration_seconds') |
+                  int }}
+            - if:
+                - condition: template
+                  value_template: "{{ not wait.completed }}"
+              then:
+                - action: "{{ gsm_module_disconnect_action[0].action }}"
+                  data: "{{ gsm_module_disconnect_action[0].data }}"
+                  alias: Disconnect phone call
+          else:
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                notify_if_trigger_id_is_none: true
+                automation_trigger_id: "{{ trigger.id if trigger is defined else none }}"
+                message_title: Невалидный номер!
+                message_text: Номер {{ repeat.item }} был пропущен.
+                message_notification_id: invalid_phone_number_notification-{{ repeat.item }}
