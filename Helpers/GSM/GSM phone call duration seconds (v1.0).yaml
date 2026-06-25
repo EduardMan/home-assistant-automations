@@ -1,14 +1,13 @@
-# Настройка времени ожидания ответа для получения баланса через USSD команду.
-name: USSD balance extracting required time seconds (v1.0)
-icon: mdi:clock-outline
+# Настройка длительности звонка (в секундах).
+name: GSM phone call duration seconds (v1.0)
+icon: mdi:phone-clock
 stepSize: 1
 unitOfMeasurement: s
 type: Number
 label: GSM
-entityId: ussd_balance_extracting_required_time_seconds
+entityId: gsm_phone_call_duration_seconds
 displayMode: Input field
 visible: false
-# Оператор может долго отвечать и крайне нежелательно отправить второй запрос пока первый не завершен, поэтому не менее 1= секунд
-minimumValue: 10
-maximumValue: 60
-value: 15
+minimumValue: 3
+maximumValue: 40
+value: 40
