@@ -1,0 +1,67 @@
+{# ver.: 1.0 #}
+
+{% macro get_custom_min_availability_timeout_label(entity_id, returns) %}
+    {% set custom_min_availability_timeout_label =
+      labels(entity_id)
+       | select('match', '^custom_availability_timeout_.*$')
+       | map('replace', 'custom_availability_timeout_', '')
+       | map('upper')
+       | map('as_timedelta')
+       | list
+    %}
+
+    {% do returns(custom_min_availability_timeout_label | min if custom_min_availability_timeout_label else none) %}
+{% endmacro %}
+
+{% macro get_unavailable_sensors(returns) %}
+    {# find all entities ends with _last_seen #}
+    {% set all_last_seen_entities = states.sensor
+        | selectattr('entity_id', 'match', '.*_last_seen$')
+        | list %}
+
+    {# Define devices labels which already tracked by automations => they don't need to check in this helper #}
+    {% set excluded_labels = [
+        'door',
+        'moisture',
+        'motion',
+        'temperature',
+        'smoke',
+        'moisture_valve',
+        ]
+    %}
+
+    {% set get_timeout =
+      get_custom_min_availability_timeout_label | as_function
+    %}
+
+    {% set issues = namespace(total=0, list=[]) %}
+    {% set atm = 'input_number.untracked_zigbee_sensors_availability_timeout_minutes' %}
+
+    {% for last_seen_entity in all_last_seen_entities %}
+    {% set dev = device_id(last_seen_entity.entity_id) %}
+
+    {# Check that device is zigbee and works via zigbee2mqtt_, because we don't need to catch unwanted devices - this can lead to unpredictable behavior #}
+    {# device_attr(dev, 'identifiers') - this is tuple, i.e. [('mqtt', 'zigbee2mqtt_0x00158d0004519235')] #}
+    {% if 'zigbee2mqtt_' in device_attr(dev, 'identifiers') | string %}
+        {% set all_entity_labels = device_entities(dev) | map('labels') | sum(start=[]) | unique | list %}
+        {% if all_entity_labels | select('in', excluded_labels) | list | count == 0 %}
+            {% set last_seen_val = states(last_seen_entity.entity_id) %}
+            {% set custom_timeout = get_timeout(last_seen_entity.entity_id) %}
+
+            {% if last_seen_val in ['unknown', 'unavailable']
+                or ((custom_timeout is none) and (as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60 >= (states(atm) | int))
+                or ((custom_timeout is not none) and (now() - as_datetime(last_seen_val)) >= custom_timeout) %}
+
+                {% set issues.total = issues.total + 1 %}
+                {% set val = ((as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60) | int | string %}
+
+                {% set area_id = device_attr(last_seen_entity.entity_id, 'area_id') %}
+                {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+                {% set issues.list = issues.list + [device_name(last_seen_entity.entity_id) + " (" + area + ")" + " - " + val + " мин."] %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% endfor %}
+
+    {% do returns(issues) %}
+{% endmacro %}

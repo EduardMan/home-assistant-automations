@@ -11,7 +11,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Untracked zigbee sensors availability checker (v1.1)
+alias: Untracked zigbee sensors availability checker (v1.2)
 description: |2-
   **Что делает:**  
   Проверяет доступность ZigBee-устройств, у которых нет специализированной автоматизации.  
@@ -74,48 +74,11 @@ actions:
   - variables:
       unavailable_untracked_zigbee_sensors: |
         {% set limit = 5 %}
-        {# find all entities ends with _last_seen #}
-        {% set all_last_seen_entities = states.sensor
-            | selectattr('entity_id', 'match', '.*_last_seen$')
-            | list %}
-
-        {# Define devices labels which already tracked by automations =>
-            they don't need to check in this helper #}
-        {% set excluded_labels = [
-            'door',
-            'moisture',
-            'motion',
-            'temperature',
-            'smoke',
-            'moisture_valve',
-            ] %}
-
-        {% set issues = namespace(total=0, list=[]) %}
-        {% set atm = 'input_number.untracked_zigbee_sensors_availability_timeout_minutes' %}
-
-        {% for last_seen_entity in all_last_seen_entities %}
-        {% set dev = device_id(last_seen_entity.entity_id) %}
-
-        {# Check that device is zigbee and works via zigbee2mqtt_,
-            because we don't need to catch unwanted devices - this can lead to unpredictable behavior #}
-        {# device_attr(dev, 'identifiers') - this is tuple, i.e. [('mqtt', 'zigbee2mqtt_0x00158d0004519235')] #}
-        {% if 'zigbee2mqtt_' in device_attr(dev, 'identifiers') | string %}
-            {% set all_entity_labels = device_entities(dev) | map('labels') | sum(start=[]) | unique | list %}
-            {% if all_entity_labels | select('in', excluded_labels) | list | count == 0 %}
-                {% set last_seen_val = states(last_seen_entity.entity_id) %}
-                {% if last_seen_val in ['unknown', 'unavailable'] 
-                    or (as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60 >= (states(atm) | int) %}
-                    
-                    {% set issues.total = issues.total + 1 %}
-                    {% set val = ((as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60) | int | string %}
-
-                    {% set area_id = device_attr(last_seen_entity.entity_id, 'area_id') %}
-                    {% set area = area_name(area_id) if area_id else "Без комнаты" %}
-                    {% set issues.list = issues.list + [device_name(last_seen_entity.entity_id) + " (" + area + ")" + " - " + val + " мин."] %}
-                {% endif %}
-            {% endif %}
-        {% endif %}
-        {% endfor %}
+        
+        {% from 'untracked_zigbee_sensors_utils_v_1_0.jinja' import get_unavailable_sensors %}
+  
+        {% set get_unavailable_sensors_func = as_function(get_unavailable_sensors) %}
+        {% set issues = get_unavailable_sensors_func() %}
 
         {% if issues.total > limit %}
             {{ issues.list[:limit] | join('\n') ~ '\n... и ещё ' ~ (issues.total - limit) ~ ' датчик(а)' }}
