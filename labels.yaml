@@ -47,6 +47,15 @@ label:
   - name: storage
     icon: mdi:database
     colour: Deep purple
+  - name: custom_availability_timeout_PT6H
+    icon: mdi:timer-cog
+    colour: Deep purple
+  - name: custom_availability_timeout_PT12H
+    icon: mdi:timer-cog
+    colour: Deep purple
+  - name: custom_availability_timeout_P1D
+    icon: mdi:timer-cog
+    colour: Deep purple
 dashboards:
   - name: Admin Controls
     icon: mdi:shield-account
