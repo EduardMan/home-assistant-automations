@@ -485,6 +485,15 @@ views:
                 style: buttons
             features_position: inline
           - type: tile
+            entity: input_number.gsm_phone_call_duration_seconds
+            name: Call duration
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
             entity: number.gsm_modules_available_count
             name: Available count
             color: grey
