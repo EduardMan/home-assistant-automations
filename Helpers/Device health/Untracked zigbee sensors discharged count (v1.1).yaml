@@ -34,7 +34,7 @@ state:
     {% set filtered_threshold_entities = namespace(filtered_entities=[ ]) %}
       
     {% for entity_for_filter in entities %}
-      {% if states(entity_for_filter) | float < battery_threshold %}
+      {% if (states(entity_for_filter) | lower in ['unknown', 'unavailable']) or (states(entity_for_filter) | float < battery_threshold) %}
         {% set filtered_threshold_entities.filtered_entities = filtered_threshold_entities.filtered_entities + [ entity_for_filter ] %}
       {% endif %}
     {% endfor %}
