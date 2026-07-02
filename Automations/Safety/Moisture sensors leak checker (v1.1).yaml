@@ -11,7 +11,7 @@
 #   - Close labeled moisture valves with retries (Script)
 #   - sensor.uptime (Integration)
 
-alias: Moisture sensors leak checker (v1.0)
+alias: Moisture sensors leak checker (v1.1)
 description: |2-
   **Что делает:**  
   Постоянно следит за датчиками протечки. Если хотя бы один датчик всё ещё показывает протечку — закрывает вентили воды и отправляет оповещение.  
@@ -83,8 +83,12 @@ actions:
       device_name_with_area: |
         {% set limit = 5 %} 
         {% set issues = namespace(total=0, list=[]) %}
+        
+        {% set moisture_valve_ignore_entities = label_entities('moisture_valve_ignore') %}
+        
         {% set moisture_labeled_sensors = label_entities("moisture") 
            | select('match', '.*_water_leak$')
+           | reject('in', moisture_valve_ignore_entities)
            | list %}
 
         {% for moisture_labeled_sensor in moisture_labeled_sensors %}
