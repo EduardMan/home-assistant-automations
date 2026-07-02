@@ -9,7 +9,7 @@
 #   - Universal notification sender (Script)
 #   - Close labeled moisture valves with retries (Script)
 
-alias: Moisture sensors leak detection (v1.0)
+alias: Moisture sensors leak detection (v1.1)
 description: |2-
   **🔧 Что делает:**  
   Мгновенно реагирует на протечку воды: одновременно запускает закрытие всех кранов и отправляет оповещение с указанием датчика и комнаты.
@@ -17,7 +17,8 @@ description: |2-
   **⚙️ Как работает:**  
   - При срабатывании любого датчика протечки (явного или найденного по лейблу *moisture*) параллельно вызываются скрипт `close_labeled_moisture_valves_with_retries` и уведомление через `universal_notification_sender`.  
   - Явные датчики перечислены в первых двух триггерах. Третий триггер — шаблонный — ловит все остальные датчики с лейблом *moisture* и суффиксом `_water_leak`, исключая уже указанные, чтобы избежать дублирования.  
-  - **Важно:** массив `exclude_moisture_sensors` в шаблонном триггере должен содержать entity_id всех явных датчиков, иначе возможна ошибка «Already running».  
+  - Датчики, помеченные лейблом *moisture_valve_ignore*, исключаются из ловца (краны для них не закрываются).
+  - Если сработал ловец, дополнительно отправляется предупреждение «Сработал ловец!», чтобы администратор проверил автоматизацию.
 
   **📅 Когда срабатывает:**  
   - Только при переходе датчика в состояние «on» (обнаружена протечка).  
@@ -26,6 +27,7 @@ description: |2-
   **🛠️ Что нужно настроить:**  
   - Замените `{{ your water leak sensor }}` на реальные entity_id ваших датчиков протечки в первых двух триггерах.  
   - Скопируйте эти же entity_id в массив `exclude_moisture_sensors` внутри шаблонного триггера.
+  - При необходимости добавьте датчикам лейбл *moisture_valve_ignore*, чтобы исключить их из автоматического закрытия кранов.
 triggers:
   # Когда срабатывает указанный датчик протечки (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ПРОТЕЧКИ)
   - trigger: state
@@ -57,16 +59,20 @@ triggers:
       'binary_sensor.{{ your water leak sensor from triggers }}',
       'binary_sensor.{{ your water leak sensor from triggers }}'
       ] %}
+      
+      {% set moisture_valve_ignore_entities = label_entities('moisture_valve_ignore') %}
 
       {{ 
-        expand(moisture_labeled_sensors) 
+        expand(moisture_labeled_sensors)
          | selectattr('state', '!=', 'off') 
-         | map(attribute = 'entity_id') 
+         | map(attribute = 'entity_id')
+         | reject('in', moisture_valve_ignore_entities)
          | reject('in', exclude_moisture_sensors) 
          | list 
          | count != 0
       }}
     alias: When labeled moisture sensor changes to on
+    id: water_leak_sensors_catcher
 conditions: [ ]
 actions:
   # Вызываем действия параллельно, так как close_labeled_moisture_valves_with_retries может выполняться долго,
@@ -96,4 +102,17 @@ actions:
               message_title: Обнаружена протечка ({{ area_name(trigger.entity_id) }})!
               message_text: "{{ device_name_with_area }}"
               message_notification_id: moisture_sensors_leak_detection_notification-{{trigger.entity_id}}
+      - if:
+          - condition: trigger
+            id:
+              - water_leak_sensors_catcher
+        then:
+          - action: script.universal_notification_sender
+            metadata: {}
+            data:
+              notify_if_trigger_id_is_none: false
+              automation_trigger_id: "{{ trigger.id }}"
+              message_notification_id: moisture_sensors_leak_detection_catcher_triggered
+              message_title: Сработал ловец!
+              message_text: Сработал ловец протечки, проверьте корректность автоматизации.
 mode: single
