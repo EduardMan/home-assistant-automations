@@ -100,12 +100,19 @@ actions:
           | list %}
         
         {% for entity in entities %}
-          {% if states(entity) | float < battery_threshold %}
+          {% if (states(entity) | lower in ['unknown', 'unavailable']) or (states(entity) | float < battery_threshold) %}
             {% set issues.total = issues.total + 1 %}
             
             {% set area_id = device_attr(entity, 'area_id') %}
             {% set area = area_name(area_id) if area_id else "Без комнаты" %}
-            {% set issues.list = issues.list + [device_name(entity) + " (" + area + ")" + " - " + states(entity) + "%" ] %}
+        
+            {% if states(entity) | lower in ['unknown', 'unavailable']%}
+              {% set val = 'Неизвестно' %}
+            {% else %}
+              {% set val = states(entity) %}
+            {% endif %}
+        
+            {% set issues.list = issues.list + [device_name(entity) + " (" + area + ")" + " - " + val + "%" ] %}
           {% endif %}
         {% endfor %}
         
