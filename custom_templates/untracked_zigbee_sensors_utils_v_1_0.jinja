@@ -53,7 +53,12 @@
                 or ((custom_timeout is not none) and (now() - as_datetime(last_seen_val)) >= custom_timeout) %}
 
                 {% set issues.total = issues.total + 1 %}
-                {% set val = ((as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60) | int | string %}
+
+                {% if last_seen_val in ['unknown', 'unavailable'] %}
+                    {% set val = 'Неизвестно' %}
+                {% else %}
+                    {% set val = ((as_timestamp(now()) - as_timestamp(last_seen_val)) | int / 60) | int | string %}
+                {% endif %}
 
                 {% set area_id = device_attr(last_seen_entity.entity_id, 'area_id') %}
                 {% set area = area_name(area_id) if area_id else "Без комнаты" %}
