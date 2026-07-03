@@ -8,10 +8,12 @@
 # dependencies:
 #   - Moisture sensors availability timeout minutes (Helper)
 #   - Moisture sensors expected count (Helper)
+#   - Moisture sensors available count (Helper)
+#   - Moisture sensors unavailable count (Helper)
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Moisture sensors count checker (v1.0)
+alias: Moisture sensors count checker (v1.1)
 description: |2-
   **Что делает:**
   Проверяет, что необходимым датчикам и сенсорам протечки проставлен лейбл *moisture*.
@@ -72,6 +74,12 @@ triggers:
           states('input_number.moisture_sensors_availability_timeout_minutes') | int
           ) > 5 
       }}
+  - trigger: state
+    entity_id:
+      - number.moisture_sensors_available_count
+  - trigger: state
+    entity_id:
+      - number.moisture_sensors_unavailable_count
 conditions:
   - alias: System uptime is greater then Moisture sensors availability timeout minutes
     condition: template
