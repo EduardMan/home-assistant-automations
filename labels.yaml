@@ -56,6 +56,9 @@ label:
   - name: custom_availability_timeout_P1D
     icon: mdi:timer-cog
     colour: Deep purple
+  - name: custom_availability_timeout_ignore
+    icon: mdi:timer-cog
+    colour: Deep purple
   - name: moisture valve ignore
     icon: mdi:water-off
     colour: Grey

@@ -8,7 +8,7 @@
        | map('upper')
        | map('as_timedelta')
        | list
-    %}
+ %}
 
     {% do returns(custom_min_availability_timeout_label | min if custom_min_availability_timeout_label else none) %}
 {% endmacro %}
@@ -28,11 +28,11 @@
         'smoke',
         'moisture_valve',
         ]
-    %}
+ %}
 
     {% set get_timeout =
       get_custom_min_availability_timeout_label | as_function
-    %}
+ %}
 
     {% set issues = namespace(total=0, list=[]) %}
     {% set atm = 'input_number.untracked_zigbee_sensors_availability_timeout_minutes' %}
@@ -44,7 +44,8 @@
     {# device_attr(dev, 'identifiers') - this is tuple, i.e. [('mqtt', 'zigbee2mqtt_0x00158d0004519235')] #}
     {% if 'zigbee2mqtt_' in device_attr(dev, 'identifiers') | string %}
         {% set all_entity_labels = device_entities(dev) | map('labels') | sum(start=[]) | unique | list %}
-        {% if all_entity_labels | select('in', excluded_labels) | list | count == 0 %}
+        {% if (all_entity_labels | select('in', excluded_labels) | list | count == 0)
+            and ('custom_availability_timeout_ignore' not in all_entity_labels) %}
             {% set last_seen_val = states(last_seen_entity.entity_id) %}
             {% set custom_timeout = get_timeout(last_seen_entity.entity_id) %}
 
