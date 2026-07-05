@@ -53,7 +53,7 @@ fields:
   notify_if_trigger_id_is_none:
     selector:
       boolean: { }
-    default: false
+    default: true
     name: Notify if trigger id is none
     required: true
 alias: Universal notification sender (v1.1)
