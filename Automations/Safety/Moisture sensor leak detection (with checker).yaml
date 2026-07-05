@@ -1,0 +1,73 @@
+# Автоматизация для кейсов срабатывания датчиков протечки, которые не вписываются в
+# Moisture sensors leak checker и Moisture sensors leak detection
+# Такие датчики протечки имеют лейбл moisture valve ignore
+# Например, соединение труб перед электрокраном => нет никакого смысла перекрывать кран, но нужно отправить уведомление
+# Протечки не связанные с водопроводом, например датчик у аквариума, у дренажного насоса и т.д.
+# Для таких кейсов надо писать автоматизации индивидуально, например, только уведомить, отключить насос и т.д.
+
+# category
+#   - Safety
+# labels:
+#   - notification
+#   - moisture valve ignore
+# entityId
+#   - moisture_sensor_{{ meaningful name }}_tube_leak_detection_with_checker
+# dependencies:
+#   - moisture valve ignore (label)
+#   - Universal notification sender (Script)
+
+alias: Moisture sensor {{ meaningful name }} leak detection (with checker)
+description: ""
+triggers:
+  # Когда срабатывает указанный датчик протечки (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ПРОТЕЧКИ)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your water leak sensor }}
+    to:
+      - "on"
+  # При удалении уведомления об обнаруженной протечке
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    id: persistent_notification_removed
+    # Id сообщения по схеме: moisture_sensor_leak_detection_ignore_valve_notification-binary_sensor.entity id of sensor
+    # Например, moisture_sensor_leak_detection_ignore_valve_notification-binary_sensor.datchik_protechki_truba_shkaf_water_leak
+    notification_id: >-
+      moisture_sensor_leak_detection_ignore_valve_notification-binary_sensor.{{ your water leak sensor }}
+  # После запуска системы (время работы системы - настройка таймаута датчиков > 5, +5 минут на всякий случай)
+  - alias: >-
+      When system uptime + 5 greater than Moisture sensors availability timeout
+      minutes
+    trigger: template
+    value_template: |-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int - 
+          states('input_number.moisture_sensors_availability_timeout_minutes') | int
+          ) > 5 
+      }}
+  # Каждый день в 08:02:22, такое странное время нужно для того, чтобы избежать возможного одновременного запуска
+  - trigger: time
+    at: "08:02:22"
+    id: fixed_time
+conditions:
+  - condition: state
+    entity_id: binary_sensor.{{ your water leak sensor }}
+    state:
+      - "on"
+# Такие автоматизации индивидуальны ддя каждого кейса => список действий индивидуальный, ниже пример
+actions:
+  # Отправляем уведомление о протечке
+  - action: script.universal_notification_sender
+    metadata: {}
+    data:
+      notify_if_trigger_id_is_none: false
+      automation_trigger_id: "{{ trigger.id }}"
+      message_notification_id: >-
+        moisture_sensor_leak_detection_ignore_valve_notification-binary_sensor.{{ your water leak sensor }}
+      # Замените по смыслу
+      message_title: Обнаружена протечка в шкафу!
+      # Замените по смыслу
+      message_text: >-
+        🔴 Обнаружена протечка в шкафу, срочно проверьте люк. Кран перекрыт не
+        будет.
+mode: single
