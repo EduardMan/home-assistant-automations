@@ -1,7 +1,7 @@
 # Сенсор отображающий текущее количество разряженных датчиков протечки
 # dependencies:
 #   - Moisture sensors battery threshold (Helper)
-name: Moisture sensors discharged count (v1.0)
+name: Moisture sensors discharged count (v1.1)
 icon: mdi:battery-alert-variant-outline
 unitOfMeasurement: pcs
 visible: false
@@ -14,11 +14,11 @@ state:
   {% set entities = expand(label_entities("moisture") | select('match', '.*_battery$')) | list %}
   {% set filtered_threshold_entities = namespace(filtered_entities=[ ]) %}
   {% for entity_for_filter in entities %}
-    {% if entity_for_filter.state | float < battery_threshold %}
+    {% if (entity_for_filter.state in ['unknown', 'unavailable']) or (entity_for_filter.state | float < battery_threshold) %}
       {% set filtered_threshold_entities.filtered_entities = filtered_threshold_entities.filtered_entities + [ entity_for_filter ] %}
     {% endif %}
   {% endfor %}
 
   {% set entities_low = expand(label_entities("moisture") | select('match', '.*_battery_low$')) | selectattr('state', '!=', 'off') | list %}
 
-  {{ (filtered_threshold_entities.filtered_entities + entities_low) | unique(attribute='entity_id') | list | count }}
+  {{ (filtered_threshold_entities.filtered_entities + entities_low) | unique(attribute='device_id') | list | count }}
