@@ -311,8 +311,7 @@ sensor:
     id: gsm_{{esphome.name}}_gsm_heartbeat
     name: "GSM Heartbeat"
     icon: "mdi:heart-pulse"
-    internal: true
-    update_interval: 55s
+    update_interval: 40s
     lambda: |-
       auto now = id(homeassistant_time).now();
 

@@ -1,0 +1,24 @@
+# category
+#   - Util
+# labels:
+#   - GSM
+# entityId
+#   - gsm module {{module_name}} {{meaningful info}} call (gsm_module_main_module_emergency_call)
+
+# i.e. GSM module Main module emergency call
+alias: GSM module {{module_name}} {{meaningful info}} call
+sequence:
+  - action: script.universal_gsm_dialer
+    metadata: {}
+    data:
+      phone_numbers: sensor.{{GSM module {{ meaningful name }} phone numbers (v1.0)}}
+      gsm_module_dial_action:
+        - action: esphome.gsm_main_module_dial
+          metadata: {}
+          data: {}
+      call_disconnected_event_type_name: esphome.call_disconnected_gsm-main-module_event
+      gsm_module_disconnect_action:
+        - action: esphome.gsm_main_module_disconnect
+          metadata: {}
+          data: {}
+description: ""
