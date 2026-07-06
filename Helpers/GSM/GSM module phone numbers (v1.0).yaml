@@ -1,0 +1,11 @@
+# Список номеров по которым звонить в случае экстренной ситуации
+# Заменить {{ meaningful name }} на понятное значение, например GSM module Main module emergency numbers (v1.0)
+name: GSM module {{ meaningful name }} phone numbers (v1.0)
+icon: mdi:phone-alert
+type: Template sensor
+# Заменить {{ meaningful name }} на понятное значение, например gsm_module_main_module_emergency_numbers
+entityId: gsm_module_{{ meaningful name }}_phone_numbers
+visible: false
+# Массив номеров
+# важно: после кода страны, ОБЯЗАТЕЛЬНО ПРОБЕЛ, иначе HA воспримет номер как положительное число и знак плюс просто исчезнет
+state: [ '+7 9271234567', '+7 9171234567' ]
