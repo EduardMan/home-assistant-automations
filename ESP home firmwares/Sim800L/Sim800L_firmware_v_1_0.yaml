@@ -13,7 +13,7 @@
 
 # This is firmware for Sim800L.
 # Fields with {{ DON'T TOUCH. Leave it as is }} you must leave as is.
-# DON'T FORGET REPLACE {{esphome.name}} - i.e. gsm-main-module in this config
+# DON'T FORGET REPLACE {{device_name}} - i.e. gsm-main-module in this config
 # As you can see, sensor values truncated to 255 characters - this is HA sensors restrictions - Use events to receive the full message.
 # For getting full messages we use events
 # Sensors: decoded_sms_sender, decoded_sms_message, decoded_ussd_message - just for some type of debug
@@ -29,9 +29,15 @@
 # 6. sim800l:
 # 7. sensor:
 # 8. binary_sensor:
+
+# DON'T FORGET REPLACE {{device_name}} - i.e. gsm-main-module in this config (friendly_name: GSM main module)
+substitutions:
+  device_name: {{device_name}}
+  friendly_name: {{friendly_name}}
+
 esphome:
-  name: gsm-main-module
-  friendly_name: GSM main module
+  name: ${device_name}
+  friendly_name: ${friendly_name}
   # Add dependencies
   includes:
     # ucs2_decoder_v_1_0.h dependency.
@@ -115,7 +121,6 @@ wifi:
 captive_portal:
 
 # Just ADD ALL THIS BLOCKS (below) in the end of file
-# DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
 switch:
   - platform: gpio
     name: "SIM800_PWKEY"
@@ -235,9 +240,8 @@ sim800l:
         id(decoded_sms_sender).publish_state(decoded_sender.substr(0, 255));
         id(decoded_sms_message).publish_state(decoded_sms.substr(0, 255));
     # Publish full decoded sender and message to HA event sms_received_event
-    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
     - homeassistant.event:
-        event: esphome.sms_received_{{esphome.name}}_event
+        event: esphome.sms_received_${device_name}_event
         data:
           sender: !lambda return id(decoded_sender_global);
           message: !lambda return id(decoded_sms_global);
@@ -245,9 +249,8 @@ sim800l:
     - lambda: |-
         id(caller_id_text_sensor).publish_state(caller_id);
     # Publish call event to HA for convenience to catch calls
-    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
     - homeassistant.event:
-        event: esphome.incoming_call_{{esphome.name}}_event
+        event: esphome.incoming_call_${device_name}_event
         data:
           caller_id: !lambda 'return id(caller_id_text_sensor).state;'
     # We instantly connect and disconnect the call, we don't need to occupy the network, there's no point in that.
@@ -268,7 +271,7 @@ sim800l:
     - logger.log:
         format: Call disconnected
     - homeassistant.event:
-        event: esphome.call_disconnected_{{esphome.name}}_event
+        event: esphome.call_disconnected_${device_name}_event
   on_ussd_received:
     - lambda: |-
         std::string decoded_ussd;
@@ -280,9 +283,8 @@ sim800l:
 
         id(decoded_ussd_message).publish_state(decoded_ussd.substr(0, 255));
     # Publish full decoded ussd message to HA event ussd_received_event
-    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules
     - homeassistant.event:
-        event: esphome.ussd_received_{{esphome.name}}_event
+        event: esphome.ussd_received_${device_name}_event
         data:
           message: !lambda return id(decoded_ussd_global);
 
@@ -307,8 +309,7 @@ sensor:
     # Используем этот сенсор для availability (поставить force_update для sim800l rssi не сработает, так как при Disconnected,
     # когда невозможно зарегистрироваться в сети, значение обновляться не будет)
   - platform: template
-    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules (i.e. gsm_main_module_gsm_heartbeat)
-    id: gsm_{{esphome.name}}_gsm_heartbeat
+    id: gsm_heartbeat
     name: "GSM Heartbeat"
     icon: "mdi:heart-pulse"
     update_interval: 40s
