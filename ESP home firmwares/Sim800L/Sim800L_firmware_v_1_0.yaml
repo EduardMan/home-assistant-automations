@@ -121,20 +121,23 @@ switch:
     name: "SIM800_PWKEY"
     pin: 4
     restore_mode: ALWAYS_OFF
-    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их.
+    # Перезагрузить модуль через них не получится, просто не трогай их
     internal: true
   - platform: gpio
     name: "SIM800_RST"
     pin: 5
     restore_mode: ALWAYS_ON
-    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их.
+    # Перезагрузить модуль через них не получится, просто не трогай их
     internal: true
     id: sim800_rst
   - platform: gpio
     name: "SIM800_POWER"
     pin: 23
     restore_mode: ALWAYS_ON
-    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их
+    # Не надо, чтобы пользователь видел эти кнопки на дашборде и нажимал их.
+    # Перезагрузить модуль через них не получится, просто не трогай их
     internal: true
 
 uart:
@@ -252,10 +255,13 @@ sim800l:
     # FIY: It turned out that this is the most reliable way (delays will not help you -> so, just first connect and then disconnect the call)
     - sim800l.connect
     # - delay: 1s (In case of problems, uncomment the line and set necessary delay)
-    - sim800l.disconnect
+    # We disconnect on on_call_connected below => we don't need to disconnect here to avoid problems of double call disconnect
+    # - sim800l.disconnect
   on_call_connected:
     - logger.log:
         format: Call connected
+    # Delay for one second to improve stability, instant disconnect can lead to freezes
+    - delay: 1s
     # We instantly disconnect the call, we don't need to occupy the network, there's no point in that.
     - sim800l.disconnect
   on_call_disconnected:
@@ -288,6 +294,7 @@ sensor:
   - platform: sim800l
     rssi:
       name: "Sim800L RSSI"
+      force_update: true
   - platform: template
     id: balance
     name: "Balance"
@@ -300,7 +307,8 @@ sensor:
     # Используем этот сенсор для availability (поставить force_update для sim800l rssi не сработает, так как при Disconnected,
     # когда невозможно зарегистрироваться в сети, значение обновляться не будет)
   - platform: template
-    id: gsm_heartbeat
+    # DON'T FORGET REPLACE {{esphome.name}}, need this placeholder in case of multiple GSM modules in system to distinguish modules (i.e. gsm_main_module_gsm_heartbeat)
+    id: gsm_{{esphome.name}}_gsm_heartbeat
     name: "GSM Heartbeat"
     icon: "mdi:heart-pulse"
     internal: true
@@ -320,3 +328,7 @@ binary_sensor:
   - platform: sim800l
     registered:
       name: "Sim800L Registered"
+
+button:
+  - platform: restart
+    name: "GSM module Restart"
