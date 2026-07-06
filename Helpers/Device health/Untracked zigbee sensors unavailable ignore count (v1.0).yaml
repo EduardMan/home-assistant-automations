@@ -1,0 +1,12 @@
+# Сенсор, отображающий текущее количество неотслеживаемых ZigBee устройств с лейблом custom_availability_timeout_ignore
+# В системе не должно быть таких устройств (это мусор), надо быть осторожным с custom_availability_timeout_ignore.
+# Использовать только в целях отладки и разработки
+name: Untracked zigbee sensors unavailable ignore count (v1.0)
+icon: mdi:eye-off-outline
+unitOfMeasurement: pcs
+visible: false
+type: Template number
+entityId: untracked_zigbee_sensors_unavailable_ignore_count
+maximumValue: 500
+state:
+  {{ label_entities('custom_availability_timeout_ignore') | count }}
