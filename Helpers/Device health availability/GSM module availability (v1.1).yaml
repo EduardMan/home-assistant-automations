@@ -15,6 +15,10 @@ state:
   {# CHANGE PLACEHOLDER #}
   {# set your heartbeat sensor entity id, i.e. 'gsm_main_module_gsm_heartbeat' #}
   {% set gsm_heartbeat_entity_id = {{ your_heartbeat_sensor_entity_id_placeholder }} %}
+  {# CHANGE PLACEHOLDER #}
+  {# set your heartbeat sensor entity id, i.e. 'gsm_sim800l_rssi' #}
+  {% set gsm_rssi_entity_id = {{ your_rssi_sensor_entity_id_placeholder }} %}
+  {% set availability_timeout_minutes = states('input_number.gsm_modules_availability_timeout_minutes') | int * 60 %}
 
-  {{ (as_timestamp(now()) - as_timestamp(states['sensor.' ~ gsm_heartbeat_entity_id].last_updated)) < 
-    (states('input_number.gsm_modules_availability_timeout_minutes') | int * 60) }}
+  {{ ((as_timestamp(now()) - as_timestamp(states['sensor.' ~ gsm_heartbeat_entity_id].last_updated)) < availability_timeout_minutes)
+  or ((as_timestamp(now()) - as_timestamp(states['sensor.' ~ gsm_rssi_entity_id].last_updated)) < availability_timeout_minutes) }}
