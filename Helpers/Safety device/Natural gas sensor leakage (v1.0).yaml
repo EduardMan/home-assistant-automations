@@ -53,7 +53,5 @@ state:
   #}
   {{
     state_attr(miot_info, gas_sensor_status_attr) == natural_gas_leak_status or
-    states(miot_status).lower() is match '^.*alarming.*$' or
-    (gas_concentration is number) and (gas_concentration | int >= leak_detection_threshold) or
-    (gas_concentration_attr is number) and (gas_concentration_attr | int >= leak_detection_threshold)
+    states(miot_status).lower() is match '^.*alarming.*$'
   }}
