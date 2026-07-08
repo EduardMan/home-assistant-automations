@@ -93,4 +93,5 @@ actions:
       message_title: Обнаружена утечка газа!
       message_text: "{{ device_name_with_area }}"
       message_notification_id: natural_gas_sensors_leak_detection_notification
+      notify_if_trigger_id_is_none: true
 mode: single
