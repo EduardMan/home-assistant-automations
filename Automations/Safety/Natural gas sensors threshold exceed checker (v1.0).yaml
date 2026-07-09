@@ -1,0 +1,104 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+# entityId
+#   - natural_gas_sensors_threshold_exceed_checker
+# dependencies:
+#   - natural gas (label)
+#   - Universal notification sender (Script)
+
+alias: Natural gas sensors threshold exceed checker (v1.0)
+description: |2-
+  **🔧 Что делает:**
+  Периодически проверяет, не превышена ли концентрация природного газа выше заданного порога.
+  Если превышение всё ещё есть — отправляет повторное оповещение.
+
+  **Как приходит оповещение:**
+  - Если превышение зафиксировано на 1–5 датчиках — в сообщении перечислены их названия и комнаты.
+  - Если больше 5 — показаны первые пять, а затем общее количество оставшихся.
+  - Оповещение обновляется при каждой проверке, пока концентрация не вернётся в норму.
+
+  **Когда срабатывает проверка:**
+  - 📅 Каждое утро в 08:02 (дополнительный контроль).
+  - 🔄 Через несколько минут после запуска системы (чтобы датчики успели обновить своё состояние).
+  - 🔔 Сразу после того, как вы закрыли уведомление о превышении порога — чтобы перепроверить, не осталось ли опасной концентрации.
+triggers:
+  - trigger: persistent_notification
+    update_type:
+      - removed
+    id: persistent_notification_removed
+  - alias: >-
+      When system uptime + 5 greater than Natural gas sensors availability
+      timeout minutes
+    trigger: template
+    value_template: |-
+      {{ (
+          ((as_timestamp(now()) - as_timestamp(states('sensor.uptime'))) / 60) | int - 
+          states('input_number.natural_gas_sensors_availability_timeout_minutes') | int
+          ) > 5 
+      }}
+  - trigger: time
+    at: "08:02:22"
+    id: fixed_time
+conditions:
+  - condition: or
+    conditions:
+      - condition: and
+        conditions:
+          - condition: trigger
+            id:
+              - persistent_notification_removed
+          - condition: template
+            value_template: >-
+              {{ trigger.notification.notification_id is
+              match('natural_gas_sensors_threshold_exceed_detection_notification.*') }}
+      - condition: and
+        conditions:
+          - condition: not
+            conditions:
+              - condition: trigger
+                id:
+                  - persistent_notification_removed
+actions:
+  - variables:
+      device_name_with_area: |
+        {% set limit = 5 %} 
+        {% set issues = namespace(total=0, list=[]) %}
+        
+        {% set natural_gas_concentration_labeled_sensors = label_entities("natural_gas") 
+           | select('match', '.*_gas_concentration$')
+           | list %}
+        
+        {% set gas_leak_detection_threshold = states('input_number.natural_gas_sensors_leak_detection_threshold') %}
+        
+        {% for natural_gas_labeled_sensor in natural_gas_concentration_labeled_sensors %}
+          {% set gas_concentration = states(natural_gas_labeled_sensor) %}
+          {% if gas_concentration | is_number and
+                gas_concentration | float >= gas_leak_detection_threshold | float %}
+            {% set issues.total = issues.total + 1 %}
+
+            {% set area_id = device_attr(natural_gas_labeled_sensor, 'area_id') %}
+            {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+            {% set issues.list = issues.list + [device_name(natural_gas_labeled_sensor) + " (" + area + ")." + " - " + gas_concentration + "%"] %}
+          {% endif %}
+        {% endfor %}
+        {% if issues.total > limit %}
+          {{ issues.list[:limit] | join('\n') ~ '\n... и ещё ' ~ (issues.total - limit) ~ ' датчик(а)' }}
+        {% else %}
+          {{ issues.list | join('\n') }}
+        {% endif %}
+  - if:
+      - condition: template
+        value_template: "{{ device_name_with_area != '' }}"
+        alias: If device_name_with_area is not empty
+    then:
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          automation_trigger_id: "{{ trigger.id if trigger is defined else none }}"
+          message_title: Превышен установленный порог концентрации газа!
+          message_text: "{{ device_name_with_area }}"
+          message_notification_id: natural_gas_sensors_threshold_exceed_detection_notification
+          notify_if_trigger_id_is_none: true
+mode: single
