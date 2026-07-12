@@ -8,7 +8,7 @@
 # dependencies:
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
-alias: Expected entity labels checker (v1.0)
+alias: Expected entity labels checker (v1.1)
 description: |2-
   **Что делает:**  
   Проверяет, что у всех нужных сенсоров проставлены обязательные лейблы.  
@@ -55,6 +55,8 @@ actions:
           label: moisture_valve
         - entity_id_postfix: .*_gas_leak$
           label: natural_gas
+        - entity_id_postfix: .*_smoke$
+          label: smoke
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |
@@ -100,4 +102,5 @@ actions:
           message_text: "{{ missing_labels }}"
           message_notification_id: labels_missing_notification
           message_title: Не хватает лейблов на сенсорах!
+          notify_if_trigger_id_is_none: true
 mode: single

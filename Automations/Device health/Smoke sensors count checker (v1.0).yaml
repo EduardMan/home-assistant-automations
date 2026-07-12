@@ -90,7 +90,7 @@ actions:
   # Вычисляем количество датчиков задымления с лейблом smoke
   - variables:
       smoke_sensors_labeled_smoke_current_count: >
-        {{ label_entities("smoke") | select('match', '.*_smoke') | 
+        {{ label_entities("smoke") | select('match', '.*_smoke$') | 
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом smoke не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством
@@ -110,6 +110,7 @@ actions:
             {{ states('input_number.smoke_sensors_expected_count') | int }})
           automation_trigger_id: "{{ trigger.id }}"
           message_notification_id: smoke_sensors_availability_count_problem_notification
+          notify_if_trigger_id_is_none: true
   # Если вычисленное количество датчиков батарей с лейблом smoke не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством
   - if:
@@ -128,6 +129,7 @@ actions:
             {{ states('input_number.smoke_sensors_expected_count') | int }})
           automation_trigger_id: "{{ trigger.id }}"
           message_notification_id: smoke_sensors_battery_count_problem_notification
+          notify_if_trigger_id_is_none: true
   # Если вычисленное количество датчиков задымления с лейблом smoke не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством
   - if:
@@ -146,4 +148,5 @@ actions:
             {{ states('input_number.smoke_sensors_expected_count') | int }})
           automation_trigger_id: "{{ trigger.id }}"
           message_notification_id: smoke_sensors_smoke_count_problem_notification
+          notify_if_trigger_id_is_none: true
 mode: single

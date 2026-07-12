@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected availability helper checker (v1.0)
+alias: Expected availability helper checker (v1.1)
 description: |2-
   **Что делает:**  
   Проверяет, что для каждого датчика из списка создан ровно один *availability*-сенсор и на нём висит правильный лейбл.  
@@ -64,6 +64,9 @@ actions:
           type: valve
         - entity_id_postfix: .*_gas_leak$
           label: natural_gas
+          type: binary_sensor
+        - entity_id_postfix: .*_smoke$
+          label: smoke
           type: binary_sensor
   # Находим сенсоры у которых отсутствуют availability
   - variables:
@@ -125,4 +128,5 @@ actions:
           message_text: "{{ missing_availability_helper }}"
           message_notification_id: availability_helper_missing_notification
           message_title: Не хватает сенсоров доступности!
+          notify_if_trigger_id_is_none: true
 mode: single
