@@ -1,0 +1,25 @@
+# category
+#   - Presence
+# entityId
+#   - home_occupied_detection
+
+# Суть скрипта в том, что когда какой-либо пользователь оказывается дома, необходимо выполнить
+# определенные действия. Экшены максимально индивидуальны, так что не получится написать универсальный скрипт, этот как пример
+
+alias: Home occupied detection (v1.0)
+description: ""
+triggers:
+  # Когда сенсор меняет состояние на on. Добавить необходимое количество триггеров
+  - trigger: state
+    entity_id:
+      # i.e. home_occupied_by_eduard
+      - binary_sensor.{{ your Home occupied by sensor }}
+    to:
+      - "on"
+conditions: []
+# Выполнить необходимые экшены. Например, ниже выключение камеры
+actions:
+  - action: script.vykliuchit_kameru
+    metadata: {}
+    data: {}
+mode: single

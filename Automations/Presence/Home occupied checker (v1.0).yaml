@@ -1,0 +1,41 @@
+# category
+#   - Presence
+# entityId
+#   - home_occupied_checker
+
+# Постоянно следить за тем, есть ли кто дома. Если есть, то вызвать экшены Home occupied detection.
+# Экшены максимально индивидуальны, так что не получится написать универсальный скрипт, этот как пример
+
+alias: Home occupied checker (v1.0)
+description: ""
+triggers:
+  - trigger: time_pattern
+    minutes: /3
+conditions:
+  # Если есть хоть один с состоянием on. Добавить необходимое количество триггеров
+  - condition: or
+    conditions:
+      - condition: state
+        entity_id: binary_sensor.home_occupied_by_eduard
+        state:
+          - "on"
+      - condition: state
+        entity_id: binary_sensor.home_occupied_by_elza
+        state:
+          - "on"
+# Выполнить необходимые экшены. Например, ниже вызов экшенов автоматизации Home occupied detection
+actions:
+  - if:
+      - condition: switch.is_on
+        target:
+          entity_id: switch.rozetka_girlianda_nad_kholodilnikom
+        options:
+          for: "00:00:00"
+    then:
+      - action: automation.trigger
+        metadata: {}
+        target:
+          entity_id: automation.zones_experiment
+        data:
+          skip_condition: false
+mode: single

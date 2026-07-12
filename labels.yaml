@@ -13,6 +13,8 @@ category:
     icon: mdi:shield-check
   - name: GSM
     icon: mdi:sim
+  - name: Presence
+    icon: mdi:home-account
 label:
   - name: door
     icon: mdi:door
