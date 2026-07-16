@@ -1,0 +1,101 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+# entityId
+#   - smoke_sensors_smoke_detection
+# dependencies:
+#   - smoke (label)
+#   - Universal notification sender (Script)
+
+alias: Smoke sensors smoke detection (v1.0)
+description: |2-
+  **🔧 Что делает:**
+  Мгновенно реагирует на обнаружение дыма датчиком и отправляет оповещение с указанием устройства и комнаты.
+
+  **⚙️ Как работает:**
+  - Явные датчики перечислены в первых двух триггерах. Третий триггер (ловец) отслеживает все датчики с лейблом *smoke* и суффиксом `_smoke`, исключая уже указанные.
+  - При срабатывании ловца дополнительно отправляется техническое уведомление «Сработал ловец!» для проверки автоматизации.
+
+  **📅 Когда срабатывает:**
+  - Только при переходе датчика в состояние «on» (обнаружен дым).
+  - Реакция мгновенная, без задержек.
+
+  **🛠️ Что нужно настроить:**
+  - Замените `{{ your smoke sensor }}` на реальные entity_id ваших датчиков дыма в первых двух триггерах.
+  - Скопируйте эти же entity_id в массив `exclude_smoke_sensors` внутри шаблонного триггера.
+triggers:
+  # Когда срабатывает указанный датчик задымления (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ЗАДЫМЛЕНИЯ)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your smoke sensor }}
+    to:
+      - "on"
+    enabled: true
+  # Когда срабатывает указанный датчик задымления (НЕОБХОДИМО ВЫБРАТЬ ВАШИ ДАТЧИКИ ЗАДЫМЛЕНИЯ)
+  - trigger: state
+    entity_id:
+      - binary_sensor.{{ your smoke sensor }}
+    to:
+      - "on"
+    enabled: true
+  # Когда статус одного из сенсора задымления помеченного лейблом smoke перестает быть равным off
+  # Данный триггер это защита, если вдруг забыли добавить сенсор задымления в список триггеров
+  # НЕ НАДО НАДЕЯТЬСЯ И РАССЧИТЫВАТЬ НА ЭТОТ ТРИГГЕР - ЭТО "защита от дурака", ВСЕ СЕНСОРЫ ЗАДЫМЛЕНИЯ ДОЛЖНЫ ПРИСУТСТВОВАТЬ
+  # В СПИСКЕ ТРИГГЕРОВ
+  # В СКРИПТЕ ЕСТЬ МАССИВ exclude_smoke_sensors, который должен содержать entity_id сенсоров указанных в триггерах,
+  # иначе в логах постоянно будет ошибка "Already running (only a single execution is allowed)"
+  - trigger: template
+    value_template: |
+      {% set smoke_labeled_sensors = label_entities("smoke") 
+         | select('match', '.*_smoke$')
+         | list %}
+      
+      {% set exclude_smoke_sensors = [
+      'binary_sensor.{{ your smoke sensor from triggers }}',
+      'binary_sensor.{{ your smoke sensor from triggers }}'
+      ] %}
+      
+      {{ 
+        expand(smoke_labeled_sensors)
+         | selectattr('state', '!=', 'off') 
+         | map(attribute = 'entity_id')
+         | reject('in', exclude_smoke_sensors) 
+         | list 
+         | count != 0
+      }}
+    alias: When labeled smoke sensor changes to on
+    id: smoke_smoke_sensors_catcher
+conditions: [ ]
+actions:
+  - variables:
+      # Определим имя сенсора, его комнату и концентрацию
+      device_name_with_area: >
+        {% set dev = device_id(trigger.entity_id) %}
+        {% set area_id = device_attr(dev, 'area_id') %}
+        {% set area = area_name(area_id) if area_id else "Без комнаты" %}
+        {% set device_name = device_attr(dev, 'name_by_user') or device_attr(dev, 'name') %}
+        
+        {{ device_name ~ " (" ~ area ~ ")." }}
+  # Отправим уведомление о задымлении
+  - action: script.universal_notification_sender
+    metadata: {}
+    data:
+      automation_trigger_id: "{{ trigger.id }}"
+      message_title: Обнаружено задымление ({{ area_name(trigger.entity_id) }})!
+      message_notification_id: smoke_sensors_smoke_detection_notification-{{trigger.entity_id}}
+      message_text: "{{ device_name_with_area }}"
+  - if:
+      - condition: trigger
+        id:
+          - smoke_smoke_sensors_catcher
+    then:
+      - action: script.universal_notification_sender
+        metadata: { }
+        data:
+          notify_if_trigger_id_is_none: false
+          automation_trigger_id: "{{ trigger.id }}"
+          message_notification_id: smoke_sensors_smoke_detection_catcher_triggered
+          message_title: Сработал ловец!
+          message_text: Сработал ловец задымления, проверьте корректность автоматизации.
+mode: single
