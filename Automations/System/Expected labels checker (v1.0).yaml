@@ -95,6 +95,7 @@ actions:
       - action: script.universal_notification_sender
         metadata: { }
         data:
+          notify_if_trigger_id_is_none: true
           automation_trigger_id: "{{ trigger.id }}"
           message_text: "{{ missing_labels }}"
           message_notification_id: labels_missing_notification
