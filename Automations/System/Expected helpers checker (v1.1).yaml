@@ -215,6 +215,7 @@ actions:
       - action: script.universal_notification_sender
         metadata: { }
         data:
+          notify_if_trigger_id_is_none: true
           automation_trigger_id: "{{ trigger.id }}"
           message_text: "{{ missing_helpers }}"
           message_notification_id: helpers_missing_notification
