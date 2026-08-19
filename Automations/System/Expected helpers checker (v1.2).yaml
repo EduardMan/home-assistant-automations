@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected helpers checker (v1.1)
+alias: Expected helpers checker (v1.2)
 description: |2-
   **Что делает:**  
   Проверяет, что в системе присутствуют все обязательные хелперы, заданные списком внутри автоматизации, и их названия не изменены.
@@ -182,6 +182,31 @@ actions:
         # Common
         - entity_id: input_number.untracked_zigbee_sensors_availability_timeout_minutes
           name: Untracked zigbee sensors availability timeout minutes (v1.0)
+        - entity_id: input_number.untracked_zigbee_sensors_battery_threshold
+          name: Untracked zigbee sensors battery threshold (v1.0)
+        - entity_id: number.untracked_zigbee_sensors_discharged_count
+          name: Untracked zigbee sensors discharged count (v1.1)
+        - entity_id: number.untracked_zigbee_sensors_unavailable_count
+          name: Untracked zigbee sensors unavailable count (v1.0)
+        - entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+          name: Untracked zigbee sensors unavailable ignore count (v1.0)
+        # GSM
+        - entity_id: input_number.gsm_modules_availability_timeout_minutes
+          name: GSM module availability timeout minutes (v1.0)
+        - entity_id: input_number.ussd_balance_extracting_required_time_seconds
+          name: USSD balance extracting required time seconds (v1.0)
+        - entity_id: input_number.ussd_balance_extracting_retry_count
+          name: USSD balance extracting retry count (v1.0)
+        - entity_id: input_number.ussd_balance_extracting_retry_count
+          name: USSD balance extracting retry count (v1.0)
+        - entity_id: input_number.gsm_modules_sim_balance_threshold
+          name: GSM modules sim balance threshold (v1.0)
+        - entity_id: input_number.gsm_phone_call_duration_seconds
+          name: GSM phone call duration seconds (v1.0)
+        - entity_id: number.gsm_modules_available_count
+          name: GSM modules available count (v1.0)
+        - entity_id: number.gsm_modules_unavailable_count
+          name: GSM modules unavailable count (v1.0)
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
