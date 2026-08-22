@@ -1,6 +1,6 @@
 # Настройка таймаута доступности GSM модуля (в минутах).
 # Если GSM модуль не присылает данные дольше этого времени, он считается недоступным.
-name: GSM module availability timeout minutes (v1.0)
+name: GSM modules availability timeout minutes (v1.0)
 icon: mdi:timer-outline
 stepSize: 1
 unitOfMeasurement: min
