@@ -197,8 +197,6 @@ actions:
           name: USSD balance extracting required time seconds (v1.0)
         - entity_id: input_number.ussd_balance_extracting_retry_count
           name: USSD balance extracting retry count (v1.0)
-        - entity_id: input_number.ussd_balance_extracting_retry_count
-          name: USSD balance extracting retry count (v1.0)
         - entity_id: input_number.gsm_modules_sim_balance_threshold
           name: GSM modules sim balance threshold (v1.0)
         - entity_id: input_number.gsm_phone_call_duration_seconds
