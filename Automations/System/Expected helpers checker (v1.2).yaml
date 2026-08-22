@@ -192,7 +192,7 @@ actions:
           name: Untracked zigbee sensors unavailable ignore count (v1.0)
         # GSM
         - entity_id: input_number.gsm_modules_availability_timeout_minutes
-          name: GSM module availability timeout minutes (v1.0)
+          name: GSM modules availability timeout minutes (v1.0)
         - entity_id: input_number.ussd_balance_extracting_required_time_seconds
           name: USSD balance extracting required time seconds (v1.0)
         - entity_id: input_number.ussd_balance_extracting_retry_count
