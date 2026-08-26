@@ -8,6 +8,7 @@ type: Number
 label: motion
 entityId: motion_sensors_battery_threshold
 displayMode: Input field
+visible: false
 minimumValue: 5
 maximumValue: 100
 value: 15

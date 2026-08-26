@@ -7,4 +7,5 @@ type: Number
 label: natural gas
 entityId: natural_gas_sensors_expected_count
 displayMode: Input field
+visible: false
 value: {{ количество датчиков задымления в доме }}

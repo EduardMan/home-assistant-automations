@@ -6,5 +6,6 @@ type: Template number
 label: natural gas
 entityId: natural_gas_sensors_available_count
 maximumValue: 100
+visible: false
 state:
   {{ expand(label_entities("natural gas") | select('match', '.*_availability$')) | selectattr('state', '==', 'on') | list | count }}

@@ -6,5 +6,6 @@ type: Template number
 label: temperature
 entityId: temperature_sensors_unavailable_count
 maximumValue: 100
+visible: false
 state:
   {{ expand(label_entities("temperature") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}

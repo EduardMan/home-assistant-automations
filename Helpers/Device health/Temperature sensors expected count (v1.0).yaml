@@ -7,4 +7,5 @@ type: Number
 label: temperature
 entityId: temperature_sensors_expected_count
 displayMode: Input field
+visible: false
 value: {{ количество датчиков температуры }}

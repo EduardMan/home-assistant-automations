@@ -5,5 +5,6 @@ unitOfMeasurement: pcs
 type: Template number
 label: smoke
 entityId: smoke_sensors_unavailable_count
+visible: false
 state:
   {{ expand(label_entities("smoke") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}

@@ -5,6 +5,7 @@ unitOfMeasurement: pcs
 type: Template number
 label: natural gas
 entityId: natural_gas_sensors_unavailable_count
+visible: false
 maximumValue: 100
 state:
   {{ expand(label_entities("natural gas") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}
