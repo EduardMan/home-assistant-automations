@@ -441,6 +441,20 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                below: 1
+          - type: tile
+            entity: number.untracked_zigbee_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                above: 0
           - type: tile
             entity: number.untracked_zigbee_sensors_unavailable_ignore_count
             color: grey
