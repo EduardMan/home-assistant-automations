@@ -9,7 +9,7 @@
 #   - Universal notification sender (Script)
 #   - Close labeled moisture valves with retries (Script)
 
-alias: Moisture sensors leak detection (v1.1)
+alias: Moisture sensors leak detection (v1.2)
 description: |2-
   **🔧 Что делает:**  
   Мгновенно реагирует на протечку воды: одновременно запускает закрытие всех кранов и отправляет оповещение с указанием датчика и комнаты.
@@ -61,9 +61,10 @@ triggers:
       ] %}
       
       {% set moisture_valve_ignore_entities = label_entities('moisture_valve_ignore') %}
-
+      
       {{ 
         expand(moisture_labeled_sensors)
+         | selectattr('state', '!=', 'unknown')
          | selectattr('state', '!=', 'off') 
          | map(attribute = 'entity_id')
          | reject('in', moisture_valve_ignore_entities)
