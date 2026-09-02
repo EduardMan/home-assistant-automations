@@ -2,6 +2,7 @@
 #   - notification
 # entityId
 #   - universal_notification_sender
+
 sequence:
   - condition: template
     value_template: |-
