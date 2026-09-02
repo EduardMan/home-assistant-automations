@@ -45,8 +45,10 @@ sequence:
             | list
           }}
         {% else %}
-          {{ speakers }}
+          {{ speakers | default([]) }}
         {% endif %}
+  - condition: template
+    value_template: '{{ target_speakers | count > 0 }}'
   - if:
       - condition: template
         value_template: '{{ stop_current_playback | default(false) }}'
