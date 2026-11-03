@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected helpers checker (v1.2)
+alias: Expected helpers checker (v1.3)
 description: |2-
   **Что делает:**  
   Проверяет, что в системе присутствуют все обязательные хелперы, заданные списком внутри автоматизации, и их названия не изменены.
@@ -66,7 +66,7 @@ actions:
           name: Moisture sensors unavailable count (v1.0)
           label: "moisture"
         - entity_id: number.moisture_sensors_discharged_count
-          name: Moisture sensors discharged count (v1.1)
+          name: Moisture sensors discharged count (v1.2)
           label: "moisture"
         # Door
         - entity_id: input_number.door_sensors_expected_count
