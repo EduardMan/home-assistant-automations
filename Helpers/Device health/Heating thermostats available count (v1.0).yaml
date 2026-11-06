@@ -1,4 +1,4 @@
-# Сенсор, отображающий текущее количество доступных радиаторов отопления
+# Сенсор, отображающий текущее количество доступных термостатов отопления
 name: Heating thermostats available count (v1.0)
 icon: mdi:check-circle-outline
 unitOfMeasurement: pcs

@@ -6,10 +6,10 @@
 # entityId
 #   - heating_thermostats_availability_checker
 # dependencies:
-#   - heating_thermostats availability timeout minutes (Helper)
-#   - heating_thermostats unavailable count (Helper)
-#   - heating_thermostats available count (Helper)
-#   - heating_thermostats expected count (Helper)
+#   - Heating thermostats availability timeout minutes (Helper)
+#   - Heating thermostats unavailable count (Helper)
+#   - Heating thermostats available count (Helper)
+#   - Heating thermostats expected count (Helper)
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 

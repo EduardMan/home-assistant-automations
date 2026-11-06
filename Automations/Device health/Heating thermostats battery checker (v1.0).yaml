@@ -114,7 +114,7 @@ actions:
               message_text: "{{ discharged_heating_thermostats }}"
               message_title: Низкий заряд в термостатах отопления!
               message_notification_id: heating_thermostats_discharged_notification
-      # Если количество разряженных термостатов более двух, то отправляем уведомление с общим количеством недоступных термостатов
+      # Если количество разряженных термостатов более двух, то отправляем уведомление с общим количеством разряженных термостатов
       - conditions:
           - condition: numeric_state
             entity_id: number.heating_thermostats_discharged_count
