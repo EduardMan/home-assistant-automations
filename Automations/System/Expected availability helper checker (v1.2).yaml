@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected availability helper checker (v1.1)
+alias: Expected availability helper checker (v1.2)
 description: |2-
   **Что делает:**  
   Проверяет, что для каждого датчика из списка создан ровно один *availability*-сенсор и на нём висит правильный лейбл.  
@@ -68,6 +68,9 @@ actions:
         - entity_id_postfix: .*_smoke$
           label: smoke
           type: binary_sensor
+        - entity_id_postfix: .*_radiator_local_temperature$
+          label: heating_thermostat
+          type: sensor
   # Находим сенсоры у которых отсутствуют availability
   - variables:
       missing_availability_helper: |

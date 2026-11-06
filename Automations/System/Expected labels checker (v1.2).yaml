@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected labels checker (v1.1)
+alias: Expected labels checker (v1.2)
 description: |2-
   **🔧 Что делает:**  
   Проверяет, что в системе созданы все обязательные лейблы из заданного списка и их названия не изменены.
@@ -69,6 +69,8 @@ actions:
           label_name: moisture valve
         - label_id: gsm
           label_name: GSM
+        - label_id: heating_thermostat
+          label_name: heating thermostat
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |

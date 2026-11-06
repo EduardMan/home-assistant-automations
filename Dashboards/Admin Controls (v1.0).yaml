@@ -404,6 +404,68 @@ views:
       - type: grid
         cards:
           - type: heading
+            heading: Heating thermostats
+            heading_style: title
+            icon: mdi:radiator
+          - type: tile
+            entity: input_number.heating_thermostats_expected_count
+            name: Expected count
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.heating_thermostats_battery_threshold
+            name: Battery threshold
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.heating_thermostats_availability_timeout_minutes
+            name: Availability timeout
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.heating_thermostats_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.heating_thermostats_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.heating_thermostats_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+      - type: grid
+        cards:
+          - type: heading
             heading: Common
             heading_style: title
             icon: mdi:zigbee

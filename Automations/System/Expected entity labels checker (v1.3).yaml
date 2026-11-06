@@ -8,7 +8,7 @@
 # dependencies:
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
-alias: Expected entity labels checker (v1.2)
+alias: Expected entity labels checker (v1.3)
 description: |2-
   **Что делает:**  
   Проверяет, что у всех нужных сенсоров проставлены обязательные лейблы.  
@@ -57,6 +57,9 @@ actions:
           label: natural_gas
         - entity_id_postfix: .*_smoke$
           label: smoke
+        - entity_type: sensor
+          entity_id_postfix: .*_radiator_local_temperature$
+          label: heating_thermostat
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |
@@ -67,12 +70,17 @@ actions:
           {% set required_label = expected_label.label %}
           {% set entity_id_postfix = expected_label.entity_id_postfix %}
         
-          {% if 'entity_type' in expected_label %}
+          {% if 'entity_type' in expected_label and 'entity_id_postfix' not in expected_label %}
             {% set filtered_sensors = states[expected_label.entity_type]
               | map(attribute='entity_id')
-              | list %}  
-          {% else %}
+              | list %}
+          {% elif 'entity_id_postfix' in expected_label and 'entity_type' not in expected_label %}
             {% set filtered_sensors = states.binary_sensor
+              | selectattr('entity_id', 'match', entity_id_postfix)
+              | map(attribute='entity_id')
+              | list %}
+          {% elif 'entity_id_postfix' in expected_label and 'entity_type' in expected_label %}
+            {% set filtered_sensors = states[expected_label.entity_type]
               | selectattr('entity_id', 'match', entity_id_postfix)
               | map(attribute='entity_id')
               | list %}

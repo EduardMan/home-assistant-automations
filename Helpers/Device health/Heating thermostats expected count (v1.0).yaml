@@ -1,0 +1,11 @@
+# Настройка ожидаемого количества термостатов отопления в системе.
+name: Heating thermostats expected count (v1.0)
+icon: mdi:clipboard-check-outline
+stepSize: 1
+unitOfMeasurement: pcs
+type: Number
+label: heating thermostat
+entityId: heating_thermostats_expected_count
+displayMode: Input field
+visible: false
+value: {{ количество термостатов отопления в доме }}

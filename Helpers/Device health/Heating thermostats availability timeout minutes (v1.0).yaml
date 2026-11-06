@@ -1,0 +1,13 @@
+# Настройка таймаута доступности термостатов отопления (в минутах).
+# Если термостат не присылает данные дольше этого времени, он считается недоступным.
+name: Heating thermostats availability timeout minutes (v1.0)
+icon: mdi:timer-outline
+stepSize: 1
+unitOfMeasurement: min
+type: Number
+label: heating thermostat
+entityId: heating_thermostats_availability_timeout_minutes
+displayMode: Input field
+visible: false
+maximumValue: 180
+value: 140

@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected helpers checker (v1.3)
+alias: Expected helpers checker (v1.4)
 description: |2-
   **Что делает:**  
   Проверяет, что в системе присутствуют все обязательные хелперы, заданные списком внутри автоматизации, и их названия не изменены.
@@ -205,6 +205,25 @@ actions:
           name: GSM modules available count (v1.0)
         - entity_id: number.gsm_modules_unavailable_count
           name: GSM modules unavailable count (v1.0)
+        # Heating thermostat
+        - entity_id: input_number.heating_thermostats_expected_count
+          name: Heating thermostats expected count (v1.0)
+          label: "heating_thermostat"
+        - entity_id: input_number.heating_thermostats_availability_timeout_minutes
+          name: Heating thermostats availability timeout minutes (v1.0)
+          label: "heating_thermostat"
+        - entity_id: input_number.heating_thermostats_battery_threshold
+          name: Heating thermostats battery threshold (v1.0)
+          label: "heating_thermostat"
+        - entity_id: number.heating_thermostats_available_count
+          name: Heating thermostats available count (v1.0)
+          label: "heating_thermostat"
+        - entity_id: number.heating_thermostats_unavailable_count
+          name: Heating thermostats unavailable count (v1.0)
+          label: "heating_thermostat"
+        - entity_id: number.heating_thermostats_discharged_count
+          name: Heating thermostats discharged count (v1.0)
+          label: "heating_thermostat"
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |

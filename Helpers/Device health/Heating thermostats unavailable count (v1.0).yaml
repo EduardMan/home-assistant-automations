@@ -1,0 +1,11 @@
+# Сенсор, отображающий текущее количество недоступных термостатов отопления
+name: Heating thermostats unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+visible: false
+type: Template number
+label: heating thermostat
+entityId: heating_thermostats_unavailable_count
+maximumValue: 100
+state:
+  {{ expand(label_entities("heating_thermostat") | select('match', '.*_availability$')) | selectattr('state', '!=', 'on') | list | count }}
