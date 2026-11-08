@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected helpers checker (v1.4)
+alias: Expected helpers checker (v1.5)
 description: |2-
   **Что делает:**  
   Проверяет, что в системе присутствуют все обязательные хелперы, заданные списком внутри автоматизации, и их названия не изменены.
@@ -187,7 +187,7 @@ actions:
         - entity_id: number.untracked_zigbee_sensors_discharged_count
           name: Untracked zigbee sensors discharged count (v1.1)
         - entity_id: number.untracked_zigbee_sensors_unavailable_count
-          name: Untracked zigbee sensors unavailable count (v1.0)
+          name: Untracked zigbee sensors unavailable count (v1.1)
         - entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
           name: Untracked zigbee sensors unavailable ignore count (v1.0)
         # GSM
