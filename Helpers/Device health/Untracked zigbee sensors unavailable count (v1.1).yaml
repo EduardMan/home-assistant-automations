@@ -1,5 +1,5 @@
 # Сенсор, отображающий текущее количество недоступных неотслеживаемых ZigBee устройств
-name: Untracked zigbee sensors unavailable count (v1.0)
+name: Untracked zigbee sensors unavailable count (v1.1)
 icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
 visible: false
@@ -7,7 +7,7 @@ type: Template number
 entityId: untracked_zigbee_sensors_unavailable_count
 maximumValue: 500
 state:
-  {% from 'untracked_zigbee_sensors_utils_v_1_0.jinja' import get_unavailable_sensors %}
+  {% from 'untracked_zigbee_sensors_utils_v_1_1.jinja' import get_unavailable_sensors %}
 
   {% set get_unavailable_sensors_func = as_function(get_unavailable_sensors) %}
   {{ get_unavailable_sensors_func().total }}
