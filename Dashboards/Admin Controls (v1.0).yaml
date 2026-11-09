@@ -322,10 +322,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_discharged_count
+                above: 0
+            entity: number.temperature_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.temperature_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_unavailable_count
+                above: 0
+            entity: number.temperature_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -380,10 +412,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_discharged_count
+                above: 0
+            entity: number.smoke_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.smoke_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_unavailable_count
+                above: 0
+            entity: number.smoke_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -447,6 +511,22 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_valves_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_valves_unavailable_count
+                above: 0
+            entity: number.moisture_valves_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
       - type: grid
         cards:
           - type: heading
@@ -492,6 +572,22 @@ views:
             entity: number.natural_gas_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.natural_gas_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.natural_gas_sensors_unavailable_count
+                above: 0
+            entity: number.natural_gas_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -551,10 +647,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_discharged_count
+                above: 0
+            entity: number.heating_thermostats_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.heating_thermostats_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_unavailable_count
+                above: 0
+            entity: number.heating_thermostats_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -591,6 +719,22 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_discharged_count
+                above: 0
+            entity: number.untracked_zigbee_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.untracked_zigbee_sensors_unavailable_count
             name: Unavailable count
@@ -601,6 +745,7 @@ views:
             features_position: bottom
             visibility:
               - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_count
                 below: 1
           - type: tile
             entity: number.untracked_zigbee_sensors_unavailable_count
@@ -612,6 +757,7 @@ views:
             features_position: bottom
             visibility:
               - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_count
                 above: 0
           - type: tile
             entity: number.untracked_zigbee_sensors_unavailable_ignore_count
@@ -682,6 +828,22 @@ views:
             entity: number.gsm_modules_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.gsm_modules_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.gsm_modules_unavailable_count
+                above: 0
+            entity: number.gsm_modules_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
