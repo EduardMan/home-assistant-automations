@@ -51,10 +51,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_discharged_count
+                above: 0
+            entity: number.door_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.door_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_unavailable_count
+                above: 0
+            entity: number.door_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -110,10 +142,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_discharged_count
+                above: 0
+            entity: number.moisture_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.moisture_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_unavailable_count
+                above: 0
+            entity: number.moisture_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
@@ -168,10 +232,42 @@ views:
             tap_action:
               action: none
             features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_discharged_count
+                above: 0
+            entity: number.motion_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
           - type: tile
             entity: number.motion_sensors_unavailable_count
             name: Unavailable count
             color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_unavailable_count
+                above: 0
+            entity: number.motion_sensors_unavailable_count
+            name: Unavailable count
+            color: red
             vertical: false
             tap_action:
               action: none
