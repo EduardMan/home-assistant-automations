@@ -9,5 +9,5 @@ label: heating thermostat
 entityId: heating_thermostats_availability_timeout_minutes
 displayMode: Input field
 visible: false
-maximumValue: 180
-value: 140
+maximumValue: 240
+value: 180
