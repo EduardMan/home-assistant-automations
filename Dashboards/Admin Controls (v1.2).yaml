@@ -984,16 +984,14 @@ views:
             vertical: false
             features_position: bottom
             visibility:
-              - condition: template
-                value_template: >-
-                  {% set ignored = states('number.untracked_zigbee_sensors_unavailable_ignore_count') %}
-                  {{ is_number(ignored) and (ignored | float(0)) == 0 }}
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                below: 1
           - type: tile
             visibility:
-              - condition: template
-                value_template: >-
-                  {% set ignored = states('number.untracked_zigbee_sensors_unavailable_ignore_count') %}
-                  {{ not (is_number(ignored) and (ignored | float(0)) == 0) }}
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                above: 0
             entity: number.untracked_zigbee_sensors_unavailable_ignore_count
             color: amber
             vertical: false
