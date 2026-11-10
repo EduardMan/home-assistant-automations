@@ -69,7 +69,7 @@ views:
             {% set details = details + ['⚪ Неполные данные'] -%}
           {% endif -%}
           {% set ignored_noun = 'исключение' if ignored % 10 == 1 and ignored % 100 != 11 else ('исключения' if ignored % 10 in [2, 3, 4] and ignored % 100 not in [12, 13, 14] else 'исключений') -%}
-          {{ '## Device Health\n\n' ~ status ~ ('\n\n' ~ (details | join(' · ')) if details else '') ~ ('\n\nℹ️ ' ~ ignored ~ ' ' ~ ignored_noun if ignored > 0 else '') }}
+          {{ '### Device Health\n' ~ status ~ (' · ' ~ (details | join(' · ')) if details else '') ~ (' · ℹ️ ' ~ ignored ~ ' ' ~ ignored_noun if ignored > 0 else '') }}
     sections:
       - type: grid
         cards:
