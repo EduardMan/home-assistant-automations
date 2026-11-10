@@ -7,6 +7,27 @@ views:
             heading: Door sensors
             heading_style: title
             icon: mdi:door
+            badges:
+              - type: entity
+                entity: number.door_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.door_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.door_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.door_sensors_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.door_sensors_expected_count
             name: Expected count
@@ -126,6 +147,27 @@ views:
             heading: Moisture sensors
             heading_style: title
             icon: mdi:water
+            badges:
+              - type: entity
+                entity: number.moisture_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.moisture_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_sensors_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.moisture_sensors_expected_count
             name: Expected count
@@ -245,6 +287,27 @@ views:
             heading: Motion sensors
             heading_style: title
             icon: mdi:motion-sensor
+            badges:
+              - type: entity
+                entity: number.motion_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.motion_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.motion_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.motion_sensors_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.motion_sensors_expected_count
             name: Expected count
@@ -362,6 +425,27 @@ views:
             heading: Temperature sensors
             heading_style: title
             icon: mdi:thermometer
+            badges:
+              - type: entity
+                entity: number.temperature_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.temperature_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.temperature_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.temperature_sensors_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.temperature_sensors_expected_count
             name: Expected count
@@ -479,6 +563,27 @@ views:
             heading: Smoke sensors
             heading_style: title
             icon: mdi:smoke-detector-variant
+            badges:
+              - type: entity
+                entity: number.smoke_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smoke_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.smoke_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smoke_sensors_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.smoke_sensors_expected_count
             name: Expected count
@@ -596,6 +701,17 @@ views:
             heading: Moisture valves
             heading_style: title
             icon: mdi:valve
+            badges:
+              - type: entity
+                entity: number.moisture_valves_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_valves_unavailable_count
+                    above: 0
           - type: tile
             entity: input_number.moisture_valves_expected_count
             name: Expected count
@@ -697,6 +813,17 @@ views:
             heading: Natural gas sensors
             heading_style: title
             icon: mdi:gas-burner
+            badges:
+              - type: entity
+                entity: number.natural_gas_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.natural_gas_sensors_unavailable_count
+                    above: 0
           - type: tile
             entity: input_number.natural_gas_sensors_expected_count
             name: Expected count
@@ -790,6 +917,27 @@ views:
             heading: Heating thermostats
             heading_style: title
             icon: mdi:radiator
+            badges:
+              - type: entity
+                entity: number.heating_thermostats_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.heating_thermostats_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.heating_thermostats_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.heating_thermostats_discharged_count
+                    above: 0
           - type: tile
             entity: input_number.heating_thermostats_expected_count
             name: Expected count
@@ -912,6 +1060,37 @@ views:
             heading: Common
             heading_style: title
             icon: mdi:zigbee
+            badges:
+              - type: entity
+                entity: number.untracked_zigbee_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.untracked_zigbee_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_discharged_count
+                    above: 0
+              - type: entity
+                entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+                name: Ignored
+                icon: mdi:eye-off-outline
+                color: amber
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                    above: 0
           - type: tile
             entity: input_number.untracked_zigbee_sensors_availability_timeout_minutes
             name: Availability timeout
@@ -1003,6 +1182,17 @@ views:
             heading: GSM
             heading_style: title
             icon: mdi:sim
+            badges:
+              - type: entity
+                entity: number.gsm_modules_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.gsm_modules_unavailable_count
+                    above: 0
           - type: tile
             entity: input_number.gsm_modules_availability_timeout_minutes
             name: Availability timeout
