@@ -1231,6 +1231,8 @@ views:
             entity: number.untracked_zigbee_sensors_unavailable_ignore_count
             color: grey
             vertical: false
+            tap_action:
+              action: none
             features_position: bottom
             visibility:
               - condition: numeric_state
@@ -1244,6 +1246,8 @@ views:
             entity: number.untracked_zigbee_sensors_unavailable_ignore_count
             color: amber
             vertical: false
+            tap_action:
+              action: none
             features_position: bottom
         column_span: 1
       - type: grid
