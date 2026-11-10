@@ -1,5 +1,75 @@
 views:
   - type: sections
+    header:
+      layout: start
+      card:
+        type: markdown
+        content: |-
+          {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'moisture_valves', 'natural_gas_sensors', 'heating_thermostats'] -%}
+          {% set availability_categories = categories + ['untracked_zigbee_sensors', 'gsm_modules'] -%}
+          {% set battery_categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'heating_thermostats', 'untracked_zigbee_sensors'] -%}
+          {% set check = namespace(unavailable=0, discharged=0, mismatches=0, complete=true) -%}
+          {% for category in availability_categories -%}
+            {% set value = states('number.' ~ category ~ '_unavailable_count') -%}
+            {% if is_number(value) -%}
+              {% set check.unavailable = check.unavailable + (value | int(0)) -%}
+            {% else -%}
+              {% set check.complete = false -%}
+            {% endif -%}
+          {% endfor -%}
+          {% for category in battery_categories -%}
+            {% set value = states('number.' ~ category ~ '_discharged_count') -%}
+            {% if is_number(value) -%}
+              {% set check.discharged = check.discharged + (value | int(0)) -%}
+            {% else -%}
+              {% set check.complete = false -%}
+            {% endif -%}
+          {% endfor -%}
+          {% for category in categories -%}
+            {% set available = states('number.' ~ category ~ '_available_count') -%}
+            {% set unavailable = states('number.' ~ category ~ '_unavailable_count') -%}
+            {% set expected = states('input_number.' ~ category ~ '_expected_count') -%}
+            {% if is_number(available) and is_number(unavailable) and is_number(expected) -%}
+              {% if (available | int(0)) + (unavailable | int(0)) != (expected | int(0)) -%}
+                {% set check.mismatches = check.mismatches + 1 -%}
+              {% endif -%}
+            {% else -%}
+              {% set check.complete = false -%}
+            {% endif -%}
+          {% endfor -%}
+          {% set ignored_state = states('number.untracked_zigbee_sensors_unavailable_ignore_count') -%}
+          {% if is_number(ignored_state) -%}
+            {% set ignored = ignored_state | int(0) -%}
+          {% else -%}
+            {% set ignored = 0 -%}
+            {% set check.complete = false -%}
+          {% endif -%}
+          {% if check.unavailable > 0 -%}
+            {% set status = '🔴 **Обнаружены проблемы**' -%}
+          {% elif check.discharged > 0 or check.mismatches > 0 -%}
+            {% set status = '🟠 **Требует внимания**' -%}
+          {% elif not check.complete -%}
+            {% set status = '⚪ **Не удалось полностью проверить состояние**' -%}
+          {% else -%}
+            {% set status = '✅ **Контролируемые устройства в норме**' -%}
+          {% endif -%}
+          {% set details = [] -%}
+          {% if check.unavailable > 0 -%}
+            {% set details = details + ['🔴 ' ~ check.unavailable ~ ' недоступно'] -%}
+          {% endif -%}
+          {% if check.discharged > 0 -%}
+            {% set details = details + ['🟠 ' ~ check.discharged ~ ' разряжено'] -%}
+          {% endif -%}
+          {% if check.mismatches > 0 -%}
+            {% set n = check.mismatches -%}
+            {% set noun = 'расхождение' if n % 10 == 1 and n % 100 != 11 else ('расхождения' if n % 10 in [2, 3, 4] and n % 100 not in [12, 13, 14] else 'расхождений') -%}
+            {% set details = details + ['🟠 ' ~ n ~ ' ' ~ noun] -%}
+          {% endif -%}
+          {% if not check.complete -%}
+            {% set details = details + ['⚪ Неполные данные'] -%}
+          {% endif -%}
+          {% set ignored_noun = 'исключение' if ignored % 10 == 1 and ignored % 100 != 11 else ('исключения' if ignored % 10 in [2, 3, 4] and ignored % 100 not in [12, 13, 14] else 'исключений') -%}
+          {{ '## Device Health\n\n' ~ status ~ ('\n\n' ~ (details | join(' · ')) if details else '') ~ ('\n\nℹ️ ' ~ ignored ~ ' ' ~ ignored_noun if ignored > 0 else '') }}
     sections:
       - type: grid
         cards:
