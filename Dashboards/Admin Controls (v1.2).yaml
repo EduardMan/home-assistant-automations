@@ -10,6 +10,34 @@ views:
           - type: tile
             entity: input_number.door_sensors_expected_count
             name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.door_sensors_available_count') %}
+                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.door_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.door_sensors_available_count') %}
+                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.door_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.door_sensors_expected_count
+            name: Expected count
+            color: amber
             show_entity_picture: false
             hide_state: true
             vertical: false
@@ -39,30 +67,6 @@ views:
             entity: number.door_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.door_sensors_available_count') %}
-                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.door_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.door_sensors_available_count') %}
-                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.door_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.door_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -125,6 +129,34 @@ views:
           - type: tile
             entity: input_number.moisture_sensors_expected_count
             name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_sensors_available_count') %}
+                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_sensors_available_count') %}
+                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.moisture_sensors_expected_count
+            name: Expected count
+            color: amber
             show_entity_picture: false
             hide_state: true
             vertical: false
@@ -154,30 +186,6 @@ views:
             entity: number.moisture_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.moisture_sensors_available_count') %}
-                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.moisture_sensors_available_count') %}
-                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.moisture_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -240,6 +248,33 @@ views:
           - type: tile
             entity: input_number.motion_sensors_expected_count
             name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.motion_sensors_available_count') %}
+                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.motion_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.motion_sensors_available_count') %}
+                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.motion_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.motion_sensors_expected_count
+            name: Expected count
+            color: amber
             hide_state: true
             vertical: false
             features_position: inline
@@ -268,30 +303,6 @@ views:
             entity: number.motion_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.motion_sensors_available_count') %}
-                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.motion_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.motion_sensors_available_count') %}
-                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.motion_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.motion_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -354,6 +365,33 @@ views:
           - type: tile
             entity: input_number.temperature_sensors_expected_count
             name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.temperature_sensors_available_count') %}
+                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.temperature_sensors_available_count') %}
+                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.temperature_sensors_expected_count
+            name: Expected count
+            color: amber
             hide_state: true
             vertical: false
             features:
@@ -382,30 +420,6 @@ views:
             entity: number.temperature_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.temperature_sensors_available_count') %}
-                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.temperature_sensors_available_count') %}
-                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.temperature_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -468,6 +482,33 @@ views:
           - type: tile
             entity: input_number.smoke_sensors_expected_count
             name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smoke_sensors_available_count') %}
+                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smoke_sensors_available_count') %}
+                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.smoke_sensors_expected_count
+            name: Expected count
+            color: amber
             hide_state: true
             vertical: false
             features_position: inline
@@ -496,30 +537,6 @@ views:
             entity: number.smoke_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.smoke_sensors_available_count') %}
-                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.smoke_sensors_available_count') %}
-                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.smoke_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -582,6 +599,33 @@ views:
           - type: tile
             entity: input_number.moisture_valves_expected_count
             name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_valves_available_count') %}
+                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_valves_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_valves_available_count') %}
+                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_valves_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.moisture_valves_expected_count
+            name: Expected count
+            color: amber
             hide_state: true
             vertical: false
             features:
@@ -623,30 +667,6 @@ views:
             tap_action:
               action: none
             features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.moisture_valves_available_count') %}
-                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
-                  {% set expected = states('input_number.moisture_valves_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.moisture_valves_available_count') %}
-                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
-                  {% set expected = states('input_number.moisture_valves_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.moisture_valves_available_count
-            name: Available count
-            color: amber
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
           - type: tile
             entity: number.moisture_valves_unavailable_count
             name: Unavailable count
@@ -680,6 +700,33 @@ views:
           - type: tile
             entity: input_number.natural_gas_sensors_expected_count
             name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.natural_gas_sensors_available_count') %}
+                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.natural_gas_sensors_available_count') %}
+                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.natural_gas_sensors_expected_count
+            name: Expected count
+            color: amber
             hide_state: true
             vertical: false
             features:
@@ -708,30 +755,6 @@ views:
             entity: number.natural_gas_sensors_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.natural_gas_sensors_available_count') %}
-                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.natural_gas_sensors_available_count') %}
-                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
-                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.natural_gas_sensors_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
@@ -770,6 +793,34 @@ views:
           - type: tile
             entity: input_number.heating_thermostats_expected_count
             name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.heating_thermostats_available_count') %}
+                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
+                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.heating_thermostats_available_count') %}
+                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
+                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.heating_thermostats_expected_count
+            name: Expected count
+            color: amber
             show_entity_picture: false
             hide_state: true
             vertical: false
@@ -801,32 +852,6 @@ views:
             entity: number.heating_thermostats_available_count
             name: Available count
             color: grey
-            vertical: false
-            tap_action:
-              action: none
-            icon_tap_action:
-              action: none
-            features_position: bottom
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.heating_thermostats_available_count') %}
-                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
-                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
-                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
-          - type: tile
-            visibility:
-              - condition: template
-                value_template: >-
-                  {% set available = states('number.heating_thermostats_available_count') %}
-                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
-                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
-                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
-                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
-            entity: number.heating_thermostats_available_count
-            name: Available count
-            color: amber
             vertical: false
             tap_action:
               action: none
