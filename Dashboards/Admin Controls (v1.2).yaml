@@ -45,31 +45,31 @@ views:
             {% set check.complete = false -%}
           {% endif -%}
           {% if check.unavailable > 0 -%}
-            {% set status = '🔴 **Обнаружены проблемы**' -%}
+            {% set status = '<font color="#D32F2F"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></font> **Обнаружены проблемы**' -%}
           {% elif check.discharged > 0 or check.mismatches > 0 -%}
-            {% set status = '🟠 **Требует внимания**' -%}
+            {% set status = '<font color="#B7791F"><ha-icon icon="mdi:alert-outline"></ha-icon></font> **Требует внимания**' -%}
           {% elif not check.complete -%}
-            {% set status = '⚪ **Не удалось полностью проверить состояние**' -%}
+            {% set status = '<ha-icon icon="mdi:help-circle-outline"></ha-icon> **Не удалось полностью проверить состояние**' -%}
           {% else -%}
-            {% set status = '✅ **Контролируемые устройства в норме**' -%}
+            {% set status = '<font color="#218343"><ha-icon icon="mdi:check-circle-outline"></ha-icon></font> **Проверки пройдены**' -%}
           {% endif -%}
           {% set details = [] -%}
           {% if check.unavailable > 0 -%}
-            {% set details = details + ['🔴 ' ~ check.unavailable ~ ' недоступно'] -%}
+            {% set details = details + ['<font color="#D32F2F"><ha-icon icon="mdi:wifi-off"></ha-icon></font> ' ~ check.unavailable ~ '&nbsp;недоступно'] -%}
           {% endif -%}
           {% if check.discharged > 0 -%}
-            {% set details = details + ['🟠 ' ~ check.discharged ~ ' разряжено'] -%}
+            {% set details = details + ['<font color="#B7791F"><ha-icon icon="mdi:battery-low"></ha-icon></font> ' ~ check.discharged ~ '&nbsp;разряжено'] -%}
           {% endif -%}
           {% if check.mismatches > 0 -%}
             {% set n = check.mismatches -%}
             {% set noun = 'расхождение' if n % 10 == 1 and n % 100 != 11 else ('расхождения' if n % 10 in [2, 3, 4] and n % 100 not in [12, 13, 14] else 'расхождений') -%}
-            {% set details = details + ['🟠 ' ~ n ~ ' ' ~ noun] -%}
+            {% set details = details + ['<font color="#B7791F"><ha-icon icon="mdi:alert-outline"></ha-icon></font> ' ~ n ~ '&nbsp;' ~ noun] -%}
           {% endif -%}
           {% if not check.complete -%}
-            {% set details = details + ['⚪ Неполные данные'] -%}
+            {% set details = details + ['<ha-icon icon="mdi:help-circle-outline"></ha-icon> Неполные данные'] -%}
           {% endif -%}
           {% set ignored_noun = 'исключение' if ignored % 10 == 1 and ignored % 100 != 11 else ('исключения' if ignored % 10 in [2, 3, 4] and ignored % 100 not in [12, 13, 14] else 'исключений') -%}
-          {{ '### Device Health\n' ~ status ~ (' · ' ~ (details | join(' · ')) if details else '') ~ (' · ℹ️ ' ~ ignored ~ ' ' ~ ignored_noun if ignored > 0 else '') }}
+          {{ ([status] + details + (['<ha-icon icon="mdi:information-outline"></ha-icon> ' ~ ignored ~ '&nbsp;' ~ ignored_noun] if ignored > 0 else [])) | join('<br>') }}
     sections:
       - type: grid
         cards:
