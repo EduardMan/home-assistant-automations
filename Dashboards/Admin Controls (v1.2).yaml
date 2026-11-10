@@ -1,7 +1,7 @@
 views:
   - type: sections
     header:
-      layout: start
+      layout: center
       card:
         type: markdown
         content: |-
@@ -51,7 +51,7 @@ views:
           {% elif not check.complete -%}
             {% set status = '<ha-icon icon="mdi:help-circle-outline"></ha-icon> **Не удалось полностью проверить состояние**' -%}
           {% else -%}
-            {% set status = '<font color="#218343"><ha-icon icon="mdi:check-circle-outline"></ha-icon></font> **Проверки пройдены**' -%}
+            {% set status = '<font color="#218343"><ha-icon icon="mdi:check-circle-outline"></ha-icon></font> **Проблем не обнаружено**' -%}
           {% endif -%}
           {% set details = [] -%}
           {% if check.unavailable > 0 -%}
@@ -69,7 +69,7 @@ views:
             {% set details = details + ['<ha-icon icon="mdi:help-circle-outline"></ha-icon> Неполные данные'] -%}
           {% endif -%}
           {% set ignored_noun = 'исключение' if ignored % 10 == 1 and ignored % 100 != 11 else ('исключения' if ignored % 10 in [2, 3, 4] and ignored % 100 not in [12, 13, 14] else 'исключений') -%}
-          {{ ([status] + details + (['<ha-icon icon="mdi:information-outline"></ha-icon> ' ~ ignored ~ '&nbsp;' ~ ignored_noun] if ignored > 0 else [])) | join('<br><br>') }}
+          {{ ([status] + details + (['<ha-icon icon="mdi:information-outline"></ha-icon> Контроль доступности: ' ~ ignored ~ '&nbsp;' ~ ignored_noun] if ignored > 0 else [])) | join('<br><br>') }}
     sections:
       - type: grid
         cards:
