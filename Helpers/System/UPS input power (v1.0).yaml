@@ -9,7 +9,6 @@
 name: UPS {{ meaningful name }} input power (v1.0)
 type: Template sensor
 device: {{ intended device }}
-icon: mdi:flash
 unitOfMeasurement: W
 deviceClass: Power
 stateClass: Measurement
