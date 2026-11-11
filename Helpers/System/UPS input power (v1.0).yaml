@@ -6,6 +6,7 @@
 # Если исходные сущности названы иначе, укажи их полные entity_id в state и availability template.
 name: UPS {{ meaningful name }} input power (v1.0)
 type: Template sensor
+device: {{ intended device }}
 icon: mdi:flash
 unitOfMeasurement: W
 deviceClass: Power
