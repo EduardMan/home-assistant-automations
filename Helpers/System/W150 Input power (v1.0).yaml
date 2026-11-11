@@ -1,0 +1,22 @@
+# Сенсор, отображающий расчётную входную мощность ИБП WalleCube W150 (P = U × I)
+# category:
+#   - System
+# dependencies:
+#   - sensor.w150_input_voltage (NUT)
+#   - sensor.w150_input_current (NUT)
+name: W150 Input power (v1.0)
+type: Template sensor
+icon: mdi:flash
+unitOfMeasurement: W
+deviceClass: Power
+stateClass: Measurement
+entityId: w150_input_power
+visible: false
+availability template: >-
+  {{ is_number(states('sensor.w150_input_voltage'))
+     and is_number(states('sensor.w150_input_current')) }}
+state: >-
+  {{ (
+      (states('sensor.w150_input_voltage') | float(0)) *
+      (states('sensor.w150_input_current') | float(0))
+  ) | round(1) }}
