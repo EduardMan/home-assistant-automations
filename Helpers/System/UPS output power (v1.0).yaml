@@ -1,0 +1,25 @@
+# Универсальный шаблон сенсора расчётной выходную мощности ИБП (P = U × I).
+# category:
+#   - System
+# ЗАМЕНИТЬ: {{ meaningful name }} на название ИБП, например W150.
+# ЗАМЕНИТЬ: {{ entity_id }} на общий префикс сущностей ИБП без sensor., например w150.
+# Если исходные сущности названы иначе, укажи их полные entity_id в state и availability template.
+# dependencies:
+#   - sensor.{{ entity_id }}_output_voltage (Source sensor)
+#   - sensor.{{ entity_id }}_output_current (Source sensor)
+name: {{ meaningful name }} output power (v1.0)
+type: Template sensor
+icon: mdi:flash-outline
+unitOfMeasurement: W
+deviceClass: Power
+stateClass: Measurement
+entityId: {{ entity_id }}_output_power
+visible: false
+availability template: >-
+  {{ is_number(states('sensor.{{ entity_id }}_output_voltage'))
+     and is_number(states('sensor.{{ entity_id }}_output_current')) }}
+state: >-
+  {{ (
+      (states('sensor.{{ entity_id }}_output_voltage') | float(0)) *
+      (states('sensor.{{ entity_id }}_output_current') | float(0))
+  ) | round(1) }}
