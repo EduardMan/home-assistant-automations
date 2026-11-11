@@ -77,7 +77,3 @@ dashboards:
     icon: mdi:shield-account
     adminOnly: true
     addToSidebar: true
-  - name: System Health
-    icon: mdi:heart-pulse
-    adminOnly: true
-    addToSidebar: true
