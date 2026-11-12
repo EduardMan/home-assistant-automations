@@ -1471,7 +1471,7 @@ views:
                 detail: false
           - type: tile
             entity: sensor.w150_battery_runtime
-            name: Battery runtime
+            name: Remaining runtime
             vertical: false
             grid_options:
               columns: 12
