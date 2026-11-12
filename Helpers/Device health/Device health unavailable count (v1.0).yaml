@@ -6,7 +6,7 @@
 # Если хотя бы один исходный счётчик недоступен, итоговый хелпер недоступен — частичная сумма не выдаётся за точное значение.
 name: Device health unavailable count (v1.0)
 type: Template number
-icon: mdi:wifi-off
+icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
 maximumValue: 1000
 entityId: device_health_unavailable_count
