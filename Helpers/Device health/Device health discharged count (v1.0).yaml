@@ -1,0 +1,32 @@
+# Суммарное количество разряженных устройств из категорий с контролем батареи.
+# category:
+#   - Device health
+# dependencies:
+#   - Category *_discharged_count (Template number)
+# Если хотя бы один исходный счётчик недоступен, итоговый хелпер недоступен — частичная сумма не выдаётся за точное значение.
+name: Device health discharged count (v1.0)
+type: Template number
+icon: mdi:battery-alert-variant-outline
+unitOfMeasurement: pcs
+maximumValue: 1000
+entityId: device_health_discharged_count
+visible: false
+availability template: >-
+  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'heating_thermostats', 'untracked_zigbee_sensors'] %}
+  {% set check = namespace(complete=true) %}
+  {% for category in categories %}
+    {% if not is_number(states('number.' ~ category ~ '_discharged_count')) %}
+      {% set check.complete = false %}
+    {% endif %}
+  {% endfor %}
+  {{ check.complete }}
+state: >-
+  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'heating_thermostats', 'untracked_zigbee_sensors'] %}
+  {% set check = namespace(total=0) %}
+  {% for category in categories %}
+    {% set value = states('number.' ~ category ~ '_discharged_count') %}
+    {% if is_number(value) %}
+      {% set check.total = check.total + (value | int(0)) %}
+    {% endif %}
+  {% endfor %}
+  {{ check.total }}
