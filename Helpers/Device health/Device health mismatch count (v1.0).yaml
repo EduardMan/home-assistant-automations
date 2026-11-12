@@ -14,23 +14,107 @@ maximumValue: 100
 entityId: device_health_mismatch_count
 visible: false
 availability template: >-
-  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'moisture_valves', 'natural_gas_sensors', 'heating_thermostats'] %}
+  {% set checks = [
+                        (
+                          'number.door_sensors_available_count',
+                          'number.door_sensors_unavailable_count',
+                          'input_number.door_sensors_expected_count'
+                        ),
+                        (
+                          'number.moisture_sensors_available_count',
+                          'number.moisture_sensors_unavailable_count',
+                          'input_number.moisture_sensors_expected_count'
+                        ),
+                        (
+                          'number.motion_sensors_available_count',
+                          'number.motion_sensors_unavailable_count',
+                          'input_number.motion_sensors_expected_count'
+                        ),
+                        (
+                          'number.temperature_sensors_available_count',
+                          'number.temperature_sensors_unavailable_count',
+                          'input_number.temperature_sensors_expected_count'
+                        ),
+                        (
+                          'number.smoke_sensors_available_count',
+                          'number.smoke_sensors_unavailable_count',
+                          'input_number.smoke_sensors_expected_count'
+                        ),
+                        (
+                          'number.moisture_valves_available_count',
+                          'number.moisture_valves_unavailable_count',
+                          'input_number.moisture_valves_expected_count'
+                        ),
+                        (
+                          'number.natural_gas_sensors_available_count',
+                          'number.natural_gas_sensors_unavailable_count',
+                          'input_number.natural_gas_sensors_expected_count'
+                        ),
+                        (
+                          'number.heating_thermostats_available_count',
+                          'number.heating_thermostats_unavailable_count',
+                          'input_number.heating_thermostats_expected_count'
+                        )
+                      ]
+  %}
   {% set check = namespace(complete=true) %}
-  {% for category in categories %}
-    {% if not (is_number(states('number.' ~ category ~ '_available_count'))
-       and is_number(states('number.' ~ category ~ '_unavailable_count'))
-       and is_number(states('input_number.' ~ category ~ '_expected_count'))) %}
+  {% for available_entity, unavailable_entity, expected_entity in checks %}
+    {% if not (is_number(states(available_entity))
+       and is_number(states(unavailable_entity))
+       and is_number(states(expected_entity))) %}
       {% set check.complete = false %}
     {% endif %}
   {% endfor %}
   {{ check.complete }}
 state: >-
-  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'moisture_valves', 'natural_gas_sensors', 'heating_thermostats'] %}
+  {% set checks = [
+                        (
+                          'number.door_sensors_available_count',
+                          'number.door_sensors_unavailable_count',
+                          'input_number.door_sensors_expected_count'
+                        ),
+                        (
+                          'number.moisture_sensors_available_count',
+                          'number.moisture_sensors_unavailable_count',
+                          'input_number.moisture_sensors_expected_count'
+                        ),
+                        (
+                          'number.motion_sensors_available_count',
+                          'number.motion_sensors_unavailable_count',
+                          'input_number.motion_sensors_expected_count'
+                        ),
+                        (
+                          'number.temperature_sensors_available_count',
+                          'number.temperature_sensors_unavailable_count',
+                          'input_number.temperature_sensors_expected_count'
+                        ),
+                        (
+                          'number.smoke_sensors_available_count',
+                          'number.smoke_sensors_unavailable_count',
+                          'input_number.smoke_sensors_expected_count'
+                        ),
+                        (
+                          'number.moisture_valves_available_count',
+                          'number.moisture_valves_unavailable_count',
+                          'input_number.moisture_valves_expected_count'
+                        ),
+                        (
+                          'number.natural_gas_sensors_available_count',
+                          'number.natural_gas_sensors_unavailable_count',
+                          'input_number.natural_gas_sensors_expected_count'
+                        ),
+                        (
+                          'number.heating_thermostats_available_count',
+                          'number.heating_thermostats_unavailable_count',
+                          'input_number.heating_thermostats_expected_count'
+                        )
+                      ]
+  %}
   {% set check = namespace(total=0) %}
-  {% for category in categories %}
-    {% set available = states('number.' ~ category ~ '_available_count') %}
-    {% set unavailable = states('number.' ~ category ~ '_unavailable_count') %}
-    {% set expected = states('input_number.' ~ category ~ '_expected_count') %}
+  {% for available_entity, unavailable_entity, expected_entity in checks %}
+    {% set available = states(available_entity) %}
+    {% set unavailable = states(unavailable_entity) %}
+    {% set expected = states(expected_entity) %}
     {% if is_number(available) and is_number(unavailable) and is_number(expected) %}
       {% if (available | int(0)) + (unavailable | int(0)) != (expected | int(0)) %}
         {% set check.total = check.total + 1 %}
