@@ -1433,6 +1433,10 @@ views:
                 hours_to_show: 24
                 detail: false
       - type: grid
+        visibility:
+          - condition: numeric_state
+            entity: sensor.keenetic_router_connected_clients
+            above: -1
         cards:
           - type: heading
             heading: Network
@@ -1440,16 +1444,12 @@ views:
             icon: mdi:router-wireless
           - type: tile
             entity: sensor.keenetic_router_connected_clients
-            name: Connected clients
+            name: Clients
             vertical: false
-            grid_options:
-              columns: 8
           - type: tile
             entity: sensor.keenetic_router_wan_status
             name: WAN
             vertical: false
-            grid_options:
-              columns: 4
           - type: tile
             entity: sensor.keenetic_router_cpu_load
             name: Router CPU
