@@ -1352,67 +1352,79 @@ views:
     cards: []
     show_icon_and_title: true
     path: device-health-view
-# System Health: native, individually editable tiles.
-# System Monitor: default-style IDs (device prefix system_monitor); CPU is confirmed
-# as sensor.system_monitor_processor_use by the user's HA screenshot.
-# RAM, disk and CPU temperature IDs are based on current System Monitor naming.
-# Verify them against the Entities tab in each HA instance; the disk sensor may
-# differ for other mount points, and CPU temperature may be absent on some hosts.
-# Missing entities stay visible so incorrect IDs are easy to spot and fix.
+# System Health (v1.0) tab: built-in Sections/Tile/Badge cards.
+# Each metric is independently editable in the Home Assistant dashboard editor.
+# System Monitor IDs are confirmed from this instance's Entities list.
+# Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
   - type: sections
     header:
       layout: center
+      badges_position: top
       card:
         type: markdown
         content: |-
-          {% set raw = states('sensor.w150_status_data') -%}
-          {% set codes = raw.split() -%}
-          {% if 'OB' in codes -%}
+          {% set status = states('sensor.w150_status_data').split() -%}
+          {% if 'OB' in status -%}
             <font color="#B7791F"><ha-icon icon="mdi:battery-arrow-down-outline"></ha-icon></font> **ИБП работает от аккумулятора**
-          {% elif 'OL' in codes -%}
+          {% elif 'OL' in status -%}
             <font color="#218343"><ha-icon icon="mdi:power-plug"></ha-icon></font> **ИБП работает от сети**
           {% else -%}
             <ha-icon icon="mdi:help-circle-outline"></ha-icon> **Режим питания ИБП неизвестен**
           {% endif -%}
-          {% if raw not in ['unknown', 'unavailable', 'none'] -%}
-            <br><br><ha-icon icon="mdi:information-outline"></ha-icon> Статус NUT: {{ raw }}
-          {% endif %}
+    badges:
+      - type: entity
+        entity: sensor.uptime
+        name: Uptime
+        show_name: true
+        show_state: true
+        time_format: relative
+      - type: entity
+        entity: sensor.w150_battery_charge
+        name: UPS charge
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.ups_server_main_output_power
+        name: UPS output
+        show_name: true
+        show_state: true
     sections:
       - type: grid
+        column_span: 2
         cards:
           - type: heading
-            heading: Home Assistant
+            heading: Server
             heading_style: title
-            icon: mdi:home-assistant
+            icon: mdi:server
           - type: tile
             entity: sensor.system_monitor_processor_use
-            name: CPU usage
+            name: CPU
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
                 detail: false
           - type: tile
             entity: sensor.system_monitor_memory_usage
-            name: RAM usage
+            name: RAM
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
                 detail: false
           - type: tile
             entity: sensor.system_monitor_disk_usage
-            name: Disk usage /
+            name: Disk /
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
@@ -1423,19 +1435,16 @@ views:
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
                 detail: false
-          - type: tile
-            entity: sensor.uptime
-            name: Uptime
-            vertical: false
       - type: grid
+        column_span: 2
         cards:
           - type: heading
-            heading: UPS power
+            heading: UPS
             heading_style: title
             icon: mdi:power-plug-outline
           - type: tile
@@ -1444,7 +1453,7 @@ views:
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
@@ -1455,7 +1464,40 @@ views:
             vertical: false
             grid_options:
               columns: 12
-            features_position: bottom
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_charge
+            name: Battery charge
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_runtime
+            name: Battery runtime
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_temperature
+            name: Battery temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
             features:
               - type: trend-graph
                 hours_to_show: 24
@@ -1476,45 +1518,6 @@ views:
             entity: sensor.w150_input_current
             name: Input current
             vertical: false
-      - type: grid
-        cards:
-          - type: heading
-            heading: UPS battery
-            heading_style: title
-            icon: mdi:battery
-          - type: tile
-            entity: sensor.w150_battery_charge
-            name: Battery charge
-            vertical: false
-            grid_options:
-              columns: 12
-            features_position: bottom
-            features:
-              - type: trend-graph
-                hours_to_show: 24
-                detail: false
-          - type: tile
-            entity: sensor.w150_battery_runtime
-            name: Battery runtime
-            vertical: false
-            grid_options:
-              columns: 12
-            features_position: bottom
-            features:
-              - type: trend-graph
-                hours_to_show: 24
-                detail: false
-          - type: tile
-            entity: sensor.w150_battery_temperature
-            name: Battery temperature
-            vertical: false
-            grid_options:
-              columns: 12
-            features_position: bottom
-            features:
-              - type: trend-graph
-                hours_to_show: 24
-                detail: false
           - type: tile
             entity: sensor.w150_battery_voltage
             name: Battery voltage
@@ -1523,11 +1526,8 @@ views:
             entity: sensor.w150_battery_current
             name: Battery current
             vertical: false
-          - type: tile
-            entity: sensor.w150_status_data
-            name: NUT status
-            vertical: false
       - type: grid
+        column_span: 2
         cards:
           - type: heading
             heading: Maintenance
@@ -1539,7 +1539,7 @@ views:
             vertical: false
           - type: tile
             entity: sensor.backup_last_successful_automatic_backup
-            name: Last successful backup
+            name: Last backup
             vertical: false
           - type: tile
             entity: sensor.backup_next_scheduled_automatic_backup
