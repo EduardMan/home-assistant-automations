@@ -1,0 +1,1544 @@
+views:
+  - type: sections
+    badges:
+      - type: entity
+        entity: sensor.device_health_status
+        name: Status
+        icon: mdi:heart-pulse
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: number.device_health_unavailable_count
+        name: Unavailable
+        icon: mdi:wifi-off
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: number.device_health_discharged_count
+        name: Discharged
+        icon: mdi:battery-alert-variant-outline
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: number.device_health_mismatch_count
+        name: Mismatches
+        icon: mdi:alert-outline
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+        name: Ignored
+        icon: mdi:eye-off-outline
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+            above: 0
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Door sensors
+            heading_style: title
+            icon: mdi:door
+            badges:
+              - type: entity
+                entity: number.door_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.door_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.door_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.door_sensors_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.door_sensors_expected_count
+            name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.door_sensors_available_count') %}
+                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.door_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.door_sensors_available_count') %}
+                  {% set unavailable = states('number.door_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.door_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.door_sensors_expected_count
+            name: Expected count
+            color: amber
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.door_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.door_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.door_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.door_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_discharged_count
+                above: 0
+            entity: number.door_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.door_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.door_sensors_unavailable_count
+                above: 0
+            entity: number.door_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Moisture sensors
+            heading_style: title
+            icon: mdi:water
+            badges:
+              - type: entity
+                entity: number.moisture_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.moisture_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_sensors_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.moisture_sensors_expected_count
+            name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_sensors_available_count') %}
+                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_sensors_available_count') %}
+                  {% set unavailable = states('number.moisture_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.moisture_sensors_expected_count
+            name: Expected count
+            color: amber
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.moisture_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_discharged_count
+                above: 0
+            entity: number.moisture_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_sensors_unavailable_count
+                above: 0
+            entity: number.moisture_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Motion sensors
+            heading_style: title
+            icon: mdi:motion-sensor
+            badges:
+              - type: entity
+                entity: number.motion_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.motion_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.motion_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.motion_sensors_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.motion_sensors_expected_count
+            name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.motion_sensors_available_count') %}
+                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.motion_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.motion_sensors_available_count') %}
+                  {% set unavailable = states('number.motion_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.motion_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.motion_sensors_expected_count
+            name: Expected count
+            color: amber
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.motion_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.motion_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: number.motion_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.motion_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_discharged_count
+                above: 0
+            entity: number.motion_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.motion_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.motion_sensors_unavailable_count
+                above: 0
+            entity: number.motion_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Temperature sensors
+            heading_style: title
+            icon: mdi:thermometer
+            badges:
+              - type: entity
+                entity: number.temperature_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.temperature_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.temperature_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.temperature_sensors_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.temperature_sensors_expected_count
+            name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.temperature_sensors_available_count') %}
+                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.temperature_sensors_available_count') %}
+                  {% set unavailable = states('number.temperature_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.temperature_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.temperature_sensors_expected_count
+            name: Expected count
+            color: amber
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.temperature_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.temperature_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.temperature_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.temperature_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_discharged_count
+                above: 0
+            entity: number.temperature_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.temperature_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.temperature_sensors_unavailable_count
+                above: 0
+            entity: number.temperature_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Smoke sensors
+            heading_style: title
+            icon: mdi:smoke-detector-variant
+            badges:
+              - type: entity
+                entity: number.smoke_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smoke_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.smoke_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smoke_sensors_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.smoke_sensors_expected_count
+            name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smoke_sensors_available_count') %}
+                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smoke_sensors_available_count') %}
+                  {% set unavailable = states('number.smoke_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.smoke_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.smoke_sensors_expected_count
+            name: Expected count
+            color: amber
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.smoke_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features_position: inline
+            features:
+              - type: numeric-input
+                style: buttons
+          - type: tile
+            entity: input_number.smoke_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.smoke_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smoke_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_discharged_count
+                above: 0
+            entity: number.smoke_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smoke_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smoke_sensors_unavailable_count
+                above: 0
+            entity: number.smoke_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Moisture valves
+            heading_style: title
+            icon: mdi:valve
+            badges:
+              - type: entity
+                entity: number.moisture_valves_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.moisture_valves_unavailable_count
+                    above: 0
+          - type: tile
+            entity: input_number.moisture_valves_expected_count
+            name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_valves_available_count') %}
+                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_valves_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.moisture_valves_available_count') %}
+                  {% set unavailable = states('number.moisture_valves_unavailable_count') %}
+                  {% set expected = states('input_number.moisture_valves_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.moisture_valves_expected_count
+            name: Expected count
+            color: amber
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.moisture_valves_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.close_valve_required_time_seconds
+            name: Close required time
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.close_valves_retry_count
+            name: Close retries count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.moisture_valves_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.moisture_valves_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_valves_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.moisture_valves_unavailable_count
+                above: 0
+            entity: number.moisture_valves_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+      - type: grid
+        cards:
+          - type: heading
+            heading: Natural gas sensors
+            heading_style: title
+            icon: mdi:gas-burner
+            badges:
+              - type: entity
+                entity: number.natural_gas_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.natural_gas_sensors_unavailable_count
+                    above: 0
+          - type: tile
+            entity: input_number.natural_gas_sensors_expected_count
+            name: Expected count
+            color: grey
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.natural_gas_sensors_available_count') %}
+                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.natural_gas_sensors_available_count') %}
+                  {% set unavailable = states('number.natural_gas_sensors_unavailable_count') %}
+                  {% set expected = states('input_number.natural_gas_sensors_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.natural_gas_sensors_expected_count
+            name: Expected count
+            color: amber
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.natural_gas_sensors_leak_detection_threshold
+            name: Leak detection limit
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.natural_gas_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.natural_gas_sensors_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.natural_gas_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.natural_gas_sensors_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.natural_gas_sensors_unavailable_count
+                above: 0
+            entity: number.natural_gas_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: Heating thermostats
+            heading_style: title
+            icon: mdi:radiator
+            badges:
+              - type: entity
+                entity: number.heating_thermostats_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.heating_thermostats_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.heating_thermostats_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.heating_thermostats_discharged_count
+                    above: 0
+          - type: tile
+            entity: input_number.heating_thermostats_expected_count
+            name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.heating_thermostats_available_count') %}
+                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
+                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.heating_thermostats_available_count') %}
+                  {% set unavailable = states('number.heating_thermostats_unavailable_count') %}
+                  {% set expected = states('input_number.heating_thermostats_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.heating_thermostats_expected_count
+            name: Expected count
+            color: amber
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.heating_thermostats_battery_threshold
+            name: Battery threshold
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.heating_thermostats_availability_timeout_minutes
+            name: Availability timeout
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.heating_thermostats_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.heating_thermostats_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_discharged_count
+                above: 0
+            entity: number.heating_thermostats_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.heating_thermostats_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.heating_thermostats_unavailable_count
+                above: 0
+            entity: number.heating_thermostats_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+      - type: grid
+        cards:
+          - type: heading
+            heading: Common
+            heading_style: title
+            icon: mdi:zigbee
+            badges:
+              - type: entity
+                entity: number.untracked_zigbee_sensors_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.untracked_zigbee_sensors_discharged_count
+                name: Discharged
+                icon: mdi:battery-alert-variant-outline
+                color: deep-orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_discharged_count
+                    above: 0
+              - type: entity
+                entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+                name: Ignored
+                icon: mdi:eye-off-outline
+                color: amber
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                    above: 0
+          - type: tile
+            entity: input_number.untracked_zigbee_sensors_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.untracked_zigbee_sensors_battery_threshold
+            name: Battery threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.untracked_zigbee_sensors_discharged_count
+            name: Discharged count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_discharged_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_discharged_count
+                above: 0
+            entity: number.untracked_zigbee_sensors_discharged_count
+            name: Discharged count
+            color: deep-orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.untracked_zigbee_sensors_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_count
+                below: 1
+          - type: tile
+            entity: number.untracked_zigbee_sensors_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_count
+                above: 0
+          - type: tile
+            entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                above: 0
+            entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+            color: amber
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+        column_span: 1
+      - type: grid
+        cards:
+          - type: heading
+            heading: GSM
+            heading_style: title
+            icon: mdi:sim
+            badges:
+              - type: entity
+                entity: number.gsm_modules_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.gsm_modules_unavailable_count
+                    above: 0
+          - type: tile
+            entity: input_number.gsm_modules_availability_timeout_minutes
+            name: Availability timeout
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.ussd_balance_extracting_required_time_seconds
+            name: Balance update required time
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.ussd_balance_extracting_retry_count
+            name: Balance update retries count
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.gsm_modules_sim_balance_threshold
+            name: Balance threshold
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: input_number.gsm_phone_call_duration_seconds
+            name: Call duration
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.gsm_modules_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.gsm_modules_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.gsm_modules_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.gsm_modules_unavailable_count
+                above: 0
+            entity: number.gsm_modules_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+    max_columns: 4
+    title: Device Health
+    icon: mdi:connection
+    subview: false
+    top_margin: false
+    cards: []
+    show_icon_and_title: true
+    path: device-health-view
+# System Health (v1.0) tab: built-in Sections/Tile/Badge cards.
+# Each metric is independently editable in the Home Assistant dashboard editor.
+# System Monitor IDs are confirmed from this instance's Entities list.
+# Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
+# Keenetic Router Pro IDs confirmed in this HA instance; WAN throughput IDs contain
+# the configured WAN uplink name and may differ on another instance/router.
+  - type: sections
+    badges:
+      - type: entity
+        entity: sensor.uptime
+        name: Uptime
+        show_name: true
+        show_state: true
+        time_format: total
+      - type: entity
+        entity: sensor.system_monitor_memory_usage
+        name: RAM
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.system_monitor_processor_use
+        name: CPU
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.system_monitor_processor_temperature
+        name: CPU Temp
+        show_name: true
+        show_state: true
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Server
+            heading_style: title
+            icon: mdi:server
+          - type: tile
+            entity: sensor.system_monitor_processor_use
+            name: CPU
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_memory_usage
+            name: RAM
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_disk_usage
+            name: Disk /
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_processor_temperature
+            name: CPU temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        visibility:
+          - condition: template
+            value_template: >-
+              {{ integration_entities('keenetic_router_pro') | count > 0 }}
+        cards:
+          - type: heading
+            heading: Network
+            heading_style: title
+            icon: mdi:router-wireless
+          - type: tile
+            entity: sensor.keenetic_router_connected_clients
+            name: Clients
+            vertical: false
+          - type: tile
+            entity: sensor.keenetic_router_wan_status
+            name: WAN
+            vertical: false
+          - type: tile
+            entity: sensor.keenetic_router_cpu_load
+            name: Router CPU
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_memory_usage
+            name: Router RAM
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_rx_throughput
+            name: WAN download
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_tx_throughput
+            name: WAN upload
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: UPS
+            heading_style: title
+            icon: mdi:power-plug-outline
+          - type: tile
+            entity: sensor.ups_server_main_output_power
+            name: Output power
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.ups_server_main_input_power
+            name: Input power
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_charge
+            name: Battery charge
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_runtime
+            name: Remaining runtime
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_temperature
+            name: Battery temp
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: Backups
+            heading_style: title
+            icon: mdi:backup-restore
+          - type: tile
+            entity: sensor.backup_last_successful_automatic_backup
+            name: Last backup
+            vertical: false
+          - type: tile
+            entity: sensor.backup_next_scheduled_automatic_backup
+            name: Next backup
+            vertical: false
+    max_columns: 4
+    title: System Health
+    icon: mdi:heart-pulse
+    subview: false
+    top_margin: false
+    cards: []
+    show_icon_and_title: true
+    path: system-health-view
