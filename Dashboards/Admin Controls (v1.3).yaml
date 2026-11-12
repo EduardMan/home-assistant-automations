@@ -1488,30 +1488,6 @@ views:
               - type: trend-graph
                 hours_to_show: 24
                 detail: false
-          - type: tile
-            entity: sensor.w150_output_voltage
-            name: Output voltage
-            vertical: false
-          - type: tile
-            entity: sensor.w150_output_current
-            name: Output current
-            vertical: false
-          - type: tile
-            entity: sensor.w150_input_voltage
-            name: Input voltage
-            vertical: false
-          - type: tile
-            entity: sensor.w150_input_current
-            name: Input current
-            vertical: false
-          - type: tile
-            entity: sensor.w150_battery_voltage
-            name: Battery voltage
-            vertical: false
-          - type: tile
-            entity: sensor.w150_battery_current
-            name: Battery current
-            vertical: false
       - type: grid
         column_span: 2
         cards:
