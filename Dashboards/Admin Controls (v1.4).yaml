@@ -115,6 +115,16 @@ views:
         entity: number.untracked_zigbee_sensors_unavailable_ignore_count
         name: Ignored
         icon: mdi:eye-off-outline
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+            below: 1
+      - type: entity
+        entity: number.untracked_zigbee_sensors_unavailable_ignore_count
+        name: Ignored
+        icon: mdi:eye-off-outline
         color: yellow
         show_name: true
         show_state: true
