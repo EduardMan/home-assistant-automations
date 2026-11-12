@@ -1353,9 +1353,12 @@ views:
     show_icon_and_title: true
     path: device-health-view
 # System Health: native, individually editable tiles.
-# Entity IDs below are fixed intentionally. Verify instance-specific names in HA;
-# missing entities should be visible instead of silently disappearing.
-# Note: processor temperature and disk mount sensors depend on host capabilities.
+# System Monitor: default-style IDs (device prefix system_monitor); CPU is confirmed
+# as sensor.system_monitor_processor_use by the user's HA screenshot.
+# RAM, disk and CPU temperature IDs are based on current System Monitor naming.
+# Verify them against the Entities tab in each HA instance; the disk sensor may
+# differ for other mount points, and CPU temperature may be absent on some hosts.
+# Missing entities stay visible so incorrect IDs are easy to spot and fix.
   - type: sections
     header:
       layout: center
@@ -1382,7 +1385,7 @@ views:
             heading_style: title
             icon: mdi:home-assistant
           - type: tile
-            entity: sensor.processor_use
+            entity: sensor.system_monitor_processor_use
             name: CPU usage
             vertical: false
             grid_options:
@@ -1393,7 +1396,7 @@ views:
                 hours_to_show: 24
                 detail: false
           - type: tile
-            entity: sensor.memory_use_percent
+            entity: sensor.system_monitor_memory_usage
             name: RAM usage
             vertical: false
             grid_options:
@@ -1404,7 +1407,7 @@ views:
                 hours_to_show: 24
                 detail: false
           - type: tile
-            entity: sensor.disk_use_percent
+            entity: sensor.system_monitor_disk_usage
             name: Disk usage
             vertical: false
             grid_options:
@@ -1415,7 +1418,7 @@ views:
                 hours_to_show: 24
                 detail: false
           - type: tile
-            entity: sensor.processor_temperature
+            entity: sensor.system_monitor_processor_temperature
             name: CPU temperature
             vertical: false
             grid_options:
