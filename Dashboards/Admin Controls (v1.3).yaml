@@ -1447,13 +1447,6 @@ views:
             entity: sensor.keenetic_router_connected_clients
             name: Connected clients
             vertical: false
-            grid_options:
-              columns: 12
-            features_position: inline
-            features:
-              - type: trend-graph
-                hours_to_show: 24
-                detail: false
           - type: tile
             entity: sensor.keenetic_router_cpu_load
             name: Router CPU
