@@ -1,0 +1,40 @@
+# Количество категорий Device Health, в которых available + unavailable не совпадает с expected.
+# category:
+#   - Device health
+# dependencies:
+#   - Category *_available_count / *_unavailable_count (Template number)
+#   - Category *_expected_count (Input number)
+# Считаются КАТЕГОРИИ с расхождениями, а не разница в количестве устройств.
+# Если хотя бы один исходный счётчик неизвестен, итоговый хелпер недоступен.
+name: Device health mismatch count (v1.0)
+type: Template number
+icon: mdi:alert-outline
+unitOfMeasurement: pcs
+maximumValue: 100
+entityId: device_health_mismatch_count
+visible: false
+availability template: >-
+  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'moisture_valves', 'natural_gas_sensors', 'heating_thermostats'] %}
+  {% set check = namespace(complete=true) %}
+  {% for category in categories %}
+    {% if not (is_number(states('number.' ~ category ~ '_available_count'))
+       and is_number(states('number.' ~ category ~ '_unavailable_count'))
+       and is_number(states('input_number.' ~ category ~ '_expected_count'))) %}
+      {% set check.complete = false %}
+    {% endif %}
+  {% endfor %}
+  {{ check.complete }}
+state: >-
+  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'moisture_valves', 'natural_gas_sensors', 'heating_thermostats'] %}
+  {% set check = namespace(total=0) %}
+  {% for category in categories %}
+    {% set available = states('number.' ~ category ~ '_available_count') %}
+    {% set unavailable = states('number.' ~ category ~ '_unavailable_count') %}
+    {% set expected = states('input_number.' ~ category ~ '_expected_count') %}
+    {% if is_number(available) and is_number(unavailable) and is_number(expected) %}
+      {% if (available | int(0)) + (unavailable | int(0)) != (expected | int(0)) %}
+        {% set check.total = check.total + 1 %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  {{ check.total }}
