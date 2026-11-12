@@ -1357,20 +1357,6 @@ views:
 # System Monitor IDs are confirmed from this instance's Entities list.
 # Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
   - type: sections
-    header:
-      layout: center
-      badges_position: top
-      card:
-        type: markdown
-        content: |-
-          {% set status = states('sensor.w150_status_data').split() -%}
-          {% if 'OB' in status -%}
-            <font color="#B7791F"><ha-icon icon="mdi:battery-arrow-down-outline"></ha-icon></font> **ИБП работает от аккумулятора**
-          {% elif 'OL' in status -%}
-            <font color="#218343"><ha-icon icon="mdi:power-plug"></ha-icon></font> **ИБП работает от сети**
-          {% else -%}
-            <ha-icon icon="mdi:help-circle-outline"></ha-icon> **Режим питания ИБП неизвестен**
-          {% endif -%}
     badges:
       - type: entity
         entity: sensor.uptime
