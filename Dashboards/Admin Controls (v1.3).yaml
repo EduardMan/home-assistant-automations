@@ -1356,6 +1356,8 @@ views:
 # Each metric is independently editable in the Home Assistant dashboard editor.
 # System Monitor IDs are confirmed from this instance's Entities list.
 # Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
+# Keenetic Router Pro IDs confirmed in this HA instance; WAN throughput IDs contain
+# the configured WAN uplink name and may differ on another instance/router.
   - type: sections
     badges:
       - type: entity
@@ -1422,6 +1424,71 @@ views:
           - type: tile
             entity: sensor.system_monitor_processor_temperature
             name: CPU temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: Network
+            heading_style: title
+            icon: mdi:router
+          - type: tile
+            entity: sensor.keenetic_router_connected_clients
+            name: Connected clients
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_wan_status
+            name: WAN status
+            vertical: false
+          - type: tile
+            entity: sensor.keenetic_router_cpu_load
+            name: Router CPU
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_memory_usage
+            name: Router RAM
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_rx_throughput
+            name: WAN download
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_tx_throughput
+            name: WAN upload
             vertical: false
             grid_options:
               columns: 12
