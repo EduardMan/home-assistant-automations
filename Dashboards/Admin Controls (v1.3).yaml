@@ -1352,53 +1352,28 @@ views:
     cards: []
     show_icon_and_title: true
     path: device-health-view
+# System Health: native, individually editable tiles.
+# Entity IDs below are fixed intentionally. Verify instance-specific names in HA;
+# missing entities should be visible instead of silently disappearing.
+# Note: processor temperature and disk mount sensors depend on host capabilities.
   - type: sections
     header:
       layout: center
       card:
         type: markdown
         content: |-
-          {% set required = [
-            'sensor.w150_input_voltage',
-            'sensor.w150_input_current',
-            'sensor.w150_output_voltage',
-            'sensor.w150_output_current'
-          ] -%}
-          {% set check = namespace(missing=0, raw_status='') -%}
-          {% for entity in required -%}
-            {% if not is_number(states(entity)) -%}
-              {% set check.missing = check.missing + 1 -%}
-            {% endif -%}
-          {% endfor -%}
-          {% set ups_device = device_id('sensor.w150_input_voltage') -%}
-          {% set ups_entities = device_entities(ups_device) if ups_device else [] -%}
-          {% for entity in ups_entities -%}
-            {% if entity.startswith('sensor.') -%}
-              {% set tokens = states(entity).split() -%}
-              {% if 'OL' in tokens or 'OB' in tokens -%}
-                {% set check.raw_status = states(entity) -%}
-              {% endif -%}
-            {% endif -%}
-          {% endfor -%}
-          {% if check.missing > 0 -%}
-            {% set headline = '<font color="#D32F2F"><ha-icon icon="mdi:alert-circle-outline"></ha-icon></font> **Нет части данных ИБП**' -%}
-          {% elif 'OB' in check.raw_status.split() -%}
-            {% set headline = '<font color="#B7791F"><ha-icon icon="mdi:battery-arrow-down-outline"></ha-icon></font> **ИБП: питание от аккумулятора**' -%}
-          {% elif 'OL' in check.raw_status.split() -%}
-            {% set headline = '<font color="#218343"><ha-icon icon="mdi:power-plug"></ha-icon></font> **ИБП: питание от сети**' -%}
+          {% set raw = states('sensor.w150_status_data') -%}
+          {% set codes = raw.split() -%}
+          {% if 'OB' in codes -%}
+            <font color="#B7791F"><ha-icon icon="mdi:battery-arrow-down-outline"></ha-icon></font> **ИБП работает от аккумулятора**
+          {% elif 'OL' in codes -%}
+            <font color="#218343"><ha-icon icon="mdi:power-plug"></ha-icon></font> **ИБП работает от сети**
           {% else -%}
-            {% set headline = '<ha-icon icon="mdi:help-circle-outline"></ha-icon> **Режим питания ИБП неизвестен**' -%}
+            <ha-icon icon="mdi:help-circle-outline"></ha-icon> **Режим питания ИБП неизвестен**
           {% endif -%}
-          {% set details = [] -%}
-          {% if check.raw_status -%}
-            {% set details = details + ['<ha-icon icon="mdi:information-outline"></ha-icon> NUT: ' ~ check.raw_status] -%}
-          {% endif -%}
-          {% if has_value('sensor.uptime') -%}
-            {% set details = details + ['<ha-icon icon="mdi:home-assistant"></ha-icon> Данные Home Assistant доступны'] -%}
-          {% else -%}
-            {% set details = details + ['<ha-icon icon="mdi:help-circle-outline"></ha-icon> Нет данных о запуске Home Assistant'] -%}
-          {% endif -%}
-          {{ ([headline] + details) | join('<br><br>') }}
+          {% if raw not in ['unknown', 'unavailable', 'none'] -%}
+            <br><br><ha-icon icon="mdi:information-outline"></ha-icon> Статус NUT: {{ raw }}
+          {% endif %}
     sections:
       - type: grid
         cards:
@@ -1407,39 +1382,54 @@ views:
             heading_style: title
             icon: mdi:home-assistant
           - type: tile
-            entity: sensor.uptime
-            name: Last start
-            color: grey
+            entity: sensor.processor_use
+            name: CPU usage
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('sensor.uptime') }}"
-          - type: markdown
-            content: |-
-              {% set metrics = namespace(lines=[]) -%}
-              {% for entity in integration_entities('systemmonitor') -%}
-                {% set key = entity | lower -%}
-                {% if entity.startswith('sensor.') and has_value(entity) and (
-                  'processor_use' in key or
-                  'processor_temperature' in key or
-                  'memory_use_percent' in key or
-                  'memory_usage' in key or
-                  'disk_use_percent' in key
-                ) -%}
-                  {% set name = state_attr(entity, 'friendly_name') or entity -%}
-                  {% set unit = state_attr(entity, 'unit_of_measurement') or '' -%}
-                  {% set metrics.lines = metrics.lines + [
-                    '**' ~ name ~ '**: ' ~ states(entity) ~ (' ' ~ unit if unit else '')
-                  ] -%}
-                {% endif -%}
-              {% endfor -%}
-              {% if metrics.lines -%}
-                {{ metrics.lines | join('<br><br>') }}
-              {% else -%}
-                <ha-icon icon="mdi:information-outline"></ha-icon> Метрики CPU, RAM и диска пока не подключены. Установи **System Monitor** и включи нужные диагностические сенсоры.
-              {% endif %}
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.memory_use_percent
+            name: RAM usage
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.disk_use_percent
+            name: Disk usage
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.processor_temperature
+            name: CPU temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.uptime
+            name: Uptime
+            vertical: false
       - type: grid
-        column_span: 2
         cards:
           - type: heading
             heading: UPS power
@@ -1448,155 +1438,123 @@ views:
           - type: tile
             entity: sensor.ups_server_main_output_power
             name: Output power
-            color: grey
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('sensor.ups_server_main_output_power') }}"
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
           - type: tile
             entity: sensor.ups_server_main_input_power
             name: Input power
-            color: grey
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('sensor.ups_server_main_input_power') }}"
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
           - type: tile
             entity: sensor.w150_output_voltage
             name: Output voltage
-            color: grey
-            vertical: false
-          - type: tile
-            entity: sensor.w150_input_voltage
-            name: Input voltage
-            color: grey
             vertical: false
           - type: tile
             entity: sensor.w150_output_current
             name: Output current
-            color: grey
+            vertical: false
+          - type: tile
+            entity: sensor.w150_input_voltage
+            name: Input voltage
             vertical: false
           - type: tile
             entity: sensor.w150_input_current
             name: Input current
-            color: grey
             vertical: false
-          - type: history-graph
-            title: Power history · 24 h
-            hours_to_show: 24
-            show_names: true
-            grid_options:
-              columns: 12
-            entities:
-              - entity: sensor.ups_server_main_output_power
-                name: Output
-              - entity: sensor.ups_server_main_input_power
-                name: Input
-            visibility:
-              - condition: template
-                value_template: >-
-                  {{ has_value('sensor.ups_server_main_output_power')
-                     and has_value('sensor.ups_server_main_input_power') }}
       - type: grid
         cards:
           - type: heading
             heading: UPS battery
             heading_style: title
             icon: mdi:battery
-          - type: markdown
-            content: |-
-              {% set ups_device = device_id('sensor.w150_input_voltage') -%}
-              {% set ups_entities = device_entities(ups_device) if ups_device else [] -%}
-              {% set battery = namespace(lines=[]) -%}
-              {% for entity in ups_entities -%}
-                {% if entity.startswith('sensor.') and '_battery_' in entity and has_value(entity) -%}
-                  {% set name = state_attr(entity, 'friendly_name') or entity -%}
-                  {% set value = states(entity) -%}
-                  {% set unit = state_attr(entity, 'unit_of_measurement') or '' -%}
-                  {% if entity.endswith('_battery_runtime') and is_number(value) -%}
-                    {% set seconds = value | float(0) | int -%}
-                    {% set shown = (seconds // 3600) ~ ' ч ' ~ ((seconds % 3600) // 60) ~ ' мин' -%}
-                  {% else -%}
-                    {% set shown = value ~ (' ' ~ unit if unit else '') -%}
-                  {% endif -%}
-                  {% set battery.lines = battery.lines + ['**' ~ name ~ '**: ' ~ shown] -%}
-                {% endif -%}
-              {% endfor -%}
-              {% if battery.lines -%}
-                {{ battery.lines | join('<br><br>') }}
-              {% else -%}
-                <ha-icon icon="mdi:help-circle-outline"></ha-icon> Нет доступных показателей аккумулятора от NUT.
-              {% endif %}
-      - type: grid
-        cards:
-          - type: heading
-            heading: Network
-            heading_style: title
-            icon: mdi:lan
-          - type: markdown
-            content: |-
-              {% set network = namespace(lines=[]) -%}
-              {% for entity in integration_entities('ping') -%}
-                {% if entity.startswith('binary_sensor.') and has_value(entity) -%}
-                  {% set name = state_attr(entity, 'friendly_name') or entity -%}
-                  {% if is_state(entity, 'on') -%}
-                    {% set line = '<font color="#218343"><ha-icon icon="mdi:check-circle-outline"></ha-icon></font> ' ~ name ~ ': доступен' -%}
-                  {% else -%}
-                    {% set line = '<font color="#D32F2F"><ha-icon icon="mdi:close-circle-outline"></ha-icon></font> ' ~ name ~ ': недоступен' -%}
-                  {% endif -%}
-                  {% set network.lines = network.lines + [line] -%}
-                {% endif -%}
-              {% endfor -%}
-              {% if network.lines -%}
-                {{ network.lines | join('<br><br>') }}
-              {% else -%}
-                <ha-icon icon="mdi:information-outline"></ha-icon> Проверки сети ещё не настроены. Для мониторинга Netcraze Hopper и внешнего соединения можно добавить **Ping**.
-              {% endif %}
+          - type: tile
+            entity: sensor.w150_battery_charge
+            name: Battery charge
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_runtime
+            name: Battery runtime
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_temperature
+            name: Battery temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: bottom
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_voltage
+            name: Battery voltage
+            vertical: false
+          - type: tile
+            entity: sensor.w150_battery_current
+            name: Battery current
+            vertical: false
+          - type: tile
+            entity: sensor.w150_status_data
+            name: NUT status
+            vertical: false
       - type: grid
         cards:
           - type: heading
             heading: Maintenance
             heading_style: title
             icon: mdi:backup-restore
-          - type: markdown
-            content: |-
-              {% set backup = namespace(lines=[]) -%}
-              {% for entity in integration_entities('backup') -%}
-                {% if entity.startswith('sensor.') and has_value(entity) -%}
-                  {% set name = state_attr(entity, 'friendly_name') or entity -%}
-                  {% set backup.lines = backup.lines + ['**' ~ name ~ '**: ' ~ states(entity)] -%}
-                {% endif -%}
-              {% endfor -%}
-              {% if backup.lines -%}
-                {{ backup.lines[:5] | join('<br><br>') }}
-              {% else -%}
-                <ha-icon icon="mdi:information-outline"></ha-icon> Данные о резервных копиях пока недоступны.
-              {% endif %}
+          - type: tile
+            entity: sensor.backup_backup_manager_state
+            name: Backup manager
+            vertical: false
+          - type: tile
+            entity: sensor.backup_last_successful_automatic_backup
+            name: Last successful backup
+            vertical: false
+          - type: tile
+            entity: sensor.backup_next_scheduled_automatic_backup
+            name: Next backup
+            vertical: false
           - type: tile
             entity: update.home_assistant_core_update
-            name: HA Core update
-            color: grey
+            name: Core update
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('update.home_assistant_core_update') }}"
           - type: tile
             entity: update.home_assistant_operating_system_update
-            name: HA OS update
-            color: grey
+            name: OS update
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('update.home_assistant_operating_system_update') }}"
           - type: tile
             entity: update.home_assistant_supervisor_update
-            name: HA Supervisor update
-            color: grey
+            name: Supervisor update
             vertical: false
-            visibility:
-              - condition: template
-                value_template: "{{ has_value('update.home_assistant_supervisor_update') }}"
-    max_columns: 3
+    max_columns: 4
     title: System Health
     icon: mdi:heart-pulse
     subview: false
