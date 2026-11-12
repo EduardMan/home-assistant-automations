@@ -1437,7 +1437,12 @@ views:
           - type: heading
             heading: Network
             heading_style: title
-            icon: mdi:router
+            icon: mdi:router-wireless
+            badges:
+              - type: entity
+                entity: sensor.keenetic_router_wan_status
+                name: WAN
+                show_state: true
           - type: tile
             entity: sensor.keenetic_router_connected_clients
             name: Connected clients
@@ -1449,10 +1454,6 @@ views:
               - type: trend-graph
                 hours_to_show: 24
                 detail: false
-          - type: tile
-            entity: sensor.keenetic_router_wan_status
-            name: WAN status
-            vertical: false
           - type: tile
             entity: sensor.keenetic_router_cpu_load
             name: Router CPU
