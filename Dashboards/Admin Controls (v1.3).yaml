@@ -1363,15 +1363,20 @@ views:
         name: Uptime
         show_name: true
         show_state: true
-        time_format: relative
+        time_format: total
       - type: entity
-        entity: sensor.w150_battery_charge
-        name: UPS charge
+        entity: sensor.system_monitor_memory_usage
+        name: RAM
         show_name: true
         show_state: true
       - type: entity
-        entity: sensor.ups_server_main_output_power
-        name: UPS output
+        entity: sensor.system_monitor_processor_use
+        name: CPU
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.system_monitor_processor_temperature
+        name: CPU Temp
         show_name: true
         show_state: true
     sections:
