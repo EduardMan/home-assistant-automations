@@ -4,9 +4,50 @@ views:
       - type: entity
         entity: sensor.device_health_status
         name: Status
-        icon: mdi:heart-pulse
+        icon: mdi:check-circle-outline
+        color: green
         show_name: true
         show_state: true
+        visibility:
+          - condition: state
+            entity_id: sensor.device_health_status
+            state: Healthy
+      - type: entity
+        entity: sensor.device_health_status
+        name: Status
+        icon: mdi:alert-outline
+        color: orange
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: state
+            entity_id: sensor.device_health_status
+            state: Warning
+      - type: entity
+        entity: sensor.device_health_status
+        name: Status
+        icon: mdi:alert-circle-outline
+        color: red
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: state
+            entity_id: sensor.device_health_status
+            state: Critical
+      - type: entity
+        entity: sensor.device_health_status
+        name: Status
+        icon: mdi:help-circle-outline
+        color: grey
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: state
+            entity_id: sensor.device_health_status
+            state:
+              - Unknown
+              - unknown
+              - unavailable
       - type: entity
         entity: number.device_health_unavailable_count
         name: Unavailable
