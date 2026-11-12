@@ -12,19 +12,37 @@ maximumValue: 1000
 entityId: device_health_discharged_count
 visible: false
 availability template: >-
-  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'heating_thermostats', 'untracked_zigbee_sensors'] %}
+  {% set entities = [
+                        'number.door_sensors_discharged_count',
+                        'number.moisture_sensors_discharged_count',
+                        'number.motion_sensors_discharged_count',
+                        'number.temperature_sensors_discharged_count',
+                        'number.smoke_sensors_discharged_count',
+                        'number.heating_thermostats_discharged_count',
+                        'number.untracked_zigbee_sensors_discharged_count'
+                      ]
+  %}
   {% set check = namespace(complete=true) %}
-  {% for category in categories %}
-    {% if not is_number(states('number.' ~ category ~ '_discharged_count')) %}
+  {% for entity in entities %}
+    {% if not is_number(states(entity)) %}
       {% set check.complete = false %}
     {% endif %}
   {% endfor %}
   {{ check.complete }}
 state: >-
-  {% set categories = ['door_sensors', 'moisture_sensors', 'motion_sensors', 'temperature_sensors', 'smoke_sensors', 'heating_thermostats', 'untracked_zigbee_sensors'] %}
+  {% set entities = [
+                        'number.door_sensors_discharged_count',
+                        'number.moisture_sensors_discharged_count',
+                        'number.motion_sensors_discharged_count',
+                        'number.temperature_sensors_discharged_count',
+                        'number.smoke_sensors_discharged_count',
+                        'number.heating_thermostats_discharged_count',
+                        'number.untracked_zigbee_sensors_discharged_count'
+                      ]
+  %}
   {% set check = namespace(total=0) %}
-  {% for category in categories %}
-    {% set value = states('number.' ~ category ~ '_discharged_count') %}
+  {% for entity in entities %}
+    {% set value = states(entity) %}
     {% if is_number(value) %}
       {% set check.total = check.total + (value | int(0)) %}
     {% endif %}
