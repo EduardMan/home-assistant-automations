@@ -1352,3 +1352,228 @@ views:
     cards: []
     show_icon_and_title: true
     path: device-health-view
+# System Health (v1.0) tab: built-in Sections/Tile/Badge cards.
+# Each metric is independently editable in the Home Assistant dashboard editor.
+# System Monitor IDs are confirmed from this instance's Entities list.
+# Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
+# Keenetic Router Pro IDs confirmed in this HA instance; WAN throughput IDs contain
+# the configured WAN uplink name and may differ on another instance/router.
+  - type: sections
+    badges:
+      - type: entity
+        entity: sensor.uptime
+        name: Uptime
+        show_name: true
+        show_state: true
+        time_format: total
+      - type: entity
+        entity: sensor.system_monitor_memory_usage
+        name: RAM
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.system_monitor_processor_use
+        name: CPU
+        show_name: true
+        show_state: true
+      - type: entity
+        entity: sensor.system_monitor_processor_temperature
+        name: CPU Temp
+        show_name: true
+        show_state: true
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Server
+            heading_style: title
+            icon: mdi:server
+          - type: tile
+            entity: sensor.system_monitor_processor_use
+            name: CPU
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_memory_usage
+            name: RAM
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_disk_usage
+            name: Disk /
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.system_monitor_processor_temperature
+            name: CPU temperature
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        visibility:
+          - condition: template
+            value_template: >-
+              {{ integration_entities('keenetic_router_pro') | count > 0 }}
+        cards:
+          - type: heading
+            heading: Network
+            heading_style: title
+            icon: mdi:router-wireless
+          - type: tile
+            entity: sensor.keenetic_router_connected_clients
+            name: Clients
+            vertical: false
+          - type: tile
+            entity: sensor.keenetic_router_wan_status
+            name: WAN
+            vertical: false
+          - type: tile
+            entity: sensor.keenetic_router_cpu_load
+            name: Router CPU
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_memory_usage
+            name: Router RAM
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_rx_throughput
+            name: WAN download
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.keenetic_router_ethernet_isp_default_connection_tx_throughput
+            name: WAN upload
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: UPS
+            heading_style: title
+            icon: mdi:power-plug-outline
+          - type: tile
+            entity: sensor.ups_server_main_output_power
+            name: Output power
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.ups_server_main_input_power
+            name: Input power
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_charge
+            name: Battery charge
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_runtime
+            name: Remaining runtime
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+          - type: tile
+            entity: sensor.w150_battery_temperature
+            name: Battery temp
+            vertical: false
+            grid_options:
+              columns: 12
+            features_position: inline
+            features:
+              - type: trend-graph
+                hours_to_show: 24
+                detail: false
+      - type: grid
+        cards:
+          - type: heading
+            heading: Backups
+            heading_style: title
+            icon: mdi:backup-restore
+          - type: tile
+            entity: sensor.backup_last_successful_automatic_backup
+            name: Last backup
+            vertical: false
+          - type: tile
+            entity: sensor.backup_next_scheduled_automatic_backup
+            name: Next backup
+            vertical: false
+    max_columns: 4
+    title: System Health
+    icon: mdi:heart-pulse
+    subview: false
+    top_margin: false
+    cards: []
+    show_icon_and_title: true
+    path: system-health-view
