@@ -1442,6 +1442,14 @@ views:
             heading: Network
             heading_style: title
             icon: mdi:router-wireless
+            badges:
+              - type: entity
+                entity: sensor.keenetic_router_uptime
+                name: Uptime
+                show_state: true
+                state_content:
+                  - name
+                  - state
           - type: tile
             entity: sensor.keenetic_router_connected_clients
             name: Clients
