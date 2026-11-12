@@ -1546,7 +1546,7 @@ views:
                 detail: false
           - type: tile
             entity: sensor.w150_battery_temperature
-            name: Battery temperature
+            name: Battery temp
             vertical: false
             grid_options:
               columns: 12
