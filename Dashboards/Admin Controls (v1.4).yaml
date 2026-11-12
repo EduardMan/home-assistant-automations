@@ -57,7 +57,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_unavailable_count
-            below: 2
+            below: 1
       - type: entity
         entity: number.device_health_unavailable_count
         name: Unavailable
@@ -68,7 +68,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_unavailable_count
-            above: 1
+            above: 0
       - type: entity
         entity: number.device_health_discharged_count
         name: Discharged
@@ -78,7 +78,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_discharged_count
-            below: 2
+            below: 1
       - type: entity
         entity: number.device_health_discharged_count
         name: Discharged
@@ -89,7 +89,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_discharged_count
-            above: 1
+            above: 0
       - type: entity
         entity: number.device_health_mismatch_count
         name: Mismatches
@@ -99,7 +99,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_mismatch_count
-            below: 2
+            below: 1
       - type: entity
         entity: number.device_health_mismatch_count
         name: Mismatches
@@ -110,7 +110,7 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.device_health_mismatch_count
-            above: 1
+            above: 0
       - type: entity
         entity: number.untracked_zigbee_sensors_unavailable_ignore_count
         name: Ignored
