@@ -1,0 +1,31 @@
+# Итоговое состояние Device Health. Читается из агрегирующих хелперов; без повторения логики категорий.
+# category:
+#   - Device health
+# dependencies:
+#   - Device health unavailable count (Template number)
+#   - Device health discharged count (Template number)
+#   - Device health mismatch count (Template number)
+#   - Untracked zigbee sensors unavailable ignore count (Template number)
+# Приоритет: Critical > Warning > Unknown > Healthy.
+# Если уже подтверждены проблемы, они отображаются даже при неполных других данных.
+name: Device health status (v1.0)
+type: Template sensor
+icon: mdi:heart-pulse
+entityId: device_health_status
+visible: false
+state: >-
+  {% set unavailable = states('number.device_health_unavailable_count') %}
+  {% set discharged = states('number.device_health_discharged_count') %}
+  {% set mismatches = states('number.device_health_mismatch_count') %}
+  {% set ignored = states('number.untracked_zigbee_sensors_unavailable_ignore_count') %}
+  {% if is_number(unavailable) and (unavailable | int(0)) > 0 %}
+    Critical
+  {% elif (is_number(discharged) and (discharged | int(0)) > 0)
+       or (is_number(mismatches) and (mismatches | int(0)) > 0) %}
+    Warning
+  {% elif not (is_number(unavailable) and is_number(discharged)
+       and is_number(mismatches) and is_number(ignored)) %}
+    Unknown
+  {% else %}
+    Healthy
+  {% endif %}
