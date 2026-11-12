@@ -1376,7 +1376,6 @@ views:
         show_state: true
     sections:
       - type: grid
-        column_span: 2
         cards:
           - type: heading
             heading: Server
@@ -1427,7 +1426,6 @@ views:
                 hours_to_show: 24
                 detail: false
       - type: grid
-        column_span: 2
         cards:
           - type: heading
             heading: UPS
@@ -1489,7 +1487,6 @@ views:
                 hours_to_show: 24
                 detail: false
       - type: grid
-        column_span: 2
         cards:
           - type: heading
             heading: Maintenance
