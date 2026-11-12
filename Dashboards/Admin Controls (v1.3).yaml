@@ -1494,13 +1494,9 @@ views:
       - type: grid
         cards:
           - type: heading
-            heading: Maintenance
+            heading: Backups
             heading_style: title
             icon: mdi:backup-restore
-          - type: tile
-            entity: sensor.backup_backup_manager_state
-            name: Backup manager
-            vertical: false
           - type: tile
             entity: sensor.backup_last_successful_automatic_backup
             name: Last backup
@@ -1508,18 +1504,6 @@ views:
           - type: tile
             entity: sensor.backup_next_scheduled_automatic_backup
             name: Next backup
-            vertical: false
-          - type: tile
-            entity: update.home_assistant_core_update
-            name: Core update
-            vertical: false
-          - type: tile
-            entity: update.home_assistant_operating_system_update
-            name: OS update
-            vertical: false
-          - type: tile
-            entity: update.home_assistant_supervisor_update
-            name: Supervisor update
             vertical: false
     max_columns: 4
     title: System Health
