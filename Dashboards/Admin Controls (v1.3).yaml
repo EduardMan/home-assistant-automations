@@ -1408,7 +1408,7 @@ views:
                 detail: false
           - type: tile
             entity: sensor.system_monitor_disk_usage
-            name: Disk usage
+            name: Disk usage /
             vertical: false
             grid_options:
               columns: 12
