@@ -16,7 +16,7 @@ category:
   - name: Presence
     icon: mdi:home-account
   - name: Climate
-    icon: mdi:home-thermometer
+    icon: mdi:home-thermometer-outline
   - name: Routine
     icon: mdi:playlist-check
 label:
