@@ -84,7 +84,7 @@ actions:
       external_temperature: "{{ states('sensor.{{ your external temperature sensor }}') | float(0) }}"
       thermostat_temperature: "{{ states('sensor.{{ your thermostat temperature sensor }}') | float(0) }}"
       current_calibration: "{{ states('number.{{ your thermostat calibration number }}') | int(0) }}"
-  # Рассчитываем новую поправку с учётом уже действующей калибровки и ограничений термостата
+  # К текущей калибровке прибавляем разницу между температурой внешнего датчика и температурой термостата
   - variables:
       new_calibration: >-
         {% set correction = (external_temperature | float(0)) - (thermostat_temperature | float(0)) %}
