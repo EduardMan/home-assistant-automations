@@ -70,7 +70,7 @@ conditions:
       {{ is_number(states('sensor.{{ your external temperature sensor }}'))
          and is_number(states('sensor.{{ your thermostat temperature sensor }}'))
          and is_number(states('number.{{ your thermostat calibration number }}')) }}
-  # Не накапливаем поправку по старой температуре до нового отчёта термостата после коррекции
+  # После изменения калибровки ждём, пока термостат передаст новую температуру, чтобы при следующем расчёте не использовать старое показание
   - alias: Thermostat temperature reported after calibration changed
     condition: template
     value_template: >-
