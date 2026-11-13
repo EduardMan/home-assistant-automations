@@ -8,6 +8,8 @@
 #   - sensor.{{ your external temperature sensor }} (External temperature sensor)
 #   - sensor.{{ your thermostat temperature sensor }} (Heating thermostat temperature)
 #   - number.{{ your thermostat calibration number }} (Heating thermostat temperature calibration)
+#   - Temperature sensor availability (Template binary sensor)
+#   - Heating thermostat availability (Template binary sensor)
 
 alias: Heating thermostat {{ meaningful name }} external temperature calibration (v1.0)
 description: |2-
@@ -26,8 +28,8 @@ description: |2-
 
   **Защита от лишних команд и неверных данных:**
   - Пропускает проверку, если хотя бы одно исходное значение неизвестно или недоступно.
-  - Не использует показания датчиков, которые не обновлялись больше 6 часов.
-  - После изменения калибровки ждёт нового отчёта температуры термостата.
+  - Корректирует только если сенсоры доступности внешнего датчика и термостата равны on.
+  - После изменения калибровки ждёт нового отчёта температуры термостата, чтобы не накапливать поправку по старым данным.
   - Не требует дополнительных хелперов, таймеров или сторонних интеграций.
 
   **Что нужно настроить перед использованием:**
@@ -35,6 +37,9 @@ description: |2-
   - Замените `{{ your external temperature sensor }}` на часть entity_id внешнего датчика после `sensor.`.
   - Замените `{{ your thermostat temperature sensor }}` на часть entity_id температуры термостата после `sensor.`.
   - Замените `{{ your thermostat calibration number }}` на часть entity_id калибровки после `number.`.
+  - Замените `{{ your external temperature availability sensor }}` на часть entity_id хелпера доступности внешнего датчика после `binary_sensor.`.
+  - Замените `{{ your thermostat availability sensor }}` на часть entity_id хелпера доступности термостата после `binary_sensor.`.
+  - Хелперы доступности должны быть созданы по шаблонам Temperature sensor availability и Heating thermostat availability.
   - Шаблон рассчитан на термостаты с целочисленной калибровкой от −9 до +9 °C с шагом 1 °C (например, BRT-100-TRV).
     Для других моделей проверьте и при необходимости измените диапазон и шаг.
 triggers:
@@ -51,6 +56,16 @@ triggers:
       {{ is_number(external_temperature) and is_number(thermostat_temperature)
          and (((external_temperature | float(0)) - (thermostat_temperature | float(0))) | abs) >= 2 }}
 conditions:
+  # Внешний датчик должен быть на связи — хелпер доступности проверяет Zigbee2MQTT last_seen
+  - alias: External temperature sensor is available
+    condition: state
+    entity_id: binary_sensor.{{ your external temperature availability sensor }}
+    state: "on"
+  # Термостат также должен быть на связи
+  - alias: Heating thermostat is available
+    condition: state
+    entity_id: binary_sensor.{{ your thermostat availability sensor }}
+    state: "on"
   # Не выполняем калибровку, если хотя бы одно исходное значение недоступно
   - alias: External temperature, thermostat temperature and current calibration are numeric
     condition: template
@@ -58,18 +73,13 @@ conditions:
       {{ is_number(states('sensor.{{ your external temperature sensor }}'))
          and is_number(states('sensor.{{ your thermostat temperature sensor }}'))
          and is_number(states('number.{{ your thermostat calibration number }}')) }}
-  # Не используем устаревшие данные и ждём новый отчёт температуры после предыдущей калибровки
-  - alias: Temperature reports are fresh and thermostat reported after calibration changed
+  # Не накапливаем поправку по старой температуре до нового отчёта термостата после коррекции
+  - alias: Thermostat temperature reported after calibration changed
     condition: template
     value_template: >-
-      {% set external_temperature_state = states['sensor.{{ your external temperature sensor }}'] %}
       {% set thermostat_temperature_state = states['sensor.{{ your thermostat temperature sensor }}'] %}
       {% set calibration_state = states['number.{{ your thermostat calibration number }}'] %}
-      {% set current_time = as_timestamp(now()) %}
-      {% set max_age_seconds = 21600 %}
-      {{ external_temperature_state is not none and thermostat_temperature_state is not none and calibration_state is not none
-         and (current_time - as_timestamp(external_temperature_state.last_reported, 0)) <= max_age_seconds
-         and (current_time - as_timestamp(thermostat_temperature_state.last_reported, 0)) <= max_age_seconds
+      {{ thermostat_temperature_state is not none and calibration_state is not none
          and as_timestamp(thermostat_temperature_state.last_reported, 0) > as_timestamp(calibration_state.last_changed, 0) }}
 actions:
   # Считываем исходные значения один раз для согласованного расчёта
