@@ -5,11 +5,8 @@
 # entityId
 #   - heating_thermostat_{{ meaningful name }}_external_temperature_calibration
 # dependencies:
-#   - sensor.{{ your external temperature sensor }} (External temperature sensor)
-#   - sensor.{{ your thermostat temperature sensor }} (Heating thermostat temperature)
-#   - number.{{ your thermostat calibration number }} (Heating thermostat temperature calibration)
-#   - Temperature sensor availability (Template binary sensor)
-#   - Heating thermostat availability (Template binary sensor)
+#   - Temperature sensor availability (Helper)
+#   - Heating thermostat availability (Helper)
 
 alias: Heating thermostat {{ meaningful name }} external temperature calibration (v1.0)
 description: |2-
