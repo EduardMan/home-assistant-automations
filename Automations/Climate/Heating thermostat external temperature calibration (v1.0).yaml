@@ -89,6 +89,7 @@ actions:
       new_calibration: >-
         {% set correction = (external_temperature | float(0)) - (thermostat_temperature | float(0)) %}
         {% set result = ((current_calibration | int(0)) + correction) | round(0) | int(0) %}
+        {# Сначала max ограничивает поправку снизу до -9 °C, затем min — сверху до +9 °C. #}
         {{ [[result, -9] | max, 9] | min }}
   # Не отправляем команду, если после округления и ограничения поправка не изменилась
   - alias: Calculated calibration differs from current calibration
