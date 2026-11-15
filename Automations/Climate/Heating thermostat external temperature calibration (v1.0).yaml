@@ -1,0 +1,109 @@
+# category
+#   - Climate
+# labels:
+#   - scheduled
+# entityId
+#   - heating_thermostat_{{ meaningful name }}_external_temperature_calibration
+# dependencies:
+#   - Temperature sensor availability (Helper)
+#   - Heating thermostat availability (Helper)
+
+alias: Heating thermostat {{ meaningful name }} external temperature calibration (v1.0)
+description: |2-
+  **Что делает:**
+  Корректирует температуру радиаторного термостата по внешнему датчику.
+  Сам термостат продолжает управлять радиатором и заданной температурой.
+
+  **Как рассчитывается калибровка:**
+  - Новая поправка = текущая поправка + внешняя температура − температура термостата.
+  - Результат округляется до целого градуса и ограничивается диапазоном от −9 до +9 °C.
+  - Если рассчитанное значение совпадает с текущим, команда термостату не отправляется.
+
+  **Когда срабатывает проверка:**
+  - 📅 Каждые 5 минут — сравнивает температуру в комнате с показаниями термостата и при необходимости корректирует калибровку даже на 1 °C.
+  - 🌡️ При изменении температуры любого из двух датчиков — проверяет показания вне расписания, если разница между ними достигла 2 °C или больше.
+  - ⚙️ Если оба устройства на связи и новая поправка отличается от текущей — отправляет изменённую калибровку термостату.
+
+  **Защита от лишних команд и неверных данных:**
+  - Пропускает проверку, если хотя бы одно исходное значение неизвестно или недоступно.
+  - Корректирует только если сенсоры доступности внешнего датчика и термостата равны on.
+  - Не отправляет команду, если рассчитанная калибровка совпадает с текущей.
+  - Использует существующие хелперы доступности датчика температуры и термостата. Других хелперов не требует.
+
+  **Что нужно настроить перед использованием:**
+  - Замените `{{ meaningful name }}` на уникальное название термостата (латиницей в `entityId`).
+  - Замените `{{ your external temperature sensor }}` на часть entity_id внешнего датчика после `sensor.`.
+  - Замените `{{ your thermostat temperature sensor }}` на часть entity_id температуры термостата после `sensor.`.
+  - Замените `{{ your thermostat calibration number }}` на часть entity_id калибровки после `number.`.
+  - Замените `{{ your external temperature availability sensor }}` на часть entity_id хелпера доступности внешнего датчика после `binary_sensor.`.
+  - Замените `{{ your thermostat availability sensor }}` на часть entity_id хелпера доступности термостата после `binary_sensor.`.
+  - Хелперы доступности должны быть созданы по шаблонам Temperature sensor availability и Heating thermostat availability.
+  - Шаблон рассчитан на термостаты с целочисленной калибровкой от −9 до +9 °C с шагом 1 °C (например, BRT-100-TRV).
+    Температура термостата должна уже учитывать действующую калибровку (для BRT-100-TRV это обеспечивает Zigbee2MQTT).
+    Для других моделей проверьте диапазон, шаг и то, как устройство сообщает температуру после калибровки.
+triggers:
+  # Плановая проверка каждые 5 минут — при необходимости корректируем даже на 1 °C
+  - id: scheduled
+    trigger: time_pattern
+    minutes: "/5"
+  # При изменении температуры любого датчика проверяем, достигла ли разница 2 °C
+  - id: deviation
+    trigger: state
+    entity_id:
+      - sensor.{{ your external temperature sensor }}
+      - sensor.{{ your thermostat temperature sensor }}
+    to: null
+conditions:
+  # Внешний датчик должен быть на связи — хелпер доступности проверяет Zigbee2MQTT last_seen
+  - alias: External temperature sensor is available
+    condition: state
+    entity_id: binary_sensor.{{ your external temperature availability sensor }}
+    state: "on"
+  # Термостат также должен быть на связи
+  - alias: Heating thermostat is available
+    condition: state
+    entity_id: binary_sensor.{{ your thermostat availability sensor }}
+    state: "on"
+  # Не выполняем калибровку, если хотя бы одно исходное значение недоступно
+  - alias: External temperature, thermostat temperature and current calibration are numeric
+    condition: template
+    value_template: >-
+      {{ is_number(states('sensor.{{ your external temperature sensor }}'))
+         and is_number(states('sensor.{{ your thermostat temperature sensor }}'))
+         and is_number(states('number.{{ your thermostat calibration number }}')) }}
+  # По расписанию проверяем всегда; после изменения температуры — только при расхождении от 2 °C
+  - alias: Scheduled check or temperature difference is at least 2 °C
+    condition: or
+    conditions:
+      - condition: trigger
+        id: scheduled
+      - condition: template
+        value_template: >-
+          {% set external_temperature = states('sensor.{{ your external temperature sensor }}') | float(0) %}
+          {% set thermostat_temperature = states('sensor.{{ your thermostat temperature sensor }}') | float(0) %}
+          {{ (external_temperature - thermostat_temperature) | abs >= 2 }}
+actions:
+  # Считываем исходные значения один раз для согласованного расчёта
+  - variables:
+      external_temperature: "{{ states('sensor.{{ your external temperature sensor }}') | float(0) }}"
+      thermostat_temperature: "{{ states('sensor.{{ your thermostat temperature sensor }}') | float(0) }}"
+      current_calibration: "{{ states('number.{{ your thermostat calibration number }}') | int(0) }}"
+  # К текущей калибровке прибавляем разницу между температурой внешнего датчика и температурой термостата
+  - variables:
+      new_calibration: >-
+        {% set correction = (external_temperature | float(0)) - (thermostat_temperature | float(0)) %}
+        {% set result = ((current_calibration | int(0)) + correction) | round(0) | int(0) %}
+        {# Сначала max ограничивает поправку снизу до -9 °C, затем min — сверху до +9 °C. #}
+        {{ [[result, -9] | max, 9] | min }}
+  # Не отправляем команду, если после округления и ограничения поправка не изменилась
+  - alias: Calculated calibration differs from current calibration
+    condition: template
+    value_template: >-
+      {{ (new_calibration | int(0)) != (current_calibration | int(0)) }}
+  - action: number.set_value
+    metadata: {}
+    target:
+      entity_id: number.{{ your thermostat calibration number }}
+    data:
+      value: "{{ new_calibration | int(0) }}"
+mode: single
