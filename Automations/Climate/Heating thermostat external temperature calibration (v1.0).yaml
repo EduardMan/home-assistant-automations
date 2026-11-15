@@ -21,12 +21,12 @@ description: |2-
 
   **Когда срабатывает:**
   - 📅 Каждые 5 минут — даже если необходима поправка всего на 1 °C.
-  - 🌡️ При переходе расхождения между датчиками через порог 2 °C — внеплановая проверка.
+  - 🌡️ При изменении температуры внешнего датчика или термостата — внеплановая проверка, если расхождение составляет 2 °C или больше.
 
   **Защита от лишних команд и неверных данных:**
   - Пропускает проверку, если хотя бы одно исходное значение неизвестно или недоступно.
   - Корректирует только если сенсоры доступности внешнего датчика и термостата равны on.
-  - После изменения калибровки ждёт нового отчёта температуры термостата, чтобы не накапливать поправку по старым данным.
+  - Не отправляет команду, если рассчитанная калибровка совпадает с текущей.
   - Не требует дополнительных хелперов, таймеров или сторонних интеграций.
 
   **Что нужно настроить перед использованием:**
@@ -38,20 +38,20 @@ description: |2-
   - Замените `{{ your thermostat availability sensor }}` на часть entity_id хелпера доступности термостата после `binary_sensor.`.
   - Хелперы доступности должны быть созданы по шаблонам Temperature sensor availability и Heating thermostat availability.
   - Шаблон рассчитан на термостаты с целочисленной калибровкой от −9 до +9 °C с шагом 1 °C (например, BRT-100-TRV).
-    Для других моделей проверьте и при необходимости измените диапазон и шаг.
+    Температура термостата должна уже учитывать действующую калибровку (для BRT-100-TRV это обеспечивает Zigbee2MQTT).
+    Для других моделей проверьте диапазон, шаг и то, как устройство сообщает температуру после калибровки.
 triggers:
   # Плановая проверка каждые 5 минут — при необходимости корректируем даже на 1 °C
   - id: scheduled
     trigger: time_pattern
     minutes: "/5"
-  # Внеплановая проверка при переходе расхождения температур через порог 2 °C
+  # При изменении температуры любого датчика проверяем, достигла ли разница 2 °C
   - id: deviation
-    trigger: template
-    value_template: >-
-      {% set external_temperature = states('sensor.{{ your external temperature sensor }}') %}
-      {% set thermostat_temperature = states('sensor.{{ your thermostat temperature sensor }}') %}
-      {{ is_number(external_temperature) and is_number(thermostat_temperature)
-         and (((external_temperature | float(0)) - (thermostat_temperature | float(0))) | abs) >= 2 }}
+    trigger: state
+    entity_id:
+      - sensor.{{ your external temperature sensor }}
+      - sensor.{{ your thermostat temperature sensor }}
+    to: null
 conditions:
   # Внешний датчик должен быть на связи — хелпер доступности проверяет Zigbee2MQTT last_seen
   - alias: External temperature sensor is available
@@ -70,14 +70,17 @@ conditions:
       {{ is_number(states('sensor.{{ your external temperature sensor }}'))
          and is_number(states('sensor.{{ your thermostat temperature sensor }}'))
          and is_number(states('number.{{ your thermostat calibration number }}')) }}
-  # После изменения калибровки ждём, пока термостат передаст новую температуру, чтобы при следующем расчёте не использовать старое показание
-  - alias: Thermostat temperature reported after calibration changed
-    condition: template
-    value_template: >-
-      {% set thermostat_temperature_state = states['sensor.{{ your thermostat temperature sensor }}'] %}
-      {% set calibration_state = states['number.{{ your thermostat calibration number }}'] %}
-      {{ thermostat_temperature_state is not none and calibration_state is not none
-         and as_timestamp(thermostat_temperature_state.last_reported, 0) > as_timestamp(calibration_state.last_changed, 0) }}
+  # По расписанию проверяем всегда; после изменения температуры — только при расхождении от 2 °C
+  - alias: Scheduled check or temperature difference is at least 2 °C
+    condition: or
+    conditions:
+      - condition: trigger
+        id: scheduled
+      - condition: template
+        value_template: >-
+          {% set external_temperature = states('sensor.{{ your external temperature sensor }}') | float(0) %}
+          {% set thermostat_temperature = states('sensor.{{ your thermostat temperature sensor }}') | float(0) %}
+          {{ (external_temperature - thermostat_temperature) | abs >= 2 }}
 actions:
   # Считываем исходные значения один раз для согласованного расчёта
   - variables:
