@@ -224,6 +224,15 @@ actions:
         - entity_id: number.heating_thermostats_discharged_count
           name: Heating thermostats discharged count (v1.0)
           label: "heating_thermostat"
+        # Device health
+        - entity_id: sensor.device_health_status
+          name: Device health status (v1.0)
+        - entity_id: number.device_health_unavailable_count
+          name: Device health unavailable count (v1.0)
+        - entity_id: number.device_health_discharged_count
+          name: Device health discharged count (v1.0)
+        - entity_id: number.device_health_mismatch_count
+          name: Device health mismatch count (v1.0)
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
