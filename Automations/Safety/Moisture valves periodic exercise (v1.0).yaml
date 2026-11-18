@@ -10,11 +10,8 @@
 #   - moisture valve (label)
 #   - Moisture sensor availability (Helper)
 #   - Moisture valve availability (Helper)
-#   - Moisture valves expected count (Helper)
 #   - Close valve required time seconds (Helper)
-#   - Close valves retry count (Helper)
 #   - Moisture sensors leak detection (Automation)
-#   - Moisture sensors leak checker (Automation)
 #   - Close labeled moisture valves with retries (Script)
 #   - Universal notification sender (Script)
 
@@ -34,7 +31,7 @@ description: |2-
   - 📅 1-го и 15-го числа каждого месяца в 11:00.
 
   **Защита:**
-  - Пропускает запуск с уведомлением, если часть кранов уже закрыта, есть протечка или недоступные датчики, не совпадает ожидаемое количество кранов либо отключена аварийная защита.
+  - Пропускает запуск с уведомлением, если нет кранов или датчиков протечки, часть кранов уже закрыта, датчики мокрые или недоступны либо отключена аварийная защита.
   - Перед открытием проверяет, что с начала цикла не срабатывала основная автоматизация протечки.
   - Если скрипт не смог закрыть все краны, дальнейшее выполнение прекращается: сообщение об ошибке уже отправлено скриптом.
   - Если после открытия не все краны вернулись в состояние open, сообщает о необходимости ручной проверки.
@@ -42,9 +39,8 @@ description: |2-
   - Не заменяет независимую аппаратную защиту: полностью исключить гонку с аварийным перекрытием при одновременных командах невозможно.
 
   **Настройки:**
-  - Moisture valves expected count — ожидаемое число кранов.
   - Close valve required time seconds — максимальное время ожидания открытия (при закрытии используется скриптом).
-  - Close valves retry count — число попыток закрытия в существующем скрипте.
+  - Close valves retry count — число попыток закрытия в переиспользуемом скрипте.
   - Перед включением проверьте лейблы, availability-сенсоры и состояния open/closed на реальном оборудовании.
 triggers:
   # Каждый день в 11:00; условие ниже допускает только 1-е и 15-е числа месяца
@@ -72,13 +68,7 @@ actions:
   # Проверяем, что воды не перекрыли заранее, нет протечек и все устройства доступны
   - variables:
       preflight_ok: >-
-        {% set expected = states('input_number.moisture_valves_expected_count') %}
-        {% set timeout = states('input_number.close_valve_required_time_seconds') %}
-        {% set retries = states('input_number.close_valves_retry_count') %}
-        {{ is_number(expected) and (expected | int(0)) > 0
-           and is_number(timeout) and (timeout | int(0)) > 0
-           and is_number(retries) and (retries | int(0)) > 0
-           and (moisture_valves | count) == (expected | int(0))
+        {{ (moisture_valves | count) > 0
            and (moisture_sensors | count) > 0
            and (valve_availability_sensors | count) == (moisture_valves | count)
            and (sensor_availability_sensors | count) == (moisture_sensors | count)
@@ -87,7 +77,6 @@ actions:
            and (expand(valve_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (valve_availability_sensors | count)
            and (expand(sensor_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (sensor_availability_sensors | count)
            and is_state('automation.moisture_sensors_leak_detection', 'on')
-           and is_state('automation.moisture_sensors_leak_checker', 'on')
            and is_state('script.close_labeled_moisture_valves_with_retries', 'off') }}
   - if:
       - condition: template
@@ -101,7 +90,7 @@ actions:
           message_title: Профилактика кранов пропущена!
           message_text: >-
             Проверка безопасности не пройдена. Проверьте сухость и доступность датчиков,
-            число и положение кранов, их availability-сенсоры и работу аварийных автоматизаций.
+            наличие и положение кранов, их availability-сенсоры и работу аварийной автоматизации.
             Краны не переключались.
           message_notification_id: moisture_valves_periodic_exercise_skipped
       - stop: Valve exercise preflight checks failed
@@ -120,7 +109,6 @@ actions:
       safe_to_open: >-
         {% set last_leak = state_attr('automation.moisture_sensors_leak_detection', 'last_triggered') %}
         {{ is_state('automation.moisture_sensors_leak_detection', 'on')
-           and is_state('automation.moisture_sensors_leak_checker', 'on')
            and is_state('script.close_labeled_moisture_valves_with_retries', 'off')
            and (last_leak is none or as_timestamp(last_leak, 0) < (exercise_started_at | float(0)))
            and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
@@ -136,7 +124,7 @@ actions:
         data:
           automation_trigger_id: scheduled
           notify_if_trigger_id_is_none: true
-          message_title: Профилактика кранов: открытие запрещено!
+          message_title: "Профилактика кранов: открытие запрещено!"
           message_text: >-
             После закрытия кранов не пройдена проверка безопасности: возможна протечка,
             срабатывание защиты или недоступность устройств. Вода оставлена перекрытой.
@@ -162,7 +150,7 @@ actions:
         data:
           automation_trigger_id: scheduled
           notify_if_trigger_id_is_none: true
-          message_title: Профилактика кранов: открытие не подтверждено!
+          message_title: "Профилактика кранов: открытие не подтверждено!"
           message_text: >-
             Не все краны подтвердили состояние open за установленное время.
             Проверьте водоснабжение вручную.
