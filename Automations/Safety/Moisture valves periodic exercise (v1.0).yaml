@@ -42,8 +42,10 @@ description: |2-
   - Close valves retry count — число попыток закрытия в переиспользуемом скрипте.
   - Перед включением проверьте лейблы, состояния датчиков протечки и положения кранов на реальном оборудовании.
 triggers:
-  # Каждый день в 04:15; условие ниже допускает только 1-е и 15-е числа месяца
-  - id: scheduled
+  - alias: Scheduled valve exercise
+    note: >-
+      Каждый день в 04:15; условие ниже допускает только 1-е и 15-е числа месяца
+    id: scheduled
     trigger: time
     at: "04:15:00"
 conditions:
@@ -51,51 +53,68 @@ conditions:
     condition: template
     value_template: "{{ now().day in [1, 15] }}"
 actions:
-  # Определяем все краны и датчики по тем же лейблам, что и в аварийной защите
-  - variables:
+  - alias: Collect moisture valves and leak sensors
+    note: >-
+      Определяем все краны и датчики по тем же лейблам, что и в аварийной защите
+    variables:
       moisture_valves: >-
         {{ label_entities('moisture_valve') | select('match', '^valve[.]') | list }}
       moisture_sensors: >-
         {{ label_entities('moisture')
            | select('match', '^binary_sensor[.].*_water_leak$')
            | reject('in', label_entities('moisture_valve_ignore')) | list }}
-  # Запоминаем только изначально открытые краны
-  - variables:
+  - alias: Remember initially open valves
+    note: >-
+      Запоминаем только изначально открытые краны
+    variables:
       initially_open_valves: >-
         {{ expand(moisture_valves)
            | selectattr('state', 'eq', 'open')
            | map(attribute='entity_id')
            | list }}
-  # Переиспользуем штатный скрипт аварийного закрытия: все краны сразу, с повторами
-  - action: script.close_labeled_moisture_valves_with_retries
+  - alias: Close all moisture valves with retries
+    note: >-
+      Переиспользуем штатный скрипт аварийного закрытия: все краны сразу, с повторами
+    action: script.close_labeled_moisture_valves_with_retries
     metadata: {}
     data:
       suppress_success_notification: true
-  # Состояние closed может означать переключение реле, а не конец физического хода крана
-  # Ждём полное заданное время, даже если скрипт уже сообщил об успешном закрытии
-  - delay:
+  - alias: Wait for physical valve travel
+    note: >-
+      Состояние closed может означать переключение реле, а не конец физического хода крана
+      Ждём полное заданное время, даже если скрипт уже сообщил об успешном закрытии
+    delay:
       seconds: "{{ states('input_number.close_valve_required_time_seconds') | int(45) }}"
-  # Скрипт сам уведомляет о неудачном закрытии. В этом случае ничего не открываем
   - alias: All moisture valves closed successfully
+    note: >-
+      Скрипт сам уведомляет о неудачном закрытии. В этом случае ничего не открываем
     condition: template
     value_template: >-
       {{ (expand(moisture_valves) | selectattr('state', 'eq', 'closed') | list | count) == (moisture_valves | count) }}
-  # Если до профилактики все краны были закрыты, возвращать в open нечего
-  - if:
-      - condition: template
+  - alias: Skip restoration when all valves were closed
+    note: >-
+      Если до профилактики все краны были закрыты, возвращать в open нечего
+    if:
+      - alias: No initially open valves
+        condition: template
         value_template: "{{ (initially_open_valves | count) == 0 }}"
     then:
       - stop: No valves were initially open; nothing to restore
-  # Перед открытием проверяем только текущее состояние датчиков протечки
-  - variables:
+  - alias: Check leak sensors before reopening
+    note: >-
+      Перед открытием проверяем только текущее состояние датчиков протечки
+    variables:
       safe_to_open: >-
         {{ (moisture_sensors | count) > 0
            and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count) }}
-  - if:
-      - condition: template
+  - alias: Block reopening when leak sensors are not dry
+    if:
+      - alias: Leak sensor safety check failed
+        condition: template
         value_template: "{{ not (safe_to_open | bool(false)) }}"
     then:
-      - action: script.universal_notification_sender
+      - alias: Notify unsafe valve reopening
+        action: script.universal_notification_sender
         metadata: {}
         data:
           automation_trigger_id: scheduled
@@ -106,21 +125,27 @@ actions:
             ни одного датчика. Все краны оставлены закрытыми. Проверьте систему вручную.
           message_notification_id: moisture_valves_periodic_exercise_failed
       - stop: Unsafe to reopen moisture valves
-  # Восстанавливаем только те краны, которые были открыты до профилактики
-  - action: valve.open_valve
+  - alias: Restore initially open valves
+    note: >-
+      Восстанавливаем только те краны, которые были открыты до профилактики
+    action: valve.open_valve
     metadata: {}
     target:
       entity_id: "{{ initially_open_valves }}"
-  - wait_template: >-
+  - alias: Wait for reopened valves to report open
+    wait_template: >-
       {{ (expand(initially_open_valves) | selectattr('state', 'eq', 'open') | list | count) == (initially_open_valves | count) }}
     timeout:
       seconds: "{{ states('input_number.close_valve_required_time_seconds') | int(45) }}"
     continue_on_timeout: true
-  - if:
-      - condition: template
+  - alias: Notify if valve reopening is not confirmed
+    if:
+      - alias: Reopening confirmation timed out
+        condition: template
         value_template: "{{ not wait.completed }}"
     then:
-      - action: script.universal_notification_sender
+      - alias: Notify unconfirmed valve reopening
+        action: script.universal_notification_sender
         metadata: {}
         data:
           automation_trigger_id: scheduled
