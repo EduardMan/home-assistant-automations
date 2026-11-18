@@ -1,0 +1,207 @@
+# category
+#   - Safety
+# labels:
+#   - scheduled
+#   - notification
+# entityId
+#   - moisture_valves_periodic_exercise
+# dependencies:
+#   - moisture (label)
+#   - moisture valve (label)
+#   - Moisture sensor availability (Helper)
+#   - Moisture valve availability (Helper)
+#   - Moisture valves expected count (Helper)
+#   - Close valve required time seconds (Helper)
+#   - Moisture sensors leak detection (Automation)
+#   - Moisture sensors leak checker (Automation)
+#   - Close labeled moisture valves with retries (Script)
+#   - Universal notification sender (Script)
+
+alias: Moisture valves periodic exercise (v1.0)
+description: |2-
+  **Что делает:**
+  Два раза в месяц последовательно закрывает и открывает водопроводные краны с лейблом moisture_valve, чтобы шаровые механизмы не закисали.
+
+  **Когда срабатывает:**
+  - 📅 1-го и 15-го числа каждого месяца в 11:00.
+  - ⚙️ Выполняет полный цикл для каждого крана отдельно; переход к следующему только после подтверждённого открытия предыдущего.
+
+  **Защита от случайного открытия воды:**
+  - Запускается, только когда оба защитных автомата протечки включены, аварийный скрипт не выполняется, все краны открыты, все отслеживаемые датчики сухие и сенсоры доступности находятся в состоянии on.
+  - Число кранов и их availability-сенсоров должно совпадать с настройкой Moisture valves expected count; для каждого отслеживаемого датчика протечки требуется availability-сенсор.
+  - После закрытия каждого крана перед открытием заново проверяет датчики, доступность устройств, остальные краны, аварийный скрипт и факт срабатывания аварийной автоматизации с начала цикла.
+  - Если проверка не пройдена или кран не подтвердил нужное положение за отведённое время — останавливается, не открывая закрытый кран, и сообщает о необходимости ручной проверки.
+  - Не открывает краны, которые уже были закрыты до начала профилактики.
+  - Использует те же датчики протечки с лейблом moisture и суффиксом _water_leak, что и существующая защита; датчики с лейблом moisture_valve_ignore исключаются.
+
+  **Настройки:**
+  - Moisture valves expected count — ожидаемое число кранов.
+  - Close valve required time seconds — максимальное время ожидания закрытия и открытия (по умолчанию 45 секунд, если значение недоступно).
+  - Перед включением проверьте, что все реальные датчики протечки имеют лейбл moisture и для всех кранов и датчиков существуют availability-сенсоры.
+  - Не заменяет независимую аппаратную защиту от протечек: невозможно полностью исключить гонку между параллельными командами аварийной и профилактической автоматизаций.
+triggers:
+  # Ежедневное время запуска; ниже отбираем только 1-е и 15-е число месяца
+  - id: scheduled
+    trigger: time
+    at: "11:00:00"
+conditions:
+  - alias: First and fifteenth day of the month
+    condition: template
+    value_template: "{{ now().day in [1, 15] }}"
+actions:
+  # Собираем все устройства из существующих лейблов; ничего не прописываем поштучно
+  - variables:
+      moisture_valves: >-
+        {{ label_entities('moisture_valve') | select('match', '^valve[.]') | list }}
+      moisture_sensors: >-
+        {{ label_entities('moisture')
+           | select('match', '^binary_sensor[.].*_water_leak$')
+           | reject('in', label_entities('moisture_valve_ignore')) | list }}
+      valve_availability_sensors: >-
+        {{ label_entities('moisture_valve') | select('match', '^binary_sensor[.].*_availability$') | list }}
+      sensor_availability_sensors: >-
+        {{ label_entities('moisture') | select('match', '^binary_sensor[.].*_availability$') | list }}
+      cycle_started_at: "{{ as_timestamp(now()) }}"
+  # Если не все устройства и защитные автоматики готовы, даже не начинаем закрывать воду
+  - variables:
+      preflight_ok: >-
+        {% set expected = states('input_number.moisture_valves_expected_count') %}
+        {{ is_number(expected)
+           and (expected | int(0)) > 0
+           and (moisture_valves | count) == (expected | int(0))
+           and (moisture_sensors | count) > 0
+           and (valve_availability_sensors | count) == (moisture_valves | count)
+           and (sensor_availability_sensors | count) == (moisture_sensors | count)
+           and (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count)
+           and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
+           and (expand(valve_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (valve_availability_sensors | count)
+           and (expand(sensor_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (sensor_availability_sensors | count)
+           and is_state('automation.moisture_sensors_leak_detection', 'on')
+           and is_state('automation.moisture_sensors_leak_checker', 'on')
+           and is_state('script.close_labeled_moisture_valves_with_retries', 'off') }}
+  - if:
+      - condition: template
+        value_template: "{{ not (preflight_ok | bool(false)) }}"
+    then:
+      - action: script.universal_notification_sender
+        metadata: {}
+        data:
+          automation_trigger_id: scheduled
+          notify_if_trigger_id_is_none: true
+          message_title: Профилактика кранов пропущена!
+          message_text: >-
+            Не пройдена проверка безопасности: проверьте сухость и доступность датчиков,
+            положение и число кранов, их availability-сенсоры и работу аварийных автоматизаций.
+            Команды кранам не отправлялись.
+          message_notification_id: moisture_valves_periodic_exercise_skipped
+      - stop: Preconditions for safe valve exercise have not been met
+  # По одному крану: подтверждаем закрытие, затем дополнительно проверяем безопасность перед открытием
+  - repeat:
+      for_each: "{{ moisture_valves }}"
+      sequence:
+        # Повторно проверяем, не произошло ли аварии с момента запуска цикла
+        - variables:
+            safe_to_close: >-
+              {% set last_leak = state_attr('automation.moisture_sensors_leak_detection', 'last_triggered') %}
+              {{ is_state(repeat.item, 'open')
+                 and is_state('automation.moisture_sensors_leak_detection', 'on')
+                 and is_state('automation.moisture_sensors_leak_checker', 'on')
+                 and is_state('script.close_labeled_moisture_valves_with_retries', 'off')
+                 and (last_leak is none or as_timestamp(last_leak, 0) < (cycle_started_at | float(0)))
+                 and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
+                 and (expand(valve_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (valve_availability_sensors | count)
+                 and (expand(sensor_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (sensor_availability_sensors | count)
+                 and (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count) }}
+        - if:
+            - condition: template
+              value_template: "{{ not (safe_to_close | bool(false)) }}"
+          then:
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                automation_trigger_id: scheduled
+                notify_if_trigger_id_is_none: true
+                message_title: Профилактика кранов остановлена!
+                message_text: >-
+                  Проверка безопасности перед закрытием {{ repeat.item }} не пройдена.
+                  Проверьте состояние кранов и защиту от протечек вручную.
+                message_notification_id: moisture_valves_periodic_exercise_failed
+            - stop: Safety condition failed before valve closure
+        - action: valve.close_valve
+          metadata: {}
+          target:
+            entity_id: "{{ repeat.item }}"
+        - wait_template: "{{ is_state(repeat.item, 'closed') }}"
+          timeout:
+            seconds: "{{ states('input_number.close_valve_required_time_seconds') | int(45) }}"
+          continue_on_timeout: true
+        - if:
+            - condition: template
+              value_template: "{{ not wait.completed or not is_state(repeat.item, 'closed') }}"
+          then:
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                automation_trigger_id: scheduled
+                notify_if_trigger_id_is_none: true
+                message_title: Профилактика кранов: не удалось закрыть!
+                message_text: >-
+                  Кран {{ repeat.item }} не подтвердил закрытие за установленное время.
+                  Профилактика остановлена; проверьте кран вручную.
+                message_notification_id: moisture_valves_periodic_exercise_failed
+            - stop: Valve closure was not confirmed
+        # Даём контроллеру и аварийным датчикам время обновить состояние перед открытием
+        - delay: "00:00:03"
+        - variables:
+            safe_to_reopen: >-
+              {% set last_leak = state_attr('automation.moisture_sensors_leak_detection', 'last_triggered') %}
+              {{ is_state(repeat.item, 'closed')
+                 and is_state('automation.moisture_sensors_leak_detection', 'on')
+                 and is_state('automation.moisture_sensors_leak_checker', 'on')
+                 and is_state('script.close_labeled_moisture_valves_with_retries', 'off')
+                 and (last_leak is none or as_timestamp(last_leak, 0) < (cycle_started_at | float(0)))
+                 and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
+                 and (expand(valve_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (valve_availability_sensors | count)
+                 and (expand(sensor_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (sensor_availability_sensors | count)
+                 and (expand(moisture_valves) | rejectattr('entity_id', 'eq', repeat.item)
+                       | selectattr('state', 'eq', 'open') | list | count) == ((moisture_valves | count) - 1) }}
+        - if:
+            - condition: template
+              value_template: "{{ not (safe_to_reopen | bool(false)) }}"
+          then:
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                automation_trigger_id: scheduled
+                notify_if_trigger_id_is_none: true
+                message_title: Профилактика кранов: открытие запрещено!
+                message_text: >-
+                  Кран {{ repeat.item }} закрыт, но открывать его небезопасно:
+                  возникла протечка, сработала защита или изменилось состояние устройств.
+                  Кран оставлен закрытым, требуется ручная проверка.
+                message_notification_id: moisture_valves_periodic_exercise_failed
+            - stop: Safety condition failed before valve reopening
+        - action: valve.open_valve
+          metadata: {}
+          target:
+            entity_id: "{{ repeat.item }}"
+        - wait_template: "{{ is_state(repeat.item, 'open') }}"
+          timeout:
+            seconds: "{{ states('input_number.close_valve_required_time_seconds') | int(45) }}"
+          continue_on_timeout: true
+        - if:
+            - condition: template
+              value_template: "{{ not wait.completed or not is_state(repeat.item, 'open') }}"
+          then:
+            - action: script.universal_notification_sender
+              metadata: {}
+              data:
+                automation_trigger_id: scheduled
+                notify_if_trigger_id_is_none: true
+                message_title: Профилактика кранов: не удалось открыть!
+                message_text: >-
+                  Кран {{ repeat.item }} не подтвердил открытие за установленное время.
+                  Профилактика остановлена, требуется ручная проверка водоснабжения.
+                message_notification_id: moisture_valves_periodic_exercise_failed
+            - stop: Valve reopening was not confirmed
+mode: single
