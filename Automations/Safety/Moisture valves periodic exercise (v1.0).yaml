@@ -21,18 +21,18 @@ description: |2-
   Дважды в месяц закрывает и снова открывает водопроводные краны с лейблом *moisture valve*, чтобы механизмы не закисали.
 
   **Как работает:**
-  - Проверяет, что все краны открыты, все отслеживаемые датчики протечки сухие, устройства доступны, а аварийные автоматизации включены.
+  - Перед закрытием проверяет только, что основная аварийная автоматизация включена, а скрипт закрытия не выполняется.
   - Вызывает скрипт Close labeled moisture valves with retries, который закрывает все краны с повторными попытками.
   - Передаёт suppress_success_notification: true — при успешном закрытии уведомления нет, а при повторных попытках и ошибках скрипт оповещает как обычно.
-  - Только после подтверждения закрытия всех кранов и повторной проверки безопасности открывает все краны.
+  - Запоминает, были ли все краны открыты до начала цикла, и только после подтверждения закрытия и повторной проверки безопасности открывает их.
   - Если открыть воду небезопасно, оставляет краны закрытыми и отправляет уведомление.
 
   **Когда срабатывает:**
   - 📅 1-го и 15-го числа каждого месяца в 04:15.
 
   **Защита:**
-  - Пропускает запуск с уведомлением, если нет кранов или датчиков протечки, часть кранов уже закрыта, датчики мокрые или недоступны либо отключена аварийная защита.
-  - Перед открытием проверяет, что с начала цикла не срабатывала основная автоматизация протечки.
+  - Пропускает запуск с уведомлением, если основная аварийная автоматизация отключена или скрипт закрытия уже выполняется.
+  - Перед открытием проверяет, что все краны были открыты до начала цикла, датчики сухие и доступны, а с начала цикла не срабатывала основная автоматизация протечки.
   - Если скрипт не смог закрыть все краны, дальнейшее выполнение прекращается: сообщение об ошибке уже отправлено скриптом.
   - Если после открытия не все краны вернулись в состояние open, сообщает о необходимости ручной проверки.
   - Использует датчики протечки с лейблом moisture и суффиксом _water_leak; исключает датчики с лейблом moisture_valve_ignore.
@@ -65,18 +65,13 @@ actions:
       sensor_availability_sensors: >-
         {{ label_entities('moisture') | select('match', '^binary_sensor[.].*_availability$') | list }}
       exercise_started_at: "{{ as_timestamp(now()) }}"
-  # Проверяем, что воды не перекрыли заранее, нет протечек и все устройства доступны
+  # Запоминаем исходное положение кранов и проверяем готовность аварийной защиты
   - variables:
-      preflight_ok: >-
+      all_valves_initially_open: >-
         {{ (moisture_valves | count) > 0
-           and (moisture_sensors | count) > 0
-           and (valve_availability_sensors | count) == (moisture_valves | count)
-           and (sensor_availability_sensors | count) == (moisture_sensors | count)
-           and (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count)
-           and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
-           and (expand(valve_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (valve_availability_sensors | count)
-           and (expand(sensor_availability_sensors) | selectattr('state', 'eq', 'on') | list | count) == (sensor_availability_sensors | count)
-           and is_state('automation.moisture_sensors_leak_detection', 'on')
+           and (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count) }}
+      preflight_ok: >-
+        {{ is_state('automation.moisture_sensors_leak_detection', 'on')
            and is_state('script.close_labeled_moisture_valves_with_retries', 'off') }}
   - if:
       - condition: template
@@ -89,9 +84,8 @@ actions:
           notify_if_trigger_id_is_none: true
           message_title: Профилактика кранов пропущена!
           message_text: >-
-            Проверка безопасности не пройдена. Проверьте сухость и доступность датчиков,
-            наличие и положение кранов, их availability-сенсоры и работу аварийной автоматизации.
-            Краны не переключались.
+            Основная автоматизация защиты от протечек отключена или скрипт
+            аварийного закрытия кранов уже выполняется. Краны не переключались.
           message_notification_id: moisture_valves_periodic_exercise_skipped
       - stop: Valve exercise preflight checks failed
   # Переиспользуем штатный скрипт аварийного закрытия: все краны сразу, с повторами
@@ -108,7 +102,11 @@ actions:
   - variables:
       safe_to_open: >-
         {% set last_leak = state_attr('automation.moisture_sensors_leak_detection', 'last_triggered') %}
-        {{ is_state('automation.moisture_sensors_leak_detection', 'on')
+        {{ (all_valves_initially_open | bool(false))
+           and (moisture_sensors | count) > 0
+           and (valve_availability_sensors | count) == (moisture_valves | count)
+           and (sensor_availability_sensors | count) == (moisture_sensors | count)
+           and is_state('automation.moisture_sensors_leak_detection', 'on')
            and is_state('script.close_labeled_moisture_valves_with_retries', 'off')
            and (last_leak is none or as_timestamp(last_leak, 0) < (exercise_started_at | float(0)))
            and (expand(moisture_sensors) | selectattr('state', 'eq', 'off') | list | count) == (moisture_sensors | count)
@@ -126,8 +124,9 @@ actions:
           notify_if_trigger_id_is_none: true
           message_title: "Профилактика кранов: открытие запрещено!"
           message_text: >-
-            После закрытия кранов не пройдена проверка безопасности: возможна протечка,
-            срабатывание защиты или недоступность устройств. Вода оставлена перекрытой.
+            После закрытия кранов не пройдена проверка безопасности: возможно, кран
+            был перекрыт заранее, возникла протечка, сработала защита или недоступны устройства.
+            Вода оставлена перекрытой.
             Проверьте систему вручную.
           message_notification_id: moisture_valves_periodic_exercise_failed
       - stop: Unsafe to reopen moisture valves
