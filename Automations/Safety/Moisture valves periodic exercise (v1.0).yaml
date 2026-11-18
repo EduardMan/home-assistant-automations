@@ -18,13 +18,13 @@
 alias: Moisture valves periodic exercise (v1.0)
 description: |2-
   **Что делает:**
-  Дважды в месяц закрывает и снова открывает водопроводные краны с лейблом *moisture valve*, чтобы механизмы не закисали.
+  Дважды в месяц закрывает все водопроводные краны с лейблом *moisture valve* и безопасно возвращает в открытое положение только те, которые были открыты до профилактики.
 
   **Как работает:**
-  - Перед закрытием проверяет только, что основная аварийная автоматизация включена, а скрипт закрытия не выполняется.
+  - Запоминает массив открытых кранов. Перед закрытием проверяет только, что основная аварийная автоматизация включена, а скрипт закрытия не выполняется.
   - Вызывает скрипт Close labeled moisture valves with retries, который закрывает все краны с повторными попытками.
   - Передаёт suppress_success_notification: true — при успешном закрытии уведомления нет, а при повторных попытках и ошибках скрипт оповещает как обычно.
-  - Запоминает, были ли все краны открыты до начала цикла, и только после подтверждения закрытия и повторной проверки безопасности открывает их.
+  - После подтверждения закрытия всех кранов и повторной проверки безопасности открывает только краны из сохранённого массива. Изначально закрытые остаются закрытыми.
   - Если открыть воду небезопасно, оставляет краны закрытыми и отправляет уведомление.
 
   **Когда срабатывает:**
@@ -32,9 +32,9 @@ description: |2-
 
   **Защита:**
   - Пропускает запуск с уведомлением, если основная аварийная автоматизация отключена или скрипт закрытия уже выполняется.
-  - Перед открытием проверяет, что все краны были открыты до начала цикла, датчики сухие и доступны, а с начала цикла не срабатывала основная автоматизация протечки.
+  - Перед открытием проверяет, что датчики сухие и доступны, а с начала цикла не срабатывала основная автоматизация протечки.
   - Если скрипт не смог закрыть все краны, дальнейшее выполнение прекращается: сообщение об ошибке уже отправлено скриптом.
-  - Если после открытия не все краны вернулись в состояние open, сообщает о необходимости ручной проверки.
+  - Если список изначально открытых кранов пуст, команды открытия не отправляются. Если не все краны из сохранённого списка открылись, сообщает о необходимости ручной проверки.
   - Использует датчики протечки с лейблом moisture и суффиксом _water_leak; исключает датчики с лейблом moisture_valve_ignore.
   - Не заменяет независимую аппаратную защиту: полностью исключить гонку с аварийным перекрытием при одновременных командах невозможно.
 
@@ -65,11 +65,13 @@ actions:
       sensor_availability_sensors: >-
         {{ label_entities('moisture') | select('match', '^binary_sensor[.].*_availability$') | list }}
       exercise_started_at: "{{ as_timestamp(now()) }}"
-  # Запоминаем исходное положение кранов и проверяем готовность аварийной защиты
+  # Запоминаем только изначально открытые краны и проверяем готовность аварийной защиты
   - variables:
-      all_valves_initially_open: >-
-        {{ (moisture_valves | count) > 0
-           and (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count) }}
+      initially_open_valves: >-
+        {{ expand(moisture_valves)
+           | selectattr('state', 'eq', 'open')
+           | map(attribute='entity_id')
+           | list }}
       preflight_ok: >-
         {{ is_state('automation.moisture_sensors_leak_detection', 'on')
            and is_state('script.close_labeled_moisture_valves_with_retries', 'off') }}
@@ -98,12 +100,17 @@ actions:
     condition: template
     value_template: >-
       {{ (expand(moisture_valves) | selectattr('state', 'eq', 'closed') | list | count) == (moisture_valves | count) }}
-  # Перед общим открытием повторно проверяем состояние защиты и отсутствие новой протечки
+  # Если до профилактики все краны были закрыты, возвращать в open нечего
+  - if:
+      - condition: template
+        value_template: "{{ (initially_open_valves | count) == 0 }}"
+    then:
+      - stop: No valves were initially open; nothing to restore
+  # Перед открытием изначально открытых кранов повторно проверяем защиту
   - variables:
       safe_to_open: >-
         {% set last_leak = state_attr('automation.moisture_sensors_leak_detection', 'last_triggered') %}
-        {{ (all_valves_initially_open | bool(false))
-           and (moisture_sensors | count) > 0
+        {{ (moisture_sensors | count) > 0
            and (valve_availability_sensors | count) == (moisture_valves | count)
            and (sensor_availability_sensors | count) == (moisture_sensors | count)
            and is_state('automation.moisture_sensors_leak_detection', 'on')
@@ -124,19 +131,18 @@ actions:
           notify_if_trigger_id_is_none: true
           message_title: "Профилактика кранов: открытие запрещено!"
           message_text: >-
-            После закрытия кранов не пройдена проверка безопасности: возможно, кран
-            был перекрыт заранее, возникла протечка, сработала защита или недоступны устройства.
-            Вода оставлена перекрытой.
+            После закрытия кранов не пройдена проверка безопасности: возможна протечка,
+            срабатывание защиты или недоступность устройств. Все краны оставлены закрытыми.
             Проверьте систему вручную.
           message_notification_id: moisture_valves_periodic_exercise_failed
       - stop: Unsafe to reopen moisture valves
-  # Открываем все краны только при подтверждённо безопасном состоянии
+  # Восстанавливаем только те краны, которые были открыты до профилактики
   - action: valve.open_valve
     metadata: {}
     target:
-      label_id: moisture_valve
+      entity_id: "{{ initially_open_valves }}"
   - wait_template: >-
-      {{ (expand(moisture_valves) | selectattr('state', 'eq', 'open') | list | count) == (moisture_valves | count) }}
+      {{ (expand(initially_open_valves) | selectattr('state', 'eq', 'open') | list | count) == (initially_open_valves | count) }}
     timeout:
       seconds: "{{ states('input_number.close_valve_required_time_seconds') | int(45) }}"
     continue_on_timeout: true
@@ -151,7 +157,7 @@ actions:
           notify_if_trigger_id_is_none: true
           message_title: "Профилактика кранов: открытие не подтверждено!"
           message_text: >-
-            Не все краны подтвердили состояние open за установленное время.
-            Проверьте водоснабжение вручную.
+            Не все краны, открытые до профилактики, подтвердили возврат в open
+            за установленное время. Проверьте водоснабжение вручную.
           message_notification_id: moisture_valves_periodic_exercise_failed
 mode: single
