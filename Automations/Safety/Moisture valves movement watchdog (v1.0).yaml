@@ -1,0 +1,106 @@
+# category
+#   - Safety
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - moisture_valves_movement_watchdog
+# dependencies:
+#   - moisture valve (label)
+#   - Moisture valves last movement (Helper)
+#   - Universal notification sender (Script)
+
+alias: Moisture valves movement watchdog (v1.0)
+description: |2-
+  **Что делает:**
+  Отслеживает повороты водопроводных кранов с лейблом *moisture_valve* и
+  предупреждает, если ни один из них не менял положения последние 16 дней.
+
+  **Как работает:**
+  - Засчитывает оба перехода состояния: open → closed и closed → open.
+  - Игнорирует unknown/unavailable и восстановление состояния при запуске HA:
+    эти события не подтверждают движение привода.
+  - Сохраняет дату последнего перехода в помощник Moisture valves last movement.
+  - Ежедневно проверяет, что с последнего перехода прошло меньше 16 дней.
+  - Учитывает профилактические, ручные и аварийные переключения.
+  - Проверяет хотя бы один переход среди всех кранов, а не каждый кран отдельно.
+  - Состояние в HA может отражать переключение реле, а не фактический поворот.
+
+  **Когда срабатывает:**
+  - 🔄 При изменении состояния сущностей (учитываются только краны с лейблом moisture_valve).
+  - 📅 Каждый день в 08:07.
+
+  **Настройки:**
+  - Moisture valves last movement — помощник даты и времени, который сохраняется
+    между перезапусками Home Assistant.
+triggers:
+  - id: valve_state_changed
+    alias: Track moisture valve state changes
+    note: >-
+      Отслеживаем state_changed, но засчитываем только переходы
+      open → closed или closed → open у кранов с лейблом moisture_valve.
+    trigger: event
+    event_type: state_changed
+  - id: scheduled
+    alias: Daily valve movement age check
+    note: Ежедневно в 08:07 проверяем, было ли переключение за последние 16 суток.
+    trigger: time
+    at: "08:07:00"
+conditions:
+  - alias: Scheduled check or labeled valve movement
+    condition: or
+    conditions:
+      - condition: trigger
+        id: scheduled
+      - condition: and
+        conditions:
+          - condition: trigger
+            id: valve_state_changed
+          - alias: Labeled valve changed between open and closed
+            condition: template
+            value_template: >-
+              {% set old = trigger.event.data.old_state %}
+              {% set new = trigger.event.data.new_state %}
+              {{ trigger.event.data.entity_id in label_entities('moisture_valve')
+                 and trigger.event.data.entity_id.startswith('valve.')
+                 and old is not none and new is not none
+                 and old.state in ['open', 'closed']
+                 and new.state in ['open', 'closed']
+                 and old.state != new.state }}
+actions:
+  - alias: Remember movement or check if overdue
+    choose:
+      - alias: Save valve movement
+        conditions:
+          - condition: trigger
+            id: valve_state_changed
+        sequence:
+          - alias: Remember last valve movement
+            action: input_datetime.set_datetime
+            target:
+              entity_id: input_datetime.moisture_valves_last_movement
+            data:
+              timestamp: "{{ as_timestamp(now()) }}"
+      - alias: Notify if no movement in 16 days
+        conditions:
+          - condition: trigger
+            id: scheduled
+          - alias: No valve moved during the last 16 days
+            condition: template
+            value_template: >-
+              {% set last = as_timestamp(states('input_datetime.moisture_valves_last_movement'), 0) %}
+              {{ last == 0 or (as_timestamp(now()) - last) >= 16 * 86400 }}
+        sequence:
+          - alias: Notify missing valve movement
+            action: script.universal_notification_sender
+            data:
+              automation_trigger_id: "{{ trigger.id }}"
+              notify_if_trigger_id_is_none: true
+              message_title: "Профилактика кранов: нет переключений за 16 дней!"
+              message_text: >-
+                За последние 16 дней не зарегистрирован ни один переход
+                водопроводного крана между open и closed.
+                Проверьте профилактику и состояние приводов.
+              message_notification_id: moisture_valves_movement_overdue
+mode: queued
+max: 10

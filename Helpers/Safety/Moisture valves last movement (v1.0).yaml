@@ -1,0 +1,9 @@
+# Запоминает дату и время последнего изменения положения крана между open и closed.
+# Создать в HA как Date and/or time (дата + время), без начального значения.
+name: Moisture valves last movement (v1.0)
+type: Date and/or time
+label: moisture valve
+entityId: moisture_valves_last_movement
+hasDate: true
+hasTime: true
+visible: false
