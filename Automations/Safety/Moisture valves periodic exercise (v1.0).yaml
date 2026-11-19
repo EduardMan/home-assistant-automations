@@ -10,7 +10,8 @@
 #   - moisture valve (label)
 #   - Close valve required time seconds (Helper)
 #   - Moisture sensors leak detection (Automation)
-#   - Close labeled moisture valves with retries (Script)
+#   - Moisture valves last confirmed closure (Helper)
+  - Close labeled moisture valves with retries (Script)
 #   - Universal notification sender (Script)
 
 alias: Moisture valves periodic exercise (v1.0)
@@ -23,6 +24,7 @@ description: |2-
   - Вызывает скрипт Close labeled moisture valves with retries, который закрывает все краны с повторными попытками.
   - Передаёт suppress_success_notification: true — при успешном закрытии уведомления нет, а при повторных попытках и ошибках скрипт оповещает как обычно.
   - После завершения скрипта выдерживает обязательную паузу Close valve required time seconds для завершения хода приводов, проверяет закрытие кранов и оставляет их закрытыми ещё на 5 секунд. Затем проверяет отсутствие протечек и открывает только краны из сохранённого массива. Изначально закрытые остаются закрытыми.
+  - Записывает в помощник Moisture valves last confirmed closure время успешного закрытия, только если до профилактики хотя бы один кран был открыт. Это позволяет отдельно проверять пропуск профилактики более 16 дней.
   - Если обнаружена протечка или состояние хотя бы одного датчика неизвестно, оставляет краны закрытыми и отправляет уведомление.
 
   **Когда срабатывает:**
@@ -95,6 +97,22 @@ actions:
     note: Даём кранам побыть в закрытом положении ещё 5 секунд после подтверждения закрытия.
     delay:
       seconds: 5
+  - alias: Record confirmed valve closure
+    note: >-
+      Сохраняем время успешной профилактики только когда хотя бы один кран
+      действительно был открыт до запуска и затем все краны подтвердили closed.
+      Так не засчитываем запуск без движения приводов.
+    if:
+      - alias: At least one valve was initially open
+        condition: template
+        value_template: "{{ (initially_open_valves | count) > 0 }}"
+    then:
+      - alias: Save last confirmed valve closure
+        action: input_datetime.set_datetime
+        target:
+          entity_id: input_datetime.moisture_valves_last_confirmed_closure
+        data:
+          timestamp: "{{ as_timestamp(now()) }}"
   - alias: Skip restoration when all valves were closed
     note: >-
       Если до профилактики все краны были закрыты, возвращать в open нечего

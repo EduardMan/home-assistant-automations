@@ -1,0 +1,9 @@
+# Запоминает дату и время последнего подтверждённого профилактического закрытия кранов.
+# Создать в HA как Date and/or time (дата + время), без начального значения.
+name: Moisture valves last confirmed closure (v1.0)
+type: Date and/or time
+label: moisture valve
+entityId: moisture_valves_last_confirmed_closure
+hasDate: true
+hasTime: true
+visible: false
