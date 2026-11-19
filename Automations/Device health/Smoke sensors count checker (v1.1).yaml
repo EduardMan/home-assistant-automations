@@ -11,7 +11,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Smoke sensors count checker (v1.0)
+alias: Smoke sensors count checker (v1.1)
 description: |2-
   **Что делает:**
   Проверяет, что необходимым датчикам и сенсорам задымления проставлен лейбл *smoke*.
@@ -80,17 +80,17 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом smoke
   - variables:
       smoke_sensors_labeled_availability_current_count: >
-        {{ label_entities("smoke") | select('match', '.*_availability$') | 
+        {{ expand(label_entities('smoke')) | selectattr('entity_id', 'match', '.*_availability$') | 
         list | count }}
   # Вычисляем количество датчиков батарей с лейблом smoke
   - variables:
       smoke_sensors_labeled_battery_current_count: >
-        {{ label_entities("smoke") | select('match', '.*_battery$') | 
+        {{ expand(label_entities('smoke')) | selectattr('entity_id', 'match', '.*_battery$') | 
         list | count }}
   # Вычисляем количество датчиков задымления с лейблом smoke
   - variables:
       smoke_sensors_labeled_smoke_current_count: >
-        {{ label_entities("smoke") | select('match', '.*_smoke$') | 
+        {{ expand(label_entities('smoke')) | selectattr('entity_id', 'match', '.*_smoke$') | 
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом smoke не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством
