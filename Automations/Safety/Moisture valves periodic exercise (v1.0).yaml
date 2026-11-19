@@ -33,7 +33,7 @@ description: |2-
   - Перед открытием проверяет только текущие состояния отслеживаемых датчиков протечки: если датчиков нет, открытие исходно открытых кранов разрешено; если датчики есть, каждый должен показывать off. Состояния on, unknown и unavailable не допускают открытия.
   - Если скрипт не смог закрыть все краны, дальнейшее выполнение прекращается: сообщение об ошибке уже отправлено скриптом.
   - Если список изначально открытых кранов пуст, после попытки закрытия неизвестных/недоступных кранов команды открытия не отправляются. При ошибке команды открытия продолжает проверку результата. Если не все краны из сохранённого списка открылись, сообщает о необходимости ручной проверки.
-  - Использует датчики протечки с лейблом moisture и суффиксом _water_leak; исключает датчики с лейблом moisture_valve_ignore.
+  - Использует загруженные сущности кранов и датчиков по лейблам. Датчики протечки фильтруются по лейблу moisture и суффиксу _water_leak; датчики с moisture_valve_ignore исключаются. Сущности, отключённые через Disable, не учитываются, а состояния unknown и unavailable остаются в проверках безопасности.
   - Moisture sensors leak checker отдельно перепроверяет протечки, но не заменяет проверку непосредственно перед открытием.
   - Не заменяет независимую аппаратную защиту: полностью исключить гонку с аварийным перекрытием при одновременных командах невозможно.
 
@@ -55,14 +55,20 @@ conditions:
 actions:
   - alias: Collect moisture valves and leak sensors
     note: >-
-      Определяем все краны и датчики по тем же лейблам, что и в аварийной защите
+      Определяем по лейблам только загруженные в HA краны и датчики.
+      Отключённые через Disable исключаются; unknown и unavailable сохраняются.
     variables:
       moisture_valves: >-
-        {{ label_entities('moisture_valve') | select('match', '^valve[.]') | list }}
+        {{ expand(label_entities('moisture_valve'))
+           | selectattr('entity_id', 'match', '^valve[.]')
+           | map(attribute='entity_id')
+           | list }}
       moisture_sensors: >-
-        {{ label_entities('moisture')
-           | select('match', '^binary_sensor[.].*_water_leak$')
-           | reject('in', label_entities('moisture_valve_ignore')) | list }}
+        {{ expand(label_entities('moisture'))
+           | selectattr('entity_id', 'match', '^binary_sensor[.].*_water_leak$')
+           | rejectattr('entity_id', 'in', label_entities('moisture_valve_ignore'))
+           | map(attribute='entity_id')
+           | list }}
   - alias: Stop when no moisture valves are found
     note: >-
       Если нет ни одного крана с лейблом moisture_valve, завершаем выполнение
