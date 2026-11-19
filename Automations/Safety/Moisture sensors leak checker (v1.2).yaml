@@ -21,7 +21,7 @@ description: |2-
   - Если активны 1–5 датчиков — в сообщении перечислены их названия и комнаты.  
   - Если больше 5 — показаны первые пять, а затем общее количество оставшихся.  
   - Оповещение обновляется при каждой проверке, пока датчики не станут сухими.
-  - Общее уведомление об успешном закрытии подавляется; сообщения о протечке и ошибках закрытия сохраняются.
+  - Уведомление об успешном закрытии кранов сохраняется наряду с сообщениями о протечке, повторах и ошибках закрытия.
 
   **Когда срабатывает проверка:**  
   - 🔁 Каждые 10 минут (чтобы вовремя заметить продолжающуюся протечку).  
@@ -142,7 +142,7 @@ actions:
           - action: script.close_labeled_moisture_valves_with_retries
             metadata: { }
             data:
-              suppress_success_notification: true
+              suppress_success_notification: false
           # Отправляем уведомление о протечке
           - action: script.universal_notification_sender
             metadata: { }
@@ -189,7 +189,7 @@ actions:
                   - action: script.close_labeled_moisture_valves_with_retries
                     metadata: { }
                     data:
-                      suppress_success_notification: true
+                      suppress_success_notification: false
                   # Отправляем уведомление о протечке
                   - action: script.universal_notification_sender
                     metadata: { }
