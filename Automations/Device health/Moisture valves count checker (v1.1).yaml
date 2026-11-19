@@ -11,7 +11,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Moisture valves count checker (v1.0)
+alias: Moisture valves count checker (v1.1)
 description: |2-
   **Что делает:**  
   Проверяет, что все водопроводные краны имеют нужные метки и их количество совпадает с ожидаемым.

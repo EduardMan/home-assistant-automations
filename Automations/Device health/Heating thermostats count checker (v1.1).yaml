@@ -11,7 +11,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Heating thermostats count checker (v1.0)
+alias: Heating thermostats count checker (v1.1)
 description: |2-
   **Что делает:**
   Проверяет, что необходимым датчикам и сенсорам термостатов отопления проставлен лейбл *heating_thermostat*.
