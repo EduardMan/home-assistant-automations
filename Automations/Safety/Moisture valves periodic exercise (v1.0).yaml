@@ -108,11 +108,15 @@ actions:
         value_template: "{{ (initially_open_valves | count) > 0 }}"
     then:
       - alias: Save last confirmed valve closure
+        note: >-
+          Сохранение даты не должно мешать восстановлению подачи воды,
+          если вспомогательный helper отсутствует или временно недоступен.
         action: input_datetime.set_datetime
         target:
           entity_id: input_datetime.moisture_valves_last_confirmed_closure
         data:
           timestamp: "{{ as_timestamp(now()) }}"
+        continue_on_error: true
   - alias: Skip restoration when all valves were closed
     note: >-
       Если до профилактики все краны были закрыты, возвращать в open нечего
