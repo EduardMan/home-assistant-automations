@@ -63,7 +63,7 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом natural gas
   - variables:
       natural_gas_sensors_labeled_availability_current_count: >
-        {{ label_entities("natural gas") | select('match', '.*_availability$') |
+        {{ expand(label_entities('natural gas')) | selectattr('entity_id', 'match', '.*_availability$') |
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом natural gas не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством

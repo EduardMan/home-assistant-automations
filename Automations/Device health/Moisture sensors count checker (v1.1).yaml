@@ -94,22 +94,22 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом moisture
   - variables:
       moisture_sensors_labeled_availability_current_count: >
-        {{ label_entities("moisture") | select('match', '.*_availability$') |
+        {{ expand(label_entities('moisture')) | selectattr('entity_id', 'match', '.*_availability$') |
         list | count }}
   # Вычисляем количество датчиков батарей с лейблом moisture
   - variables:
       moisture_sensors_labeled_battery_current_count: >
-        {{ label_entities("moisture") | select('match', '.*_battery$') | 
+        {{ expand(label_entities('moisture')) | selectattr('entity_id', 'match', '.*_battery$') | 
         list | count }}
   # Вычисляем количество датчиков состояния батарей с лейблом moisture
   - variables:
       moisture_sensors_labeled_battery_state_current_count: >
-        {{ label_entities("moisture") | select('match', '.*_battery_low$') |
+        {{ expand(label_entities('moisture')) | selectattr('entity_id', 'match', '.*_battery_low$') |
         list | count }}
   # Вычисляем количество датчиков протечки с лейблом moisture
   - variables:
       moisture_sensors_labeled_water_leak_current_count: >
-        {{ label_entities("moisture") | select('match', '.*_water_leak$') |
+        {{ expand(label_entities('moisture')) | selectattr('entity_id', 'match', '.*_water_leak$') |
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом moisture не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством  

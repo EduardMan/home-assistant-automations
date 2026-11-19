@@ -73,7 +73,7 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом moisture valve
   - variables:
       moisture_valves_labeled_availability_current_count: >
-        {{ label_entities("moisture_valve") | select('match', '.*_availability$') |
+        {{ expand(label_entities('moisture_valve')) | selectattr('entity_id', 'match', '.*_availability$') |
         list | count }}
   # Вычисляем количество водопроводных кранов с лейблом moisture valve
   - variables:

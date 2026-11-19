@@ -80,17 +80,17 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом motion
   - variables:
       motion_sensors_labeled_availability_current_count: >
-        {{ label_entities("motion") | select('match', '.*_availability$') | 
+        {{ expand(label_entities('motion')) | selectattr('entity_id', 'match', '.*_availability$') | 
         list | count }}
   # Вычисляем количество датчиков батарей с лейблом motion
   - variables:
       motion_sensors_labeled_battery_current_count: >
-        {{ label_entities("motion") | select('match', '.*_battery$') | 
+        {{ expand(label_entities('motion')) | selectattr('entity_id', 'match', '.*_battery$') | 
         list | count }}
   # Вычисляем количество датчиков присутствия с лейблом motion
   - variables:
       motion_sensors_labeled_occupancy_current_count: >
-        {{ label_entities("motion") | select('match', '.*_occupancy$') |
+        {{ expand(label_entities('motion')) | selectattr('entity_id', 'match', '.*_occupancy$') |
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом motion не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством

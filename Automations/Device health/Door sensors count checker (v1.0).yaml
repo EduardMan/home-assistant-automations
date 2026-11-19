@@ -80,17 +80,17 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом door
   - variables:
       door_sensors_labeled_availability_current_count: >
-        {{ label_entities("door") | select('match', '.*_availability$') | 
+        {{ expand(label_entities('door')) | selectattr('entity_id', 'match', '.*_availability$') | 
         list | count }}
   # Вычисляем количество датчиков батарей с лейблом door
   - variables:
       door_sensors_labeled_battery_current_count: >
-        {{ label_entities("door") | select('match', '.*_battery$') | 
+        {{ expand(label_entities('door')) | selectattr('entity_id', 'match', '.*_battery$') | 
         list | count }}
   # Вычисляем количество датчиков контакта с лейблом door
   - variables:
       door_sensors_labeled_contact_current_count: >
-        {{ label_entities("door") | select('match', '.*_contact$') | 
+        {{ expand(label_entities('door')) | selectattr('entity_id', 'match', '.*_contact$') | 
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом door не совпадает с настройкой ожидаемого количества датчиков в доме,
   # то отправляем уведомление о проблеме с количеством

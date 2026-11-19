@@ -80,17 +80,17 @@ actions:
   # Вычисляем количество датчиков доступности с лейблом heating_thermostat
   - variables:
       heating_thermostats_labeled_availability_current_count: >
-        {{ label_entities("heating_thermostat") | select('match', '.*_availability$') | 
+        {{ expand(label_entities('heating_thermostat')) | selectattr('entity_id', 'match', '.*_availability$') | 
         list | count }}
   # Вычисляем количество датчиков батарей с лейблом heating_thermostat
   - variables:
       heating_thermostats_labeled_battery_current_count: >
-        {{ label_entities("heating_thermostat") | select('match', '.*_battery$') | 
+        {{ expand(label_entities('heating_thermostat')) | selectattr('entity_id', 'match', '.*_battery$') | 
         list | count }}
   # Вычисляем количество датчиков локальной температуры с лейблом heating_thermostat
   - variables:
       heating_thermostats_labeled_local_temperature_current_count: >
-        {{ label_entities("heating_thermostat") | select('match', '.*_radiator_local_temperature$') | 
+        {{ expand(label_entities('heating_thermostat')) | selectattr('entity_id', 'match', '.*_radiator_local_temperature$') | 
         list | count }}
   # Если вычисленное количество датчиков доступности с лейблом heating_thermostat не совпадает с настройкой ожидаемого количества термостатов в доме,
   # то отправляем уведомление о проблеме с количеством
