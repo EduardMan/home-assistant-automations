@@ -11,7 +11,7 @@
 #   - Close labeled moisture valves with retries (Script)
 #   - sensor.uptime (Integration)
 
-alias: Moisture sensors leak checker (v1.1)
+alias: Moisture sensors leak checker (v1.2)
 description: |2-
   **Что делает:**  
   Постоянно следит за датчиками протечки. Если хотя бы один датчик всё ещё показывает протечку — закрывает вентили воды и отправляет оповещение.  
@@ -21,6 +21,7 @@ description: |2-
   - Если активны 1–5 датчиков — в сообщении перечислены их названия и комнаты.  
   - Если больше 5 — показаны первые пять, а затем общее количество оставшихся.  
   - Оповещение обновляется при каждой проверке, пока датчики не станут сухими.
+  - Уведомление об успешном закрытии кранов сохраняется наряду с сообщениями о протечке, повторах и ошибках закрытия.
 
   **Когда срабатывает проверка:**  
   - 🔁 Каждые 10 минут (чтобы вовремя заметить продолжающуюся протечку).  
@@ -140,7 +141,8 @@ actions:
           # Вызываем скрипт, который перекроет все краны
           - action: script.close_labeled_moisture_valves_with_retries
             metadata: { }
-            data: { }
+            data:
+              suppress_success_notification: false
           # Отправляем уведомление о протечке
           - action: script.universal_notification_sender
             metadata: { }
@@ -186,7 +188,8 @@ actions:
                   # Вызываем скрипт, который перекроет все краны
                   - action: script.close_labeled_moisture_valves_with_retries
                     metadata: { }
-                    data: { }
+                    data:
+                      suppress_success_notification: false
                   # Отправляем уведомление о протечке
                   - action: script.universal_notification_sender
                     metadata: { }

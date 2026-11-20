@@ -21,19 +21,21 @@ description: |2-
   - Если по истечении времени остались открытые краны — повторяет попытку.
   - Количество попыток ограничено настройкой `Close valves retry count`.
   - После каждой неудачной попытки (начиная со второй) отправляется промежуточное уведомление с прогрессом и списком незакрытых кранов.
-  - По окончании цикла отправляется итоговое уведомление: либо об успешном закрытии всех кранов, либо о необходимости ручного вмешательства.
+  - По окончании цикла всегда сообщает о неудаче; уведомление об успешном закрытии можно отключить параметром suppress_success_notification.
 
   **Когда используется:**
   - При обнаружении протечки (вызывается из аварийных автоматизаций).
+  - При плановой профилактике кранов (с suppress_success_notification: true).
 
   **Особенности:**
   - Работает только с кранами, помеченными лейблом *moisture valve*.
-  - Если в системе нет таких кранов, скрипт сразу завершится с уведомлением об успехе (кранов нет — протечки нет).
+  - Если в системе нет таких кранов, скрипт сразу завершится без команд и уведомлений.
   - Все уведомления отправляются через `universal_notification_sender`, что позволяет гибко настраивать каналы оповещения.
 
   **Настройки:**
   - `Close valve required time seconds` — сколько секунд ждать закрытия крана перед проверкой.
   - `Close valves retry count` — максимальное количество повторных попыток закрытия.
+  - `suppress_success_notification` (Boolean, по умолчанию false) — скрыть только уведомление об успешном закрытии; сообщения о проблемах остаются.
 sequence:
   - condition: template
     value_template: >-
@@ -195,16 +197,30 @@ sequence:
           message_title: Не удалось закрыть все краны!
           message_notification_id: close_valve_failed
     else:
-      - action: script.universal_notification_sender
-        metadata: {}
-        data:
-          automation_trigger_id: close_valve
-          message_text: >-
-            Все водопроводные краны ({{
-            states('input_number.moisture_valves_expected_count') | int }} шт.)
-            успешно закрыты!
-          message_title: Водопроводные краны закрыты!
-          message_notification_id: close_valve_success
+      # При профилактике скрываем только уведомление об успешном закрытии
+      - if:
+          - condition: template
+            value_template: "{{ not (suppress_success_notification | default(false) | bool(false)) }}"
+        then:
+          - action: script.universal_notification_sender
+            metadata: {}
+            data:
+              automation_trigger_id: close_valve
+              message_text: >-
+                Все водопроводные краны ({{
+                states('input_number.moisture_valves_expected_count') | int }} шт.)
+                успешно закрыты!
+              message_title: Водопроводные краны закрыты!
+              message_notification_id: close_valve_success
     enabled: true
-fields: {}
-alias: Close labeled moisture valves with retries (v1.0)
+fields:
+  suppress_success_notification:
+    name: Suppress success notification
+    description: >-
+      Не отправлять уведомление об успешном закрытии кранов. Уведомления
+      о повторных попытках и ошибках остаются включёнными.
+    required: false
+    default: false
+    selector:
+      boolean: {}
+alias: Close labeled moisture valves with retries (v1.1)
