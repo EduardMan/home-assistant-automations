@@ -1,0 +1,214 @@
+# TURKOV Capsule (v1.0) | MQTT + Template Climate package
+# Command schema: vent_r3, device firmware observed: 2.12
+# Replace "serial-number" in all MQTT topics with your actual serial number.
+# Include the file as a PACKAGE, not as an MQTT-only include:
+# homeassistant:
+#   packages:
+#     turkov_capsule: !include turkov_capsule.yaml
+#
+# IMPORTANT: Remove any previous `mqtt: !include turkov_capsule.yaml`
+# from configuration.yaml when switching to this package.
+# MQTT commands are never retained; availability comes from the device's LWT.
+
+mqtt:
+  sensor:
+    # ---- Core states (used by the template climate) ----
+    - name: 'Питание установки'
+      default_entity_id: sensor.turkov_capsule_power
+      unique_id: 'turkov_capsule_power'
+      device: &turkov_device
+        identifiers: ['turkov_capsule']
+        name: 'TURKOV Capsule'
+        manufacturer: 'TURKOV'
+        model: 'Capsule'
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/on'
+      entity_category: diagnostic
+      icon: 'mdi:power'
+
+    - name: 'Текущий режим установки'
+      default_entity_id: sensor.turkov_capsule_current_mode
+      unique_id: 'turkov_capsule_current_mode'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/mode'
+      entity_category: diagnostic
+
+    - name: 'Текущая скорость вентиляции'
+      default_entity_id: sensor.turkov_capsule_fan_speed
+      unique_id: 'turkov_capsule_fan_speed'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/fan_speed'
+      entity_category: diagnostic
+      icon: 'mdi:fan'
+
+    - name: 'Уставка температуры'
+      default_entity_id: sensor.turkov_capsule_temp_sp
+      unique_id: 'turkov_capsule_temp_sp'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/temp_sp'
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: '°C'
+      entity_category: diagnostic
+
+    # ---- Measurements (visible as separate sensors) ----
+    - name: 'Температура в помещении'
+      default_entity_id: sensor.turkov_capsule_indoor_temperature
+      unique_id: 'turkov_capsule_indoor_temperature'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/indoor_temperature'
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: '°C'
+
+    - name: 'Температура приточного воздуха'
+      default_entity_id: sensor.turkov_capsule_supply_temperature
+      unique_id: 'turkov_capsule_supply_temperature'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/supply_temperature'
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: '°C'
+
+    - name: 'Наружная температура'
+      default_entity_id: sensor.turkov_capsule_outdoor_temperature
+      unique_id: 'turkov_capsule_outdoor_temperature'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/outdoor_temperature'
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: '°C'
+
+    - name: 'Загрязнение фильтра'
+      default_entity_id: sensor.turkov_capsule_filter
+      unique_id: 'turkov_capsule_filter'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/filter'
+      state_class: measurement
+      unit_of_measurement: '%'
+      icon: 'mdi:air-filter'
+
+    # ---- Diagnostics ----
+    - name: 'Доступные режимы вентилятора'
+      default_entity_id: sensor.turkov_capsule_fan_mode
+      unique_id: 'turkov_capsule_fan_mode'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/fan_mode'
+      value_template: "{{ {'manual': 'Ручной', 'auto': 'Автоматический', 'both': 'Ручной и автоматический', 'none': 'Нет'}.get(value, value) }}"
+      entity_category: diagnostic
+
+    - name: 'Доступные режимы установки'
+      default_entity_id: sensor.turkov_capsule_setup
+      unique_id: 'turkov_capsule_setup'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/state/setup'
+      value_template: "{{ {'none': 'Вентиляция', 'heating': 'Нагрев', 'cooling': 'Охлаждение', 'both': 'Нагрев и охлаждение'}.get(value, value) }}"
+      entity_category: diagnostic
+
+    - name: 'Версия ПО установки'
+      default_entity_id: sensor.turkov_capsule_firmware_version
+      unique_id: 'turkov_capsule_firmware_version'
+      device: *turkov_device
+      availability_topic: 'turkov/serial-number/status'
+      state_topic: 'turkov/serial-number/vent_r3'
+      entity_category: diagnostic
+
+  binary_sensor:
+    - name: 'Подключение MQTT'
+      default_entity_id: binary_sensor.turkov_capsule_connected
+      unique_id: 'turkov_capsule_connected'
+      device: *turkov_device
+      state_topic: 'turkov/serial-number/status'
+      payload_on: 'online'
+      payload_off: 'offline'
+      device_class: connectivity
+      entity_category: diagnostic
+
+# TURKOV reports power and operating mode on different topics.
+# A template climate combines them and sends MQTT commands directly.
+template:
+  - climate:
+      - name: 'TURKOV Capsule'
+        default_entity_id: climate.turkov_capsule
+        unique_id: 'turkov_capsule_climate'
+        icon: 'mdi:hvac'
+
+        availability: >-
+          {{ is_state('binary_sensor.turkov_capsule_connected', 'on')
+             and states('sensor.turkov_capsule_power') in ['true', 'false']
+             and states('sensor.turkov_capsule_current_mode') in ['none', 'heating']
+             and states('sensor.turkov_capsule_fan_speed') in ['1', '2', '3']
+             and is_number(states('sensor.turkov_capsule_temp_sp'))
+             and is_number(states('sensor.turkov_capsule_indoor_temperature')) }}
+
+        hvac_modes: "{{ ['off', 'fan_only', 'heat'] }}"
+        hvac_mode: >-
+          {% if is_state('sensor.turkov_capsule_power', 'false') %}
+            off
+          {% elif is_state('sensor.turkov_capsule_current_mode', 'heating') %}
+            heat
+          {% else %}
+            fan_only
+          {% endif %}
+
+        fan_modes: "{{ ['low', 'medium', 'high'] }}"
+        fan_mode: >-
+          {{ {'1': 'low', '2': 'medium', '3': 'high'}.get(states('sensor.turkov_capsule_fan_speed'), 'low') }}
+
+        current_temperature: "{{ states('sensor.turkov_capsule_indoor_temperature') | float(default=none) }}"
+        target_temperature: "{{ states('sensor.turkov_capsule_temp_sp') | float(default=none) }}"
+        temperature_unit: '°C'
+        min_temperature: 15
+        max_temperature: 35  # Change to 50 only if your heater is water-based.
+        target_temperature_step: 1
+        precision: 1
+        optimistic: false
+
+        # "off" disables the unit. Active modes select TURKOV operating mode,
+        # and power on if the unit was switched off.
+        set_hvac_mode:
+          - choose:
+              - conditions: "{{ hvac_mode == 'off' }}"
+                sequence:
+                  - action: mqtt.publish
+                    data:
+                      topic: 'turkov/serial-number/command/on'
+                      payload: 'false'
+                      retain: false
+              - conditions: "{{ hvac_mode in ['fan_only', 'heat'] }}"
+                sequence:
+                  - action: mqtt.publish
+                    data:
+                      topic: 'turkov/serial-number/command/mode'
+                      payload: "{{ 'heating' if hvac_mode == 'heat' else 'none' }}"
+                      retain: false
+                  - if: "{{ not is_state('sensor.turkov_capsule_power', 'true') }}"
+                    then:
+                      - action: mqtt.publish
+                        data:
+                          topic: 'turkov/serial-number/command/on'
+                          payload: 'true'
+                          retain: false
+
+        set_fan_mode:
+          - action: mqtt.publish
+            data:
+              topic: 'turkov/serial-number/command/fan_speed'
+              payload: "{{ {'low': '1', 'medium': '2', 'high': '3'}[fan_mode] }}"
+              retain: false
+
+        set_temperature:
+          - action: mqtt.publish
+            data:
+              topic: 'turkov/serial-number/command/temp_sp'
+              payload: '{{ temperature | int }}'
+              retain: false
