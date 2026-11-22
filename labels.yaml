@@ -62,6 +62,9 @@ label:
   - name: custom_availability_timeout_P1D
     icon: mdi:timer-cog
     colour: Deep purple
+  - name: mqtt_unknown_state_ignore
+    icon: mdi:eye-off-outline
+    colour: Deep purple
   - name: custom_availability_timeout_ignore
     icon: mdi:timer-cog
     colour: Deep purple

@@ -1,0 +1,77 @@
+# category
+#   - Device health
+# labels:
+#   - notification
+#   - scheduled
+# entityId
+#   - mqtt_sensors_unknown_state_checker
+# dependencies:
+#   - sensor.uptime (Integration)
+#   - Universal notification sender (v1.1) (Script)
+#   - MQTT sensors unknown state count (Helper)
+#   - mqtt_sensor_health_v_1_0.jinja (Custom template)
+
+alias: MQTT sensors unknown state checker (v1.0)
+description: |2-
+  **Что делает:**
+  Ищет MQTT-сенсоры и бинарные сенсоры в состоянии `unknown` без учёта регистра.
+
+  Чтобы исключить отдельную сущность из проверки, назначьте ей лейбл `mqtt_unknown_state_ignore`.
+
+  **Как приходит оповещение:**
+  - Если найдены такие сенсоры, приходит push и появляется постоянное уведомление в Home Assistant.
+  - В сообщении перечислены имена первых пяти сенсоров. Если их больше, последняя строка показывает, сколько ещё осталось.
+  - Если закрыть уведомление, пока проблема сохраняется, оно появится снова без повторного push.
+
+  **Когда срабатывает проверка:**
+  - 📅 Каждый день в 08:00.
+  - ⚙️ При изменении значения счётчика.
+  - 🔄 Через пять минут после запуска Home Assistant. До этого проверка по любому триггеру пропускается.
+  - 🔔 Сразу после закрытия уведомления об MQTT-сенсорах в состоянии `unknown`.
+
+  **Сенсоры:**
+  - `number.mqtt_sensors_unknown_state_count` — текущее количество MQTT-сенсоров в состоянии `unknown`.
+triggers:
+  - trigger: state
+    entity_id: number.mqtt_sensors_unknown_state_count
+    to: null
+  - trigger: persistent_notification
+    update_type: removed
+    notification_id: mqtt_sensors_unknown_state_notification
+    id: persistent_notification_removed
+  - trigger: time
+    at: "08:00:00"
+  - alias: When system uptime reaches five minutes
+    trigger: template
+    value_template: >-
+      {% set started_at = as_timestamp(states('sensor.uptime'), none) %}
+      {{ started_at is not none and as_timestamp(now()) - started_at >= 300 }}
+conditions:
+  - alias: System uptime is at least five minutes
+    condition: template
+    value_template: >-
+      {% set started_at = as_timestamp(states('sensor.uptime'), none) %}
+      {{ started_at is not none and as_timestamp(now()) - started_at >= 300 }}
+actions:
+  - variables:
+      mqtt_unknown_state_sensors: |-
+        {% from 'mqtt_sensor_health_v_1_0.jinja' import get_mqtt_sensors_with_unknown_state %}
+        {% set unknown_mqtt_sensors = get_mqtt_sensors_with_unknown_state | as_function %}
+        {% set sensors = unknown_mqtt_sensors() %}
+        {% set limit = 5 %}
+        {% set lines = sensors[:limit] | map(attribute='name') | list %}
+        {% if sensors | count > limit %}
+          {% set lines = lines + ['… и ещё ' ~ (sensors | count - limit) ~ ' датчик(а)'] %}
+        {% endif %}
+        {{ lines | join('\n') }}
+  - if:
+      - condition: template
+        value_template: "{{ mqtt_unknown_state_sensors | trim != '' }}"
+    then:
+      - action: script.universal_notification_sender
+        data:
+          message_notification_id: mqtt_sensors_unknown_state_notification
+          automation_trigger_id: "{{ trigger.id }}"
+          message_title: У MQTT-сенсоров состояние unknown
+          message_text: "{{ mqtt_unknown_state_sensors | trim }}"
+mode: single

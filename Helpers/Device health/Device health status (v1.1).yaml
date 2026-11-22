@@ -3,27 +3,30 @@
 #   - Device health
 # dependencies:
 #   - Device health unavailable count (Template number)
+#   - MQTT sensors unknown state count (Template number)
 #   - Device health discharged count (Template number)
 #   - Device health mismatch count (Template number)
 #   - Untracked zigbee sensors unavailable ignore count (Template number)
 # Приоритет: Critical > Warning > Unknown > Healthy.
 # Если уже подтверждены проблемы, они отображаются даже при неполных других данных.
-name: Device health status (v1.0)
+name: Device health status (v1.1)
 type: Template sensor
 icon: mdi:heart-pulse
 entityId: device_health_status
 visible: false
 state: >-
   {% set unavailable = states('number.device_health_unavailable_count') %}
+  {% set unknown_state = states('number.mqtt_sensors_unknown_state_count') %}
   {% set discharged = states('number.device_health_discharged_count') %}
   {% set mismatches = states('number.device_health_mismatch_count') %}
   {% set ignored = states('number.untracked_zigbee_sensors_unavailable_ignore_count') %}
-  {% if is_number(unavailable) and (unavailable | int(0)) > 0 %}
+  {% if (is_number(unavailable) and (unavailable | int(0)) > 0)
+       or (is_number(unknown_state) and (unknown_state | int(0)) > 0) %}
     Critical
   {% elif (is_number(discharged) and (discharged | int(0)) > 0)
        or (is_number(mismatches) and (mismatches | int(0)) > 0) %}
     Warning
-  {% elif not (is_number(unavailable) and is_number(discharged)
+  {% elif not (is_number(unavailable) and is_number(unknown_state) and is_number(discharged)
        and is_number(mismatches) and is_number(ignored)) %}
     Unknown
   {% else %}
