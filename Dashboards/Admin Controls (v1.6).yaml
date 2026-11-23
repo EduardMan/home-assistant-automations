@@ -162,7 +162,7 @@ views:
             above: 0
       - type: entity
         entity: number.mqtt_sensors_unknown_state_ignore_count
-        name: MQTT Unknown ignored
+        name: Unknown state ignored
         color: yellow
         show_name: true
         show_state: true
@@ -1273,7 +1273,7 @@ views:
                     above: 0
               - type: entity
                 entity: number.mqtt_sensors_unknown_state_ignore_count
-                name: MQTT Unknown ignored
+                name: Unknown state ignored
                 icon: mdi:eye-off-outline
                 color: amber
                 show_state: true
@@ -1360,7 +1360,7 @@ views:
                 below: 1
           - type: tile
             entity: number.mqtt_sensors_unknown_state_ignore_count
-            name: MQTT Unknown ignored
+            name: Unknown state ignored
             color: grey
             vertical: false
             tap_action:
@@ -1387,7 +1387,7 @@ views:
                 entity_id: number.mqtt_sensors_unknown_state_ignore_count
                 above: 0
             entity: number.mqtt_sensors_unknown_state_ignore_count
-            name: MQTT Unknown ignored
+            name: Unknown state ignored
             color: amber
             vertical: false
             tap_action:
