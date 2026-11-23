@@ -1234,7 +1234,6 @@ views:
               - type: entity
                 entity: number.untracked_zigbee_sensors_unavailable_count
                 name: Unavailable
-                icon: mdi:close-circle-outline
                 color: red
                 show_state: true
                 visibility:
@@ -1244,7 +1243,6 @@ views:
               - type: entity
                 entity: number.mqtt_sensors_unknown_state_count
                 name: Unknown state
-                icon: mdi:progress-question
                 color: red
                 show_state: true
                 visibility:
@@ -1254,7 +1252,6 @@ views:
               - type: entity
                 entity: number.untracked_zigbee_sensors_discharged_count
                 name: Discharged
-                icon: mdi:battery-alert-variant-outline
                 color: deep-orange
                 show_state: true
                 visibility:
@@ -1264,7 +1261,6 @@ views:
               - type: entity
                 entity: number.untracked_zigbee_sensors_unavailable_ignore_count
                 name: Ignored
-                icon: mdi:eye-off-outline
                 color: amber
                 show_state: true
                 visibility:
@@ -1274,7 +1270,6 @@ views:
               - type: entity
                 entity: number.mqtt_sensors_unknown_state_ignore_count
                 name: Unknown state ignored
-                icon: mdi:eye-off-outline
                 color: amber
                 show_state: true
                 visibility:
