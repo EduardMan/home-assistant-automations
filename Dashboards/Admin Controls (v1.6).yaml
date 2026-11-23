@@ -142,7 +142,7 @@ views:
             below: 1
       - type: entity
         entity: number.mqtt_sensors_unknown_state_ignore_count
-        name: MQTT Unknown ignored
+        name: Unknown state ignored
         show_name: true
         show_state: true
         visibility:
