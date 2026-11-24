@@ -1,0 +1,10 @@
+{%- macro get_mqtt_sensor_ids(returns) -%}
+  {%- do returns(integration_entities('mqtt') | select('match', '^(sensor|binary_sensor)[.]') | list) -%}
+{%- endmacro -%}
+
+{%- macro get_mqtt_sensors_with_unknown_state(returns) -%}
+  {%- set mqtt_sensor_ids = get_mqtt_sensor_ids | as_function -%}
+  {%- set tracked = mqtt_sensor_ids() | reject('in', label_entities('mqtt_unknown_state_ignore')) | list -%}
+  {%- do returns(expand(tracked)
+    | selectattr('state', 'match', '(?i)^unknown$') | sort(attribute='entity_id')) -%}
+{%- endmacro -%}

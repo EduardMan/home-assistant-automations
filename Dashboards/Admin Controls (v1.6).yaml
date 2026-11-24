@@ -70,6 +70,25 @@ views:
             entity_id: number.device_health_unavailable_count
             above: 0
       - type: entity
+        entity: number.mqtt_sensors_unknown_state_count
+        name: Unknown state
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.mqtt_sensors_unknown_state_count
+            below: 1
+      - type: entity
+        entity: number.mqtt_sensors_unknown_state_count
+        name: Unknown state
+        color: red
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.mqtt_sensors_unknown_state_count
+            above: 0
+      - type: entity
         entity: number.device_health_discharged_count
         name: Discharged
         icon: mdi:battery-alert-variant-outline
@@ -120,6 +139,15 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+            below: 1
+      - type: entity
+        entity: number.mqtt_sensors_unknown_state_ignore_count
+        name: Unknown state ignored
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.mqtt_sensors_unknown_state_ignore_count
             below: 1
       - type: entity
         entity: number.untracked_zigbee_sensors_unavailable_ignore_count
@@ -131,6 +159,16 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+            above: 0
+      - type: entity
+        entity: number.mqtt_sensors_unknown_state_ignore_count
+        name: Unknown state ignored
+        color: yellow
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.mqtt_sensors_unknown_state_ignore_count
             above: 0
     sections:
       - type: grid
@@ -1196,7 +1234,6 @@ views:
               - type: entity
                 entity: number.untracked_zigbee_sensors_unavailable_count
                 name: Unavailable
-                icon: mdi:close-circle-outline
                 color: red
                 show_state: true
                 visibility:
@@ -1204,9 +1241,17 @@ views:
                     entity_id: number.untracked_zigbee_sensors_unavailable_count
                     above: 0
               - type: entity
+                entity: number.mqtt_sensors_unknown_state_count
+                name: Unknown state
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.mqtt_sensors_unknown_state_count
+                    above: 0
+              - type: entity
                 entity: number.untracked_zigbee_sensors_discharged_count
                 name: Discharged
-                icon: mdi:battery-alert-variant-outline
                 color: deep-orange
                 show_state: true
                 visibility:
@@ -1216,12 +1261,20 @@ views:
               - type: entity
                 entity: number.untracked_zigbee_sensors_unavailable_ignore_count
                 name: Ignored
-                icon: mdi:eye-off-outline
                 color: amber
                 show_state: true
                 visibility:
                   - condition: numeric_state
                     entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
+                    above: 0
+              - type: entity
+                entity: number.mqtt_sensors_unknown_state_ignore_count
+                name: Unknown state ignored
+                color: amber
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.mqtt_sensors_unknown_state_ignore_count
                     above: 0
           - type: tile
             entity: input_number.untracked_zigbee_sensors_availability_timeout_minutes
@@ -1301,6 +1354,18 @@ views:
                 entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
                 below: 1
           - type: tile
+            entity: number.mqtt_sensors_unknown_state_ignore_count
+            name: Unknown state ignored
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.mqtt_sensors_unknown_state_ignore_count
+                below: 1
+          - type: tile
             visibility:
               - condition: numeric_state
                 entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
@@ -1311,6 +1376,40 @@ views:
             tap_action:
               action: none
             features_position: bottom
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.mqtt_sensors_unknown_state_ignore_count
+                above: 0
+            entity: number.mqtt_sensors_unknown_state_ignore_count
+            name: Unknown state ignored
+            color: amber
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.mqtt_sensors_unknown_state_count
+            name: Unknown state
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            visibility:
+              - condition: numeric_state
+                entity_id: number.mqtt_sensors_unknown_state_count
+                below: 1
+          - type: tile
+            entity: number.mqtt_sensors_unknown_state_count
+            name: Unknown state
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            visibility:
+              - condition: numeric_state
+                entity_id: number.mqtt_sensors_unknown_state_count
+                above: 0
         column_span: 1
       - type: grid
         cards:
