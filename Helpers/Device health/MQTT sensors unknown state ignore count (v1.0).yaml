@@ -1,6 +1,4 @@
 # Количество MQTT-сущностей sensor и binary_sensor с лейблом mqtt_unknown_state_ignore.
-# dependencies:
-#   - mqtt_sensor_health_v_1_0.jinja (Custom template)
 name: MQTT sensors unknown state ignore count (v1.0)
 type: Template number
 icon: mdi:playlist-minus
@@ -9,6 +7,4 @@ maximumValue: 100
 entityId: mqtt_sensors_unknown_state_ignore_count
 visible: false
 state: >-
-  {% from 'mqtt_sensor_health_v_1_0.jinja' import get_mqtt_sensor_ids %}
-  {% set mqtt_sensor_ids = get_mqtt_sensor_ids | as_function %}
-  {{ label_entities('mqtt_unknown_state_ignore') | select('in', mqtt_sensor_ids()) | list | count }}
+  {{ label_entities('mqtt_unknown_state_ignore') | count }}
