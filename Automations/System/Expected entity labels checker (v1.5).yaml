@@ -8,7 +8,7 @@
 # dependencies:
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
-alias: Expected entity labels checker (v1.4)
+alias: Expected entity labels checker (v1.5)
 description: |2-
   **Что делает:**  
   Проверяет, что у всех нужных сенсоров проставлены обязательные лейблы.  
@@ -72,6 +72,22 @@ actions:
           models:
             - WSDCGQ11LM
           label: temperature
+        - entity_type: media_player
+          models:
+            - Станция (2018)
+            - Станция Макс (2020)
+            - Станция Мини (2019)
+            - Станция Мини 2 (2021)
+            - Станция Мини 3 (2024)
+            - Станция Лайт (2021)
+            - Станция Лайт 2 (2024)
+            - Станция 2 (2022)
+            - Станция Миди (2023)
+            - Станция Дуо Макс (2023)
+            - Станция 3 (2025)
+            - Станция Стрит (2025)
+            - Станция Мини 3 Про (2025)
+          label: smart_speaker
   # Находим отсутствующие лейблы
   - variables:
       missing_labels: |
