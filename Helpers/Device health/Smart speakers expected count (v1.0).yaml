@@ -1,0 +1,10 @@
+name: Smart speakers expected count (v1.0)
+icon: mdi:clipboard-check-outline
+unitOfMeasurement: pcs
+type: Number
+label: smart speaker
+entityId: smart_speakers_expected_count
+visible: false
+stepSize: 1
+displayMode: Input field
+value: "{{ количество колонок в доме }}"
