@@ -1,0 +1,10 @@
+name: Smart speakers unavailable count (v1.0)
+icon: mdi:close-circle-outline
+unitOfMeasurement: pcs
+type: Template number
+label: smart speaker
+entityId: smart_speakers_unavailable_count
+visible: false
+maximumValue: 100
+state: >-
+  {{ expand(label_entities('smart_speaker') | select('match', '^binary_sensor[.].*_availability$')) | rejectattr('state', 'eq', 'on') | list | count }}

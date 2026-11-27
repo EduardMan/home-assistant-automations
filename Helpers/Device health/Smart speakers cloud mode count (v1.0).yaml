@@ -1,0 +1,14 @@
+name: Smart speakers cloud mode count (v1.0)
+icon: mdi:cloud-outline
+unitOfMeasurement: pcs
+type: Template number
+label: smart speaker
+entityId: smart_speakers_cloud_mode_count
+visible: false
+maximumValue: 100
+state: >-
+  {{ expand(label_entities('smart_speaker') | select('match', '^media_player[.]'))
+     | rejectattr('state', 'in', ['unknown', 'unavailable'])
+     | selectattr('attributes.assumed_state', 'defined')
+     | selectattr('attributes.assumed_state', 'sameas', true)
+     | rejectattr('attributes.alice_state', 'defined') | list | count }}

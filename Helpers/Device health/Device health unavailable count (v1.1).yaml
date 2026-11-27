@@ -4,7 +4,7 @@
 # dependencies:
 #   - Category *_unavailable_count (Template number)
 # Если хотя бы один исходный счётчик недоступен, итоговый хелпер недоступен — частичная сумма не выдаётся за точное значение.
-name: Device health unavailable count (v1.0)
+name: Device health unavailable count (v1.1)
 type: Template number
 icon: mdi:close-circle-outline
 unitOfMeasurement: pcs
@@ -21,6 +21,7 @@ availability template: >-
                         'number.moisture_valves_unavailable_count',
                         'number.natural_gas_sensors_unavailable_count',
                         'number.heating_thermostats_unavailable_count',
+                        'number.smart_speakers_unavailable_count',
                         'number.untracked_zigbee_sensors_unavailable_count',
                         'number.gsm_modules_unavailable_count'
                       ]
@@ -42,6 +43,7 @@ state: >-
                         'number.moisture_valves_unavailable_count',
                         'number.natural_gas_sensors_unavailable_count',
                         'number.heating_thermostats_unavailable_count',
+                        'number.smart_speakers_unavailable_count',
                         'number.untracked_zigbee_sensors_unavailable_count',
                         'number.gsm_modules_unavailable_count'
                       ]
