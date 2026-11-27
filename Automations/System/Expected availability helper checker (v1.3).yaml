@@ -9,7 +9,7 @@
 #   - sensor.uptime (Integration)
 #   - Universal notification sender (Script)
 
-alias: Expected availability helper checker (v1.2)
+alias: Expected availability helper checker (v1.3)
 description: |2-
   **Что делает:**  
   Проверяет, что для каждого датчика из списка создан ровно один *availability*-сенсор и на нём висит правильный лейбл.  
@@ -60,6 +60,8 @@ actions:
         - entity_id_postfix: .*_contact$
           label: door
           type: binary_sensor
+        - label: smart_speaker
+          type: media_player
         - label: moisture_valve
           type: valve
         - entity_id_postfix: .*_gas_leak$
@@ -94,15 +96,15 @@ actions:
                | map(attribute='entity_id')
                | list %}
             {% set filtered_sensors = label_entities(required_label) | select('in', filtered_sensors_by_prefix) | list %}
-          {% elif type == 'valve' %}
-            {% set filtered_sensors_by_prefix = states.valve
+          {% elif type in ['valve', 'media_player'] %}
+            {% set filtered_sensors_by_prefix = states[type]
                | map(attribute='entity_id')
                | list %}
             {% set filtered_sensors = label_entities(required_label) | select('in', filtered_sensors_by_prefix) | list %}
           {% endif %}
 
           {% for dev in filtered_sensors %}
-            {% set availability_sensor = device_entities(device_id(dev)) | select('match', '.*_availability$') | list %}
+            {% set availability_sensor = device_entities(device_id(dev)) | select('match', '^binary_sensor[.].*_availability$') | list %}
 
             {% if availability_sensor | count != 1 %}
               {% set issues.total = issues.total + 1 %}
