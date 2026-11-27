@@ -70,23 +70,25 @@ views:
             entity_id: number.device_health_unavailable_count
             above: 0
       - type: entity
-        entity: number.mqtt_sensors_unknown_state_count
-        name: Unknown state
+        entity: number.device_health_mismatch_count
+        name: Mismatches
+        icon: mdi:alert-outline
         show_name: true
         show_state: true
         visibility:
           - condition: numeric_state
-            entity_id: number.mqtt_sensors_unknown_state_count
+            entity_id: number.device_health_mismatch_count
             below: 1
       - type: entity
-        entity: number.mqtt_sensors_unknown_state_count
-        name: Unknown state
+        entity: number.device_health_mismatch_count
+        name: Mismatches
+        icon: mdi:alert-outline
         color: red
         show_name: true
         show_state: true
         visibility:
           - condition: numeric_state
-            entity_id: number.mqtt_sensors_unknown_state_count
+            entity_id: number.device_health_mismatch_count
             above: 0
       - type: entity
         entity: number.device_health_discharged_count
@@ -110,25 +112,23 @@ views:
             entity_id: number.device_health_discharged_count
             above: 0
       - type: entity
-        entity: number.device_health_mismatch_count
-        name: Mismatches
-        icon: mdi:alert-outline
+        entity: number.mqtt_sensors_unknown_state_count
+        name: Unknown state
         show_name: true
         show_state: true
         visibility:
           - condition: numeric_state
-            entity_id: number.device_health_mismatch_count
+            entity_id: number.mqtt_sensors_unknown_state_count
             below: 1
       - type: entity
-        entity: number.device_health_mismatch_count
-        name: Mismatches
-        icon: mdi:alert-outline
+        entity: number.mqtt_sensors_unknown_state_count
+        name: Unknown state
         color: red
         show_name: true
         show_state: true
         visibility:
           - condition: numeric_state
-            entity_id: number.device_health_mismatch_count
+            entity_id: number.mqtt_sensors_unknown_state_count
             above: 0
       - type: entity
         entity: number.untracked_zigbee_sensors_unavailable_ignore_count
@@ -139,15 +139,6 @@ views:
         visibility:
           - condition: numeric_state
             entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
-            below: 1
-      - type: entity
-        entity: number.mqtt_sensors_unknown_state_ignore_count
-        name: Unknown state ignored
-        show_name: true
-        show_state: true
-        visibility:
-          - condition: numeric_state
-            entity_id: number.mqtt_sensors_unknown_state_ignore_count
             below: 1
       - type: entity
         entity: number.untracked_zigbee_sensors_unavailable_ignore_count
@@ -160,6 +151,36 @@ views:
           - condition: numeric_state
             entity_id: number.untracked_zigbee_sensors_unavailable_ignore_count
             above: 0
+      - type: entity
+        entity: number.smart_speakers_cloud_mode_count
+        name: Speakers in cloud mode
+        icon: mdi:cloud-outline
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.smart_speakers_cloud_mode_count
+            below: 1
+      - type: entity
+        entity: number.smart_speakers_cloud_mode_count
+        name: Speakers in cloud mode
+        icon: mdi:cloud-outline
+        color: orange
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.smart_speakers_cloud_mode_count
+            above: 0
+      - type: entity
+        entity: number.mqtt_sensors_unknown_state_ignore_count
+        name: Unknown state ignored
+        show_name: true
+        show_state: true
+        visibility:
+          - condition: numeric_state
+            entity_id: number.mqtt_sensors_unknown_state_ignore_count
+            below: 1
       - type: entity
         entity: number.mqtt_sensors_unknown_state_ignore_count
         name: Unknown state ignored
@@ -1227,6 +1248,129 @@ views:
       - type: grid
         cards:
           - type: heading
+            heading: Smart speakers
+            heading_style: title
+            icon: mdi:speaker
+            badges:
+              - type: entity
+                entity: number.smart_speakers_unavailable_count
+                name: Unavailable
+                icon: mdi:close-circle-outline
+                color: red
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smart_speakers_unavailable_count
+                    above: 0
+              - type: entity
+                entity: number.smart_speakers_cloud_mode_count
+                name: Cloud mode
+                icon: mdi:cloud-outline
+                color: orange
+                show_state: true
+                visibility:
+                  - condition: numeric_state
+                    entity_id: number.smart_speakers_cloud_mode_count
+                    above: 0
+          - type: tile
+            entity: input_number.smart_speakers_expected_count
+            name: Expected count
+            color: grey
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smart_speakers_available_count') %}
+                  {% set unavailable = states('number.smart_speakers_unavailable_count') %}
+                  {% set expected = states('input_number.smart_speakers_expected_count') %}
+                  {{ is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0)) }}
+          - type: tile
+            visibility:
+              - condition: template
+                value_template: >-
+                  {% set available = states('number.smart_speakers_available_count') %}
+                  {% set unavailable = states('number.smart_speakers_unavailable_count') %}
+                  {% set expected = states('input_number.smart_speakers_expected_count') %}
+                  {{ not (is_number(available) and is_number(unavailable) and is_number(expected)
+                     and ((available | float(0)) + (unavailable | float(0))) == (expected | float(0))) }}
+            entity: input_number.smart_speakers_expected_count
+            name: Expected count
+            color: amber
+            show_entity_picture: false
+            hide_state: true
+            vertical: false
+            features:
+              - type: numeric-input
+                style: buttons
+            features_position: inline
+          - type: tile
+            entity: number.smart_speakers_available_count
+            name: Available count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            icon_tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smart_speakers_cloud_mode_count
+            name: Cloud mode count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smart_speakers_cloud_mode_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smart_speakers_cloud_mode_count
+                above: 0
+            entity: number.smart_speakers_cloud_mode_count
+            name: Cloud mode count
+            color: orange
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+          - type: tile
+            entity: number.smart_speakers_unavailable_count
+            name: Unavailable count
+            color: grey
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smart_speakers_unavailable_count
+                below: 1
+          - type: tile
+            visibility:
+              - condition: numeric_state
+                entity_id: number.smart_speakers_unavailable_count
+                above: 0
+            entity: number.smart_speakers_unavailable_count
+            name: Unavailable count
+            color: red
+            vertical: false
+            tap_action:
+              action: none
+            features_position: bottom
+      - type: grid
+        cards:
+          - type: heading
             heading: Common
             heading_style: title
             icon: mdi:zigbee
@@ -1513,12 +1657,12 @@ views:
     cards: []
     show_icon_and_title: true
     path: device-health-view
-# System Health (v1.0) tab: built-in Sections/Tile/Badge cards.
-# Each metric is independently editable in the Home Assistant dashboard editor.
-# System Monitor IDs are confirmed from this instance's Entities list.
-# Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
-# Keenetic Router Pro IDs confirmed in this HA instance; WAN throughput IDs contain
-# the configured WAN uplink name and may differ on another instance/router.
+  # System Health (v1.0) tab: built-in Sections/Tile/Badge cards.
+  # Each metric is independently editable in the Home Assistant dashboard editor.
+  # System Monitor IDs are confirmed from this instance's Entities list.
+  # Battery and Backup entity IDs still need confirmation in HA; missing ones remain visible.
+  # Keenetic Router Pro IDs confirmed in this HA instance; WAN throughput IDs contain
+  # the configured WAN uplink name and may differ on another instance/router.
   - type: sections
     badges:
       - type: entity
