@@ -6,7 +6,7 @@
 #   - Category *_expected_count (Input number)
 # Считаются КАТЕГОРИИ с расхождениями, а не разница в количестве устройств.
 # Если хотя бы один исходный счётчик неизвестен, итоговый хелпер недоступен.
-name: Device health mismatch count (v1.0)
+name: Device health mismatch count (v1.1)
 type: Template number
 icon: mdi:alert-outline
 unitOfMeasurement: pcs
@@ -54,6 +54,11 @@ availability template: >-
                           'number.heating_thermostats_available_count',
                           'number.heating_thermostats_unavailable_count',
                           'input_number.heating_thermostats_expected_count'
+                        ),
+                        (
+                          'number.smart_speakers_available_count',
+                          'number.smart_speakers_unavailable_count',
+                          'input_number.smart_speakers_expected_count'
                         )
                       ]
   %}
@@ -107,6 +112,11 @@ state: >-
                           'number.heating_thermostats_available_count',
                           'number.heating_thermostats_unavailable_count',
                           'input_number.heating_thermostats_expected_count'
+                        ),
+                        (
+                          'number.smart_speakers_available_count',
+                          'number.smart_speakers_unavailable_count',
+                          'input_number.smart_speakers_expected_count'
                         )
                       ]
   %}
