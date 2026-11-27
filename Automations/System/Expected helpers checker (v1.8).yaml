@@ -245,7 +245,7 @@ actions:
         - entity_id: number.mqtt_sensors_unknown_state_ignore_count
           name: MQTT sensors unknown state ignore count (v1.0)
         - entity_id: number.device_health_unavailable_count
-          name: Device health unavailable count (v1.0)
+          name: Device health unavailable count (v1.1)
         - entity_id: number.device_health_discharged_count
           name: Device health discharged count (v1.0)
         - entity_id: number.device_health_mismatch_count
