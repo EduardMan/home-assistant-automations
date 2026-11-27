@@ -249,7 +249,7 @@ actions:
         - entity_id: number.device_health_discharged_count
           name: Device health discharged count (v1.0)
         - entity_id: number.device_health_mismatch_count
-          name: Device health mismatch count (v1.0)
+          name: Device health mismatch count (v1.1)
   # Находим отсутствующие хелперы
   - variables:
       missing_helpers: |
